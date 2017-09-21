@@ -1,0 +1,364 @@
+﻿<div style="color:blue" align=center>权限管理框架实现（1）Struts切面处理</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><span style="font-size:18px;">要做一款权限架构，就要适用几个流行的相关框加，struts2是我们公司首先需要考虑的，考虑到侵入性，决定通过切面的方式，在每个Action前进行权限验证，基本思路是：</span></p><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; 1，自定义通用权限注解</span></p><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;2，开发抽象切面，预留传入uid的接口</span></p><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;3，配置struts切面，做权限拦截</span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;">以下源码是对上边功能的实现：</span></p><h1><span style="font-size:18px;">1，权限注解</span></h1><p><pre code_snippet_id="1643522" snippet_file_name="blog_20160412_1_4735934" name="code" class="java"><span style="font-size:18px;">/**
+ * 自定义权限注解
+ */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Authority {
+
+    /**
+     * 权限码
+     * @return
+     */
+    String authorityCode();
+
+}</span></pre><span style="font-size:18px;"><br></span><h1><span style="font-size:18px;">2，sturts抽象切面</span></h1></p><p><pre code_snippet_id="1643522" snippet_file_name="blog_20160412_2_3623902" name="code" class="java"><span style="font-size:18px;">public abstract class ELInterceptor implements Interceptor {
+
+    private IVerificationUser verificationUser;
+    private ILogicUserAreaFranchiseeService logicUserAreaFranchiseeService;
+    private Result result = new Result(true);
+
+    @Override
+    public void destroy() {
+        // TODO Auto-generated method stub
+
+    }
+
+    protected final Log log = LogFactory.getLog(this.getClass());
+
+    @Override
+    public void init() {
+
+    }
+
+    /**
+     * 拦截类并作权限验证
+     * @param invocation
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public String intercept(ActionInvocation invocation) throws Exception {
+        log.info(&quot;=intercept=&gt;Authority Intercept&quot;);
+        // TODO Auto-generated method stub
+        String methodName = invocation.getProxy().getMethod();
+        Method currentMethod = invocation.getAction().getClass().getMethod(methodName);
+        Method[] methods = invocation.getAction().getClass().getMethods();
+        initAuthCode(methods);
+
+        String isTest = (String) ServletActionContext.getRequest().getParameter(&quot;authistest&quot;);
+
+        //如果该方法请求是需要进行验证的时候执行以下逻辑
+        if (currentMethod.isAnnotationPresent(Authority.class)) {
+            //取得权限验证的注解
+            Authority authority = currentMethod.getAnnotation(Authority.class);
+
+            log.info(&quot;=intercept=&gt; get authorityCode&quot;);
+            //取得当前请求的注解的authorityCode
+            String authorityCode = authority.authorityCode();
+
+             /* *
+             * 然后可以在此判断当前用户是否拥有对应的权限，如果没有可以跳到指定的无权限提示页面，如果拥有则可以
+             * 继续往下执行。
+             **/
+            boolean ispass =false;
+            ispass = Boolean.parseBoolean(getFromVm(authorityCode));
+            if (ispass){
+                if(isTest==null ||isTest.trim().isEmpty()){
+                    return invocation.invoke();
+                }else{
+                    return &quot;hasauth&quot;;
+                }
+            } else {
+                log.info(&quot;=intercept=&gt; user not have  this authorityCode&quot;);
+                writeJson(&quot;&lt;html auth='NOAUTH'&gt;&lt;/html&gt;&quot;);
+                return &quot;noauth&quot;;
+            }
+        }
+        log.info(&quot;&lt;=intercept=&gt;Authority Intercept&quot;);
+        if(isTest==null ||isTest.trim().isEmpty()){
+            return invocation.invoke();
+        }else{
+            return &quot;hasauth&quot;;
+        }
+    }
+
+    private Boolean checkOnline(AuthCheckDomain authCheckDomain){
+        boolean isPass = false;
+        AuthorityUser authorityUser =null;
+        PublicResult&lt;Boolean&gt; publicResult =verificationUser.hasAuth(authCheckDomain);
+        if(publicResult!=null&amp;&amp;publicResult.isSuccess()){
+            isPass = publicResult.getResult();
+            if(publicResult.getAuthorityUser()!=null ){
+                authorityUser=publicResult.getAuthorityUser();
+                authorityUser.setCreated(new Date());
+                AuthCache.authMap.put(authCheckDomain.getAuthCode().trim(),authorityUser);
+            }
+        }
+        return isPass;
+    }
+
+    private void writeJson(String json){
+        try {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            response.setHeader(&quot;contentType&quot;, &quot;application/json;charset=UTF-8&quot;);
+            response.setCharacterEncoding(&quot;UTF-8&quot;);
+            response.setDateHeader(&quot;Expires&quot;, 0L);
+            response.setHeader(&quot;Cache-Control&quot;, &quot;no-cache&quot;);
+            response.setHeader(&quot;Pragma&quot;, &quot;no-cache&quot;);
+            ServletOutputStream out = response.getOutputStream();
+            out.write(json.getBytes(&quot;UTF-8&quot;));
+            out.flush();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void initAuthCode(Method[] methods){
+        for(Method currentMethod :methods){
+            //如果该方法请求是需要进行验证的时候执行以下逻辑
+            if (currentMethod.isAnnotationPresent(Authority.class)) {
+                //取得权限验证的注解
+                Authority authority = currentMethod.getAnnotation(Authority.class);
+
+                log.info(&quot;=intercept=&gt; get authorityCode&quot;);
+                //取得当前请求的注解的authorityCode
+                String authorityCode = authority.authorityCode();
+                isAuthPass(authorityCode);
+            }
+        }
+
+        toVm(result);
+    }
+
+    private boolean  isAuthPass(String authorityCode){
+        log.info(&quot;=isAuthPass=&gt;&quot;);
+        AuthCheckDomain authCheckDomain = new AuthCheckDomain();
+        Long uid=getUid();
+        String ip=getIP();
+        UserAreaFranchisee userArea =  getUserArea(uid);
+        Long provinceId=null;
+        Long cityId=null;
+        Long townId=null;
+        if(userArea!=null){
+            provinceId=Long.valueOf(userArea.getProvinceid());
+            cityId=Long.valueOf(userArea.getCityid());
+            townId=Long.valueOf(userArea.getCountyid());
+        }
+
+        authCheckDomain.setAuthCode(authorityCode);
+        authCheckDomain.setUid(uid);
+        authCheckDomain.setIp(ip);
+        authCheckDomain.setProvinceId(provinceId);
+        authCheckDomain.setCityId(cityId);
+        authCheckDomain.setTownId(townId);
+
+        boolean ispass = false;
+        AuthorityUser authorityUser =null;
+        if(AuthCache.authMap!=null &amp;&amp; AuthCache.authMap.containsKey(authorityCode) &amp;&amp; AuthCache.authMap.get(authorityCode)!=null ){
+            authorityUser = AuthCache.authMap.get(authorityCode);
+            int nowLong = DateUtil.getCurrentTime();
+            long checkTime = nowLong-(authorityUser.getCreated().getTime()/1000);
+            if(checkTime&gt; RedisIntValueUtils.MapExpireSeconds.getIntValue()){
+                ispass = checkOnline(authCheckDomain);
+            }
+            ispass=CheckAuth.hasAuth(authorityUser,authCheckDomain);
+        }else{
+            ispass=checkOnline(authCheckDomain);
+        }
+
+        toVmAuthPass(authorityCode, ispass);
+        return ispass;
+    }
+
+    private void toVmAuthPass(String authCode,boolean isPass){
+        result.addDefaultModel(authCode,isPass);
+    }
+
+
+    private void toVm(Result result){
+        ValueStack context = ActionContext.getContext().getValueStack();
+        Set set = result.keySet();
+        Iterator resultCode = set.iterator();
+        context.set(&quot;textProvider&quot;, this);
+        context.set(&quot;datePickerLocale&quot;, this.getDatePickerLocale());
+
+        String text;
+        while(resultCode.hasNext()) {
+            text = (String)resultCode.next();
+            context.set(text, result.get(text));
+        }
+    }
+
+    private String getFromVm(String authCode){
+        ValueStack context = ActionContext.getContext().getValueStack();
+        Map map = (Map)context.peek();
+        String result = ((Boolean)map.get(authCode)).toString();
+        return result;
+    }
+
+    private String getDatePickerLocale() {
+        String locale = this.getLocale().toString().toLowerCase();
+        String[] arr = locale.split(&quot;_&quot;);
+        if(arr[0].equals(&quot;en&quot;)) {
+            locale = arr[0];
+        } else {
+            locale = arr[0] + &quot;-&quot; + arr[1];
+        }
+
+        return locale;
+    }
+
+    public Locale getLocale() {
+        ActionContext ctx = ActionContext.getContext();
+        if(ctx != null) {
+            return ctx.getLocale();
+        } else {
+            return null;
+        }
+    }
+
+    private UserAreaFranchisee getUserArea(Long uid){
+        UserAreaFranchisee userAreaFranchisee = null;
+        String userJson = RedisUtils.get(RedisKeyUtils.Redis_Key_UserArea.getKeyStr()+uid,String.class);
+        if(userJson==null || userJson.trim().isEmpty()){
+            userAreaFranchisee =  getUserAreaByDubbo(uid);
+            try {
+                if (userAreaFranchisee != null) {
+                    RedisUtils.set(RedisKeyUtils.Redis_Key_UserArea.getKeyStr() + uid, JSON.toJSONString(userAreaFranchisee), RedisIntValueUtils.Redis_ExpireSeconds_UserArea.getIntValue());
+                }
+            }catch (Exception e){
+                log.error(&quot;=getUserArea=&gt;set reids error&quot;,e);
+            }
+        }else{
+            try {
+                userAreaFranchisee = JSON.parseObject(userJson, UserAreaFranchisee.class);
+            }catch(Exception e){
+                log.error(&quot;=getUserArea=&gt; json error&quot;,e);
+                userAreaFranchisee=null;
+            }
+        }
+
+        return userAreaFranchisee;
+
+    }
+
+    private UserAreaFranchisee getUserAreaByDubbo(Long uid){
+        com.el.common.result.PublicResult&lt;UserAreaFranchisee&gt; result =null;
+        try {
+            result = logicUserAreaFranchiseeService.getUserAreaFranchisee(uid.intValue());
+        }catch (Exception e){
+            log.error(&quot;==&gt;error&quot; ,e);
+            result=null;
+        }
+        if(result==null || !result.isSuccess() || result.getResult()==null){
+            return null;
+        }else{
+            return result.getResult();
+        }
+    }
+
+    private Long getProvinceId(Long uid) {
+        return null;
+    }
+
+    public Long getCityId(Long uid) {
+        return null;
+    }
+
+
+    public Long getTownId(Long uid) {
+        return null;
+    }
+
+
+
+    public abstract Long getUid();
+    public abstract String getIP();
+
+    public IVerificationUser getVerificationUser() {
+        return verificationUser;
+    }
+
+    public void setVerificationUser(IVerificationUser verificationUser) {
+        this.verificationUser = verificationUser;
+    }
+
+    public ILogicUserAreaFranchiseeService getLogicUserAreaFranchiseeService() {
+        return logicUserAreaFranchiseeService;
+    }
+
+    public void setLogicUserAreaFranchiseeService(ILogicUserAreaFranchiseeService logicUserAreaFranchiseeService) {
+        this.logicUserAreaFranchiseeService = logicUserAreaFranchiseeService;
+    }
+}</span></pre></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;">此处预留了两个抽象方法，依赖具体客户端实现，分别是获取用户id和获取ip</span></p><span style="font-size:18px;">&nbsp; &nbsp; public abstract Long getUid();<br>&nbsp; &nbsp; public abstract String getIP();</span><p><span style="font-size:18px;"><br>具体切面（抽象类实现）</span></p><p><pre code_snippet_id="1643522" snippet_file_name="blog_20160412_3_8433451" name="code" class="java"><span style="font-size:18px;">@Service
+public  class ELInterceptorImpl extends  ELInterceptor {
+
+    @Autowired
+    private IVerificationUser verificationUser;
+
+    @Autowired
+    private ILogicUserAreaFranchiseeService logicUserAreaFranchiseeService;
+
+    public  Long getUid(){
+        String suid = (String) ServletActionContext.getRequest().getSession().getAttribute(&quot;uid&quot;);
+        Long uid=Long.valueOf((suid==null || suid.isEmpty())?&quot;0&quot;:suid);
+        return uid;
+    }
+
+    @Override
+    public String getIP() {
+        //这里可以从session里面取得当前的用户
+        String suip = (String) ServletActionContext.getRequest().getSession().getAttribute(&quot;ip&quot;);
+        return suip;
+
+    }
+}
+</span></pre><span style="font-size:18px;"><br>注意：struts切面抽象类中，两个具体的业务服务不能使用spring自动注入，因为spring是扫描包下的类，有注解的维护一个单例的存在，而抽象类不能实例化，所以会报错，我们可以在具体实现类中，注入两个属性，结果是一样的。</span></p><h1><span style="font-size:18px;">3，struts配置</span></h1><p><pre code_snippet_id="1643522" snippet_file_name="blog_20160412_4_7703103" name="code" class="html"><span style="font-size:18px;">&lt;interceptors&gt;
+            &lt;interceptor name=&quot;authIntercept&quot; class=&quot;com.el.authority.service.intercept.ELInterceptorImpl&quot;/&gt;
+            &lt;interceptor-stack name=&quot;strutsDefaultStack&quot;&gt;
+
+                &lt;interceptor-ref name=&quot;exception&quot;/&gt;
+                &lt;interceptor-ref name=&quot;alias&quot;/&gt;
+                &lt;interceptor-ref name=&quot;servletConfig&quot;/&gt;
+                &lt;interceptor-ref name=&quot;i18n&quot;/&gt;
+                &lt;interceptor-ref name=&quot;prepare&quot;/&gt;
+                &lt;interceptor-ref name=&quot;chain&quot;/&gt;
+                &lt;interceptor-ref name=&quot;debugging&quot;/&gt;
+                &lt;interceptor-ref name=&quot;scopedModelDriven&quot;/&gt;
+                &lt;interceptor-ref name=&quot;modelDriven&quot;/&gt;
+                &lt;interceptor-ref name=&quot;fileUpload&quot;&gt;
+                    &lt;param name=&quot;maximumSize&quot;&gt;4194304&lt;/param&gt;
+                    &lt;!--单个文件最大4M --&gt;
+                    &lt;param name=&quot;allowedTypes&quot;&gt;image/x-png,image/png,image/gif,image/jpeg,image/jpg,image/pjpeg,text/plain,application/octet-stream&lt;/param&gt;
+                    &lt;param name=&quot;allowedExtensions&quot;&gt;jpg,jpeg,png,gif,txt,vm&lt;/param&gt;
+                &lt;/interceptor-ref&gt;
+                &lt;interceptor-ref name=&quot;checkbox&quot;/&gt;
+                &lt;interceptor-ref name=&quot;multiselect&quot;/&gt;
+                &lt;interceptor-ref name=&quot;staticParams&quot;/&gt;
+                &lt;interceptor-ref name=&quot;actionMappingParams&quot;/&gt;
+                &lt;interceptor-ref name=&quot;params&quot;&gt;
+                    &lt;param name=&quot;excludeParams&quot;&gt;dojo\..*,^struts\..*,.*\\u0023.*&lt;/param&gt;
+                &lt;/interceptor-ref&gt;
+                &lt;interceptor-ref name=&quot;conversionError&quot;/&gt;
+                &lt;interceptor-ref name=&quot;validation&quot;&gt;
+                    &lt;param name=&quot;excludeMethods&quot;&gt;input,back,cancel,browse&lt;/param&gt;
+                &lt;/interceptor-ref&gt;
+                &lt;interceptor-ref name=&quot;workflow&quot;&gt;
+                    &lt;param name=&quot;excludeMethods&quot;&gt;input,back,cancel,browse&lt;/param&gt;
+                &lt;/interceptor-ref&gt;
+                &lt;interceptor-ref name=&quot;authIntercept&quot;/&gt;
+            &lt;/interceptor-stack&gt;
+            &lt;interceptor-stack name=&quot;taskInterceptor&quot;&gt;
+                &lt;interceptor-ref name=&quot;strutsDefaultStack&quot;/&gt;
+            &lt;/interceptor-stack&gt;
+        &lt;/interceptors&gt;
+        &lt;default-interceptor-ref name=&quot;taskInterceptor&quot;/&gt;
+        &lt;global-results&gt;
+            &lt;result name=&quot;exception&quot;&gt;/WEB-INF/vm/error.vm&lt;/result&gt;
+            &lt;result name=&quot;error&quot;&gt;/WEB-INF/vm/error.vm&lt;/result&gt;
+            &lt;result name=&quot;input&quot;&gt;/WEB-INF/vm/convertError.vm&lt;/result&gt;
+            &lt;result name=&quot;noauth&quot;&gt;/WEB-INF/vm/noauthority.vm&lt;/result&gt;
+            &lt;result name=&quot;hasauth&quot;&gt;/WEB-INF/vm/hasauth.vm&lt;/result&gt;
+        &lt;/global-results&gt;</span></pre><span style="font-size:18px;"><br><br></span></p><h1><span style="font-size:18px;">4，struts图示</span></h1><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; 下图是struts架构的实现，对应到刚刚的配置文件中，我们就能很容易分辨出切面的切入位置</span></p><p><span style="font-size:18px;"><img src="38576837546708" alt=""><br></span></p><p><span style="font-size:18px;"><br></span></p><h1><span style="font-size:18px;">总结：</span></h1><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; struts切面的实现，网上有很多例子，大家不防多多参考，本文中的例子主要是给大家交代清楚整体结构，通过这些后台代码及配置，我们就能全局对用户权限控制，进行控制，但是还是有些细节，篇幅所限，大家参考后续的文章，其中会介绍ValueStack的使用，前台控件的自动显隐等。</span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;"><br></span></p><p><br></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/51132883'>原文链接</a>

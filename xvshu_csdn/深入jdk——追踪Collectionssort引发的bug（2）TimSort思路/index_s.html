@@ -1,0 +1,156 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 深入jdk——追踪Collectionssort引发的bug（2）TimSort思路</div><div style="color:blue" align=center>深入jdk——追踪Collectionssort引发的bug（2）TimSort思路</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p>上片博客给大家留了疑问，就是错误发生在TimSort这一个方法内，那么，是怎么发生的呢，咱们先了解下TimSort的思路：<strong><br></strong></p><h1><strong>1. TimSort在Java 7中的实现</strong></h1><p>那么为什么Java7会将TimSort作为排序的默认实现，甚至在某种程度上牺牲它的兼容性（在stackoverflow上有大量的问题是关于这个新异常的）呢？接下来我们不妨来看一看它的实现。</p><p>首先建议大家先读一下<a target="_blank" target="_blank" href="http://en.wikipedia.org/wiki/Timsort">这篇</a>文章以简要理解TimSort的思想。</p><p>1.1) 如果传入的Comparator为空，则使用ComparableTimSort的sort实现。</p><p>&nbsp;<pre code_snippet_id="2329671" snippet_file_name="blog_20170413_1_9069209" name="code" class="java"> if (c == null) {
+            Arrays.sort(a, lo, hi);
+            return;
+        }</pre><br><wbr></p><p>1.2) 传入的待排序数组若小于MIN_MERGE（Java实现中为32，Python实现中为64），则</p><blockquote><p>a) 从数组开始处找到一组连接升序或严格降序（找到后翻转）的数<br>b) <a target="_blank" target="_blank" href="http://www.geneffects.com/briarskin/theory/binary/index.html">BinarySort</a>：使用二分查找的方法将后续的数插入之前的已排序数组</p></blockquote><p><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_2_9494320" name="code" class="java">if (nRemaining &lt; MIN_MERGE) {
+            int initRunLen = countRunAndMakeAscending(a, lo, hi, c);
+            binarySort(a, lo, hi, lo + initRunLen, c);
+            return;
+        }</pre></p><p><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_3_3224075" name="code" class="java">private static &lt;T&gt; void binarySort(T[] a, int lo, int hi, int start,
+                                       Comparator&lt;? super T&gt; c) {
+        assert lo &lt;= start &amp;&amp; start &lt;= hi;
+        if (start == lo)
+            start++;
+        for ( ; start &lt; hi; start++) {
+            T pivot = a[start];
+
+            // Set left (and right) to the index where a[start] (pivot) belongs
+            int left = lo;
+            int right = start;
+            assert left &lt;= right;
+            /*
+             * Invariants:
+             *   pivot &gt;= all in [lo, left).
+             *   pivot &lt;  all in [right, start).
+             */
+            while (left &lt; right) {
+                int mid = (left + right) &gt;&gt;&gt; 1;
+                if (c.compare(pivot, a[mid]) &lt; 0)
+                    right = mid;
+                else
+                    left = mid + 1;
+            }
+            assert left == right;
+
+            /*
+             * The invariants still hold: pivot &gt;= all in [lo, left) and
+             * pivot &lt; all in [left, start), so pivot belongs at left.  Note
+             * that if there are elements equal to pivot, left points to the
+             * first slot after them -- that's why this sort is stable.
+             * Slide elements over to make room for pivot.
+             */
+            int n = start - left;  // The number of elements to move
+            // Switch is just an optimization for arraycopy in default case
+            switch (n) {
+                case 2:  a[left + 2] = a[left + 1];
+                case 1:  a[left + 1] = a[left];
+                         break;
+                default: System.arraycopy(a, left, a, left + 1, n);
+            }
+            a[left] = pivot;
+        }
+    }</pre><br><br><br></p><p>1.3) 开始真正的TimSort过程：</p><p>1.3.1) 选取minRun大小，之后待排序数组将被分成以minRun大小为区块的一块块子数组</p><blockquote><p>a) 如果数组大小为2的N次幂，则返回16（MIN_MERGE / 2）<br>b) 其他情况下，逐位向右位移（即除以2），直到找到介于16和32间的一个数</p></blockquote><p><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_4_6953829" name="code" class="java">int minRun = minRunLength(nRemaining);</pre><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_5_6223480" name="code" class="java">private static int minRunLength(int n) {
+        assert n &gt;= 0;
+        int r = 0;      // Becomes 1 if any 1 bits are shifted off
+        while (n &gt;= MIN_MERGE) {
+            r |= (n &amp; 1);
+            n &gt;&gt;= 1;
+        }
+        return n + r;
+    }
+</pre><br><br></p><p>1.3.2) 类似于4.2.a找到初始的一组升序数列<br>1.3.3) 若这组区块大小小于minRun，则将后续的数补足（采用binary sort插入这个数组）<br>1.3.4) 为后续merge各区块作准备：记录当前已排序的各区块的大小<br>1.3.5) 对当前的各区块进行merge，merge会满足以下原则（假设X，Y，Z为相邻的三个区块）：</p><blockquote><p>a) 只对相邻的区块merge<br>b) 若当前区块数仅为2，If X&lt;=Y，将X和Y merge<br>b) 若当前区块数&gt;=3，If X&lt;=Y+Z，将X和Y merge，直到同时满足X&gt;Y+Z和Y&gt;Z</p></blockquote><p><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_6_7411960" name="code" class="java">do {
+            // Identify next run
+            int runLen = countRunAndMakeAscending(a, lo, hi, c);
+
+            // If run is short, extend to min(minRun, nRemaining)
+            if (runLen &lt; minRun) {
+                int force = nRemaining &lt;= minRun ? nRemaining : minRun;
+                binarySort(a, lo, lo + force, lo + runLen, c);
+                runLen = force;
+            }
+
+            // Push run onto pending-run stack, and maybe merge
+            ts.pushRun(lo, runLen);
+            ts.mergeCollapse();
+
+            // Advance to find next run
+            lo += runLen;
+            nRemaining -= runLen;
+        } while (nRemaining != 0);</pre><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_7_793050" name="code" class="java">private static &lt;T&gt; int countRunAndMakeAscending(T[] a, int lo, int hi,
+                                                    Comparator&lt;? super T&gt; c) {
+        assert lo &lt; hi;
+        int runHi = lo + 1;
+        if (runHi == hi)
+            return 1;
+
+        // Find end of run, and reverse range if descending
+        if (c.compare(a[runHi++], a[lo]) &lt; 0) { // Descending
+            while (runHi &lt; hi &amp;&amp; c.compare(a[runHi], a[runHi - 1]) &lt; 0)
+                runHi++;
+            reverseRange(a, lo, runHi);
+        } else {                              // Ascending
+            while (runHi &lt; hi &amp;&amp; c.compare(a[runHi], a[runHi - 1]) &gt;= 0)
+                runHi++;
+        }
+
+        return runHi - lo;
+    }</pre><br><br></p><p><br></p><p>1.3.6) 重复4.3.2 ~ 4.3.5，直到将待排序数组排序完<br>1.3.7) Final Merge：如果此时还有区块未merge，则合并它们</p><p><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_8_6791078" name="code" class="java">assert lo == hi;
+        ts.mergeForceCollapse();
+        assert ts.stackSize == 1;</pre><br><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_9_8012577" name="code" class="java">private void mergeForceCollapse() {
+        while (stackSize &gt; 1) {
+            int n = stackSize - 2;
+            if (n &gt; 0 &amp;&amp; runLen[n - 1] &lt; runLen[n + 1])
+                n--;
+            mergeAt(n);
+        }
+    }</pre><br><pre code_snippet_id="2329671" snippet_file_name="blog_20170413_10_5646027" name="code" class="java">private void mergeAt(int i) {
+        assert stackSize &gt;= 2;
+        assert i &gt;= 0;
+        assert i == stackSize - 2 || i == stackSize - 3;
+
+        int base1 = runBase[i];
+        int len1 = runLen[i];
+        int base2 = runBase[i + 1];
+        int len2 = runLen[i + 1];
+        assert len1 &gt; 0 &amp;&amp; len2 &gt; 0;
+        assert base1 + len1 == base2;
+
+        /*
+         * Record the length of the combined runs; if i is the 3rd-last
+         * run now, also slide over the last run (which isn't involved
+         * in this merge).  The current run (i+1) goes away in any case.
+         */
+        runLen[i] = len1 + len2;
+        if (i == stackSize - 3) {
+            runBase[i + 1] = runBase[i + 2];
+            runLen[i + 1] = runLen[i + 2];
+        }
+        stackSize--;
+
+        /*
+         * Find where the first element of run2 goes in run1. Prior elements
+         * in run1 can be ignored (because they're already in place).
+         */
+        int k = gallopRight(a[base2], a, base1, len1, 0, c);
+        assert k &gt;= 0;
+        base1 += k;
+        len1 -= k;
+        if (len1 == 0)
+            return;
+
+        /*
+         * Find where the last element of run1 goes in run2. Subsequent elements
+         * in run2 can be ignored (because they're already in place).
+         */
+        len2 = gallopLeft(a[base1 + len1 - 1], a, base2, len2, len2 - 1, c);
+        assert len2 &gt;= 0;
+        if (len2 == 0)
+            return;
+
+        // Merge remaining runs, using tmp array with min(len1, len2) elements
+        if (len1 &lt;= len2)
+            mergeLo(base1, len1, base2, len2);
+        else
+            mergeHi(base1, len1, base2, len2);
+    }</pre><br><br></p><h1><strong>2. Demo</strong></h1><p>这一节用一个具体的例子来演示整个算法的演进过程：</p><p><strong><span style="color:#FF0000;">*注意*</span></strong>：为了演示方便，我将TimSort中的minRun直接设置为2，否则我不能用很小的数组演示。。。同时把MIN_MERGE也改成2（默认为32），这样避免直接进入binarysort。</p><blockquote><p>初始数组为[7,5,1,2,6,8,10,12,4,3,9,11,13,15,16,14]<br>=&gt; <span style="color:#0000FF;">寻找连续的降序或升序序列 (4.3.2)</span><br><span style="color:#800000;">[1,5,7]</span>[2,6,8,10,12,4,3,9,11,13,15,16,14]<br>=&gt; <span style="color:#0000FF;">入栈 (4.3.4)<br></span>当前的栈区块为[3]<br>=&gt; <span style="color:#0000FF;">进入merge循环 (4.3.5)<br></span> do notmerge因为栈大小仅为1<br>=&gt; <span style="color:#0000FF;">寻找连续的降序或升序序列 (4.3.2)</span><br><span style="color:#800000;">[1,5,7] [2,6,8,10,12]</span>[4,3,9,11,13,15,16,14]<br>=&gt; <span style="color:#0000FF;">入栈 (4.3.4)</span><br>当前的栈区块为[3, 5]<br>=&gt; <span style="color:#0000FF;">进入merge循环 (4.3.5)</span><br>merge因为runLen[0]&lt;=runLen[1]<br>1)gallopRight：寻找run1的第一个元素应当插入run0中哪个位置（”2”应当插入”1”之后），然后就可以忽略之前run0的元素（都比run1的第一个元素小）<br>2)gallopLeft：寻找run0的最后一个元素应当插入run1中哪个位置（”7”应当插入”8”之前），然后就可以忽略之后run1的元素（都比run0的最后一个元素大）<br>这样需要排序的元素就仅剩下[5,7] [2,6]，然后进行mergeLow<br>完成之后的结果：<br><span style="color:#800000;">[1,2,5,6,7,8,10,12]</span>[4,3,9,11,13,15,16,14]<br>=&gt; <span style="color:#0000FF;">入栈 (4.3.4)<br></span>当前的栈区块为[8]<br>退出当前merge循环因为栈中的区块仅为1<br>=&gt; <span style="color:#0000FF;">寻找连续的降序或升序序列 (4.3.2)</span><br><span style="color:#800000;">[1,2,5,6,7,8,10,12] [3,4]</span>[9,11,13,15,16,14]<br>=&gt; <span style="color:#0000FF;">入栈 (4.3.4)</span><br>当前的栈区块大小为[8,2]<br>=&gt; <span style="color:#0000FF;">进入merge循环 (4.3.5)</span><br>do not merge因为runLen[0]&gt;runLen[1]<br>=&gt; <span style="color:#0000FF;">寻找连续的降序或升序序列 (4.3.2)</span><br><span style="color:#800000;">[1,2,5,6,7,8,10,12] [3,4][9,11,13,15,16]</span> [14]<br>=&gt; <span style="color:#0000FF;">入栈 (4.3.4)</span><br>当前的栈区块为[8,2,5]<br>=&gt;<br>do not merege run1与run2因为不满足runLen[0]&lt;=runLen[1]+runLen[2]<br>merge run2与run3因为runLen[1]&lt;=runLen[2]<br>1) gallopRight：发现run1和run2就已经排好序<br>完成之后的结果：<br><span style="color:#800000;">[1,2,5,6,7,8,10,12][3,4,9,11,13,15,16]</span> [14]<br>=&gt; <span style="color:#0000FF;">入栈 (4.3.4)</span><br>当前入栈的区块大小为[8,7]<br>退出merge循环因为runLen[0]&gt;runLen[1]<br>=&gt; <span style="color:#0000FF;">寻找连续的降序或升序序列 (4.3.2)</span><br>最后只剩下[14]这个元素：<span style="color:#800000;">[1,2,5,6,7,8,10,12][3,4,9,11,13,15,16] [14]<br></span> =&gt; <span style="color:#0000FF;">入栈 (4.3.4)</span><br>当前入栈的区块大小为[8,7,1]<br>=&gt; <span style="color:#0000FF;">进入merge循环 (4.3.5)</span><br>merge因为runLen[0]&lt;=runLen[1]+runLen[2]<br>因为runLen[0]&gt;runLen[2]，所以将run1和run2先合并。（否则将run0和run1先合并）<br>1) gallopRight &amp; 2) gallopLeft<br>这样需要排序的元素剩下[13,15] [14]，然后进行mergeHigh<br>完成之后的结果：<br><span style="color:#800000;">[1,2,5,6,7,8,10,12][3,4,9,11,13,14,15,16]</span> 当前入栈的区块为[8,8]<br>=&gt;<br>继续merge因为runLen[0]&lt;=runLen[1]<br>1) gallopRight &amp; 2) gallopLeft<br>需要排序的元素剩下[5,6,7,8,10,12] [3,4,9,11]，然后进行mergeHigh<br>完成之后的结果：<br><span style="color:#800000;">[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]</span>当前入栈的区块大小为[16]<br>=&gt;<br>不需要final merge因为当前栈大小为1<br>=&gt;<br>结束</p></blockquote><h1><strong>3，总结</strong></h1><p>通过分析我们发现，我们自己写的比较方法违背了原则</p><p>这就违背了a)原则：假设X的value为1，Y的value也为1；那么compare(X, Y) ≠ –compare(Y,X)<br>PS: TimSort不仅内置在各种JDK 7的版本，也存在于Android SDK中（尽管其并没有使用JDK 7）。<strong><br></strong></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/70155705'>原文链接</a>

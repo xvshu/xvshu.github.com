@@ -1,0 +1,133 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 锋利的jquery之快速定位</div><div style="color:blue" align=center>锋利的jquery之快速定位</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;学习jquery有些时间了,感觉jquery的封装的特性特别出色,尤其是屏蔽了复杂的DOM操作,在以往的操作中,定位一个标记,总要想文档,树这些概念,但是在jquery中,只要和css一样的写法,就可以快速定位一个标记.</span></p>
+<span style="font-size:18px">下面我们通过代码来看看是怎么定位的:<br>
+<br>
+</span>
+<h1><span style="font-size:18px">css定位的代码:</span></h1>
+<span style="font-size:18px"><br>
+</span>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;直接定位系统标签：</span></h2>
+<div><span style="font-size:18px"></span>
+<p>
+<pre name="code" class="javascript">ul,li{
+	margin:0px;
+	padding:0px;
+	list-style:none;
+}</pre>
+<p>
+<p><br>
+</p>
+</div>
+<h2><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp;定位带有</span><span lang="en-US" style="font-family:Calibri">class</span><span lang="zh-CN" style="font-family:SimSun">的标签：</span></span></h2>
+<p>
+<p><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun"></span></span></p>
+<pre name="code" class="css">.Loading{
+	width:400px;
+	/*margin-left:auto;
+	//margin-right:auto;*/
+	margin:0 auto;
+	visibility:hidden;
+		
+}</pre>
+<p><br>
+</p>
+<h2><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; 定位带有</span><span lang="en-US" style="font-family:Calibri">id</span><span lang="zh-CN" style="font-family:SimSun">属性的标签：</span></span></span></h2>
+<p>
+<pre name="code" class="css">#contentsecond{
+	width:300px;
+	height:100px;
+}
+</pre>
+<br>
+<br>
+<br>
+<span style="font-size:18px; font-family:SimSun">在jquery中定位这样的标签</span><br>
+<p><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"><br>
+</span></span></span></p>
+<h2><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 定义带有ID属性的标签：</span></span></span></h2>
+<p>
+<pre name="code" class="javascript">$(&quot;#realcontent&quot;).load(&quot;test.html&quot;);</pre>
+<br>
+<h2><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 直接定义系统标签及定义带有class属性的标签：</span></span></span></h2>
+<p>
+<pre name="code" class="javascript">$(&quot;div.contentin&quot;).removeClass(&quot;contentin&quot;);
+</pre>
+<br>
+<br>
+<br>
+<h1><span lang="zh-CN" style="font-size:18px; font-family:SimSun">现在我们来看看用</span><span lang="en-US" style="font-size:18px; font-family:Calibri">DOM</span><span lang="zh-CN" style="font-size:18px; font-family:SimSun">找到一个标签：</span></h1>
+<p><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun"></span></span></span></span></p>
+<pre name="code" class="javascript">	function setBorder( n )
+	{
+	&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#009900">document.getElementById( &quot;image1&quot; ).border = n;</span>
+	} 
+</pre>
+<p><span style="font-size:18px; font-family:SimSun"><br>
+</span></p>
+<h1><span style="font-size:18px; font-family:SimSun">现在我们看看jquery是如何帮助我们封装这个功能的:</span></h1>
+<p><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"><span style="white-space:pre"></span></span></span></span></span></p>
+<pre name="code" class="javascript">	(function() { 
+	var 
+	// Will speed up references to window, and allows munging its name. 
+	window = this, 
+	// Will speed up references to undefined, and allows munging its name. 
+	undefined, 
+	// Map over jQuery in case of overwrite 
+	_jQuery = <span style="color:#009900">window</span>.jQuery, 
+	// Map over the $ in case of overwrite 
+	_$ = window.$, 
+	jQuery = window.jQuery = window.$ = function(selector, context) { 
+	// The jQuery object is actually just the init constructor 'enhanced' 
+	return new jQuery.fn.init(selector, context); 
+	}, 
+	// A simple way to check for HTML strings or ID strings 
+	// (both of which we optimize for) 
+	quickExpr = /^[^&lt;]*(&lt;(.|\s)&#43;&gt;)[^&gt;]*$|^#([\w-]&#43;)$/, 
+	// Is it a simple selector 
+	isSimple = /^.[^:#\[\.,]*$/; 
+	jQuery.fn = jQuery.prototype = { 
+	init: function(selector, context) { 
+	// Make sure that a selection was provided 
+	// Make sure that a selection was provided 
+	selector = selector || document; 
+	this[0] = selector; 
+	this.length = 1; 
+	this.context = selector; 
+	return this; 
+	}, 
+	show:function() { 
+	alert(&quot;this.show&quot;); 
+	}, 
+	// Start with an empty selector 
+	selector: &quot;&quot;, 
+	// The current version of jQuery being used 
+	jquery: &quot;1.3.2&quot; 
+	}; 
+	jQuery.fn.init.prototype = jQuery.fn; 
+	})(); 
+	function test(src){ 
+	alert($(src)); 
+	$(src).show();
+</pre>
+<h1><span style="font-size:18px">扩展：隐式迭代</span></h1>
+<p><span style="font-size:18px">下面是书中提到的一个jquery的特点<br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; 当用JQuery找到带有“.myClass”类的全部元素，然后隐藏他们时。无需循环遍历每一个返回的元素。相反，JQuery里的方法都被设计成自动操作的对象集合，而不是单独的对象，这使得大量的循环结构变得不再必要，从而大幅度地减少代码量。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; 实际是jquery将dom元素的树形结构，封装为一个集合，在给某类方法添加事件的时候，jquery代替我们遍历给他们都连接到代码段，这样就减少了我们很多的重复工作！</span></p>
+<p><span style="font-size:18px">例子：</span></p>
+<p><span style="font-size:18px">$(&quot;.yourclass&quot;).addClass(&quot;newclass&quot;);<br>
+&nbsp; &nbsp; 像这样的就是隐式迭代因为$(&quot;.yourclass&quot;)选到的元素不一定只有一个，比如$(&quot;.yourclass&quot;)选中n个元素 &nbsp;这n个元素都会加上&quot;newclas&quot;这个class，除了ID选择器其它都是隐式迭代的比如$(&quot;#yourclass&quot;) 就算有多个id=&quot;yourclass&quot; 也只能得到第1个在jqery中，因为它迭代的时候只取第一个元素！所有的方法都被设计成自动操作对象集合，而不是单一的一个对象，这样避免了大量的没有意义的循环</span><br>
+</p>
+<h1><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px">总结：</span></span></span></span></h1>
+<p><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px">通过对代码的简单理解，我们不难发现，jquery简单的背后做了大量的总结及抽象工作，所以我们可以这么总结：<br>
+&nbsp; &nbsp; 1，要向写好代码，必须不断优化改进！<br>
+&nbsp; &nbsp; 2，要向做好软件，尽量灵活抽象是正道<br>
+&nbsp; &nbsp; 3，一个团队的管理，犹如设计一个页面，快速定位某项工作的基础是有一个全局的管理观念（参考代码中的window）<br>
+<br>
+<br>
+</span></span></span></span></p>
+<p><span lang="zh-CN" style="font-family:SimSun"><span lang="zh-CN" style="font-family:SimSun"><br>
+</span></span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/11984349'>原文链接</a>

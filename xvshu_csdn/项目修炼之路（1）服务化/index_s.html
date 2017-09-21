@@ -1,0 +1,41 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 项目修炼之路（1）服务化</div><div style="color:blue" align=center>项目修炼之路（1）服务化</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 在一个企业中，核心项目随着时间的推移，体量的增大，节点的增多，上线维护工作的会有几何状的增加，当初为了打开市场，开发的代码，像茅草屋一般，泥土合着稻草，风雨一旦来临，随时面临倒塌的危险，虽然后期打了很多补丁，但是整体规划上不统一，还是不够坚固，虽然住户增多舒适性也要考虑，这样我们就会经历一个改造的阶段，这个阶段就好像修炼内功一般，外表上没有太大的变化，但是气度已经不一样，更快了，更轻了，承载更大了，更舒适了！</span></p>
+<p><span style="font-size:14px">我们公司现在也在经历这个阶段，我们称之为“服务化”，而在这个过程中，我们也经历了N多问题，一起共享给大家，供大家参考：</span></p>
+<h1><span style="font-size:14px">1，开发</span></h1>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 现在已经不是哪种开发方式流行的年代了，而是百家齐名的时代，在这里，任何的开发方式，在需要服务化阶段，都是可用的，在这里我们不做赘述，这里只和大家讨论几个我们碰撞过，疼过，需要大家注意的地方。</span></p>
+<h2><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 1.1 模式确定</span></h2>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 在开发之前，对这次服务化的基本理念要提前宣讲，动员，涉及到谁，要积极配合，磨刀不误砍柴工，道理要说明白，服务化的公共问题，要提前预案，这里列举一些，大家参考：</span></p>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 事务控制，任务调度，开发模板，数据服务（包含缓存）方案，系统交互等 &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p><span style="font-size:14px"><br>
+</span></p>
+<h2><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 1.2 维度统一</span></h2>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp;在开发之初，要进行界限切割，明确每个组的业务和数据界限，避免任务推诿，在开始统一步调，做到每天一会，统一安排和调度。</span></p>
+<p><span style="font-size:14px"><br>
+</span></p>
+<h2><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 1.3 交流统一</span></h2>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 有些情况非常容易发生，就是你做了什么，其他人不知道，然后她和你做重合了，这样的情况要简历统一调度平台，接口公布平台等，做到及时高效的沟通，依赖于维度的统一，沟通语言要统一</span></p>
+<p><span style="font-size:14px"><br>
+</span></p>
+<h1><span style="font-size:14px">2，测试</span></h1>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; 各个逻辑之间有相关性，修改某个逻辑的时候，会影响其他逻辑，在业务上就表现得纠缠不清，所以这次要服务化，也叫模块化，就是为了在未来减少这种纠缠，责任明晰，各自负责各自的模块，既减少了开发也减少了测试，只是前期开发时对业务的理解不够深入，造成有可能改了bug1，引出bug2和bug3，随着时间的推移整体测试的量呈现哑铃状，开始啥都是新的，任务较多，后期改了一些，bug少了，随着时间推移，bug遮掩问题的暴露，测试量又多了起来最后发现收尾居然很快，就是这个原因吧！</span></p>
+<p><span style="font-size:14px">测试规律图：</span></p>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="19506656194941" alt=""><br>
+</span></p>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp;</span></p>
+<h1><span style="font-size:14px">3，上线</span></h1>
+<p><span style="font-size:14px">上线是个需要谨慎的行为，在这里，个人比较推进使用TCP COPY的方式进行预上线，运行一断时间之后，可以逐步升级自己的系统，这里将风险将到最低，而现在较为流行的软件是tcpcopy1.0，构件中的架构图大概是这样的，图片仅供参考：</span></p>
+<p><span style="font-size:14px"><br>
+</span></p>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="40796619844290" alt=""><br>
+</span></p>
+<p><span style="font-size:14px"><br>
+</span></p>
+<p><span style="font-size:14px">&nbsp; &nbsp; &nbsp; &nbsp;最后我们通过校验服务器进行数据校验，有差异则报警，以供修改，其实还有钟结构是不是校验数据，而是校验http返回对象，通常我们会两种方法一起采用，但是在项目上线前期可以先校验数据的正确性，再校验应答的正确性保证程序平滑过度到可用的阶段，而这期间，用户是体会不到这种变化，企业也将风险减低到比较小的范围。</span></p>
+<h1><span style="font-size:14px">总结：</span></h1>
+<p><span style="font-size:14px">&nbsp;&nbsp; 问题是程序员的导师，出了问题就是我们成长的时候，尤其是服务化，更是帮助我们迅速成长，向更高的境界迈出坚实的一步。<br>
+</span></p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50524524'>原文链接</a>

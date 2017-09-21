@@ -1,0 +1,166 @@
+﻿<div style="color:blue" align=center>Android开发学习（2）环境搭建及基本组件</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><p>继《<a href="http://blog.csdn.net/xvshu/article/details/76512895" target="_blank">Android开发学习（1）基本概念</a> 》之后，我们大概了解了安卓的基本架构，及运行方式，本篇文章旨在了解App的环境搭建及基本组成部分，在宏观上有个更清晰的了解。</p>
+
+
+
+<h1 id="环境搭建">环境搭建</h1>
+
+<p>1.jdk <br>
+2.sdk <br>
+3,idea(开发工具） <br>
+按照网上的常规做法，无需过多介绍，有jdk搭建经验的人，对这些应该驾轻就熟。</p>
+
+<h1 id="基本组件">基本组件</h1>
+
+<p>应用程序组件是一个Android应用程序的基本构建块。这些组件由应用清单文件松耦合的组织。AndroidManifest.xml描述了应用程序的每个组件，以及他们如何交互。</p>
+
+<p>以下是可以在Android应用程序中使用的四个主要组件。</p>
+
+<table>
+<thead>
+<tr>
+  <th align="center">组件</th>
+  <th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+  <td align="center">Activities</td>
+  <td align="center">描述UI，并且处理用户与机器屏幕的交互。</td>
+</tr>
+<tr>
+  <td align="center">Services</td>
+  <td align="center">处理与应用程序关联的后台操作。</td>
+</tr>
+<tr>
+  <td align="center">Broadcast Receivers</td>
+  <td align="center">处理Android操作系统和应用程序之间的通信。</td>
+</tr>
+<tr>
+  <td align="center">Content Providers</td>
+  <td align="center">处理数据和数据库管理方面的问题。</td>
+</tr>
+</tbody></table>
+
+
+<ul>
+<li>Activities <br>
+一个活动标识一个具有用户界面的单一屏幕。举个例子，一个邮件应用程序可以包含一个活动用于显示新邮件列表，另一个活动用来编写邮件，再一个活动来阅读邮件。当应用程序拥有多于一个活动，其中的一个会被标记为当应用程序启动的时候显示。</li>
+</ul>
+
+<p>一个活动是Activity类的一个子类，如下所示：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainActivity</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Activity</span> {</span>
+
+}</code></pre>
+
+<p><strong>对比java-web：类似我们的struts的Action之类；</strong></p>
+
+<ul>
+<li>Services</li>
+</ul>
+
+<p>服务是运行在后台，执行长时间操作的组件。举个例子，服务可以是用户在使用不同的程序时在后台播放音乐，或者在活动中通过网络获取数据但不阻塞用户交互。</p>
+
+<p>一个服务是Service类的子类，如下所示：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Service</span> {</span>
+
+}</code></pre>
+
+<p><strong>对比java-web：类似我们的Service；</strong></p>
+
+<ul>
+<li>Broadcast Receivers</li>
+</ul>
+
+<p>广播接收器简单地响应从其他应用程序或者系统发来的广播消息。举个例子，应用程序可以发起广播来让其他应用程序指导一些数据已经被下载到设备，并且可以供他们使用。因此广播接收器会拦截这些通信并采取适当的行动。</p>
+
+<p>广播接收器是BroadcastReceiver类的一个子类，每个消息以Intent对象的形式来广播。</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyReceiver</span>  <span class="hljs-keyword">extends</span>  <span class="hljs-title">BroadcastReceiver</span> {</span>
+
+}</code></pre>
+
+<p><strong>对比java-web：类似我们的kafka，发布订阅；</strong> <br>
++ Content Providers</p>
+
+<p>内容提供者组件通过请求从一个应用程序到另一个应用程序提供数据。这些请求由ContentResolver类的方法来处理。这些数据可以是存储在文件系统、数据库或者其他其他地方。</p>
+
+<p>内容提供者是ContentProvider类的子类，并实现一套标准的API，以便其他应用程序来执行事务。</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyContentProvider</span> <span class="hljs-keyword">extends</span>  <span class="hljs-title">ContentProvider</span> {</span>
+
+}</code></pre>
+
+<p><strong>对比java-web：类似我们的DateSource；</strong></p>
+
+
+
+<h1 id="附件组件">附件组件</h1>
+
+<p>有一些附件的组件用于以上提到的实体、他们之间逻辑、及他们之间连线的构造。这些组件如下：</p>
+
+<table>
+<thead>
+<tr>
+  <th align="center">组件</th>
+  <th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+  <td align="center">Fragments</td>
+  <td align="center">代表活动中的一个行为或者一部分用户界面。</td>
+</tr>
+<tr>
+  <td align="center">Views</td>
+  <td align="center">绘制在屏幕上的UI元素，包括按钮，列表等。</td>
+</tr>
+<tr>
+  <td align="center">Layouts</td>
+  <td align="center">控制屏幕格式，展示视图外观的View的继承。</td>
+</tr>
+<tr>
+  <td align="center">Intents</td>
+  <td align="center">组件间的消息连线。</td>
+</tr>
+<tr>
+  <td align="center">Resources</td>
+  <td align="center">外部元素，例如字符串资源、常量资源及图片资源等。</td>
+</tr>
+<tr>
+  <td align="center">Manifest</td>
+  <td align="center">应用程序的配置文件。</td>
+</tr>
+</tbody></table>
+
+
+<p>这些组件，为我们在程序中自定义动作提供了基础也是灵活性展示的基础组成部分；</p>
+
+
+
+<h1 id="总结">总结：</h1>
+
+<p>安卓就像封装好的spring框架一般，将底层的实现封装在几个基本的类中，我们在上层进行组装和自定义，安卓就像个巨大的容器，尽可能屏蔽了实现细节，使得开发者更关注与App本身。</p></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/76522549'>原文链接</a>

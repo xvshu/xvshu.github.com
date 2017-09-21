@@ -1,0 +1,411 @@
+﻿<div style="color:blue" align=center>Java集群优化——dubbo+zookeeper构建高可用分布式集群</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 不久前，我们讨论过Nginx&#43;tomcat组成的集群，这已经是非常灵活的集群技术，但是当我们的系统遇到更大的瓶颈，全部应用的单点服务器已经不能满足我们的需求，这时，我们要考虑另外一种，我们熟悉的内容，就是分布式，而当下流行的Dubbo框架，不容我们忽视，这里，咱们一起来探讨一下这个框架的使用。</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px"><br style="margin:0px; padding:0px">
+</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="margin:0px; padding:0px"><span style="font-size:18px">一，背景</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px"><br style="margin:0px; padding:0px">
+</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; 以前我们需要远程调用他人的接口，我们是这么做的：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="11229138504933" alt=""><br>
+</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">我们遇到的问题：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; (1) 当服务越来越多时，服务URL配置管理变得非常困难，F5硬件负载均衡器的单点压力也越来越大。<br>
+此时需要一个服务注册中心，动态的注册和发现服务，使服务的位置透明。<br>
+并通过在消费方获取服务提供方地址列表，实现软负载均衡和Failover，降低对F5硬件负载均衡器的依赖，也能减少部分成本。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; (2) 当进一步发展，服务间依赖关系变得错踪复杂，甚至分不清哪个应用要在哪个应用之前启动，架构师都不能完整的描述应用的架构关系。<br>
+这时，需要自动画出应用间的依赖关系图，以帮助架构师理清理关系。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; (3) 接着，服务的调用量越来越大，服务的容量问题就暴露出来，这个服务需要多少机器支撑？什么时候该加机器？<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 为了解决这些问题，第一步，要将服务现在每天的调用量，响应时间，都统计出来，作为容量规划的参考指标。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 其次，要可以动态调整权重，在线上，将某台机器的权重一直加大，并在加大的过程中记录响应时间的变化，直到响应时间到达阀&#20540;，记录此时的访问量，再以此访问量乘以机器数反推总容量。<br>
+</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 为解决这些问题，Dubbo为我们做了什么呢：</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="35181737753738" alt=""><br>
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><br>
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><br>
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">负载均衡：</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="26785337012746" alt=""><br>
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 这就是所谓的软负载均衡！</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><br>
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><br>
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 现在让我们一起来接触下这个优秀的框架：</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="margin:0px; padding:0px"><span style="margin:0px; padding:0px">&nbsp; &nbsp; &nbsp; &nbsp; 简介</span></span><br style="margin:0px; padding:0px">
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="margin:0px; padding:0px; font-family:宋体"><span style="font-size:18px">&nbsp; &nbsp; &nbsp;架构如图：</span></span></span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="43073086661508" alt=""><br style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</span>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">节点角色说明：</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Provider:&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">暴露服务的服务提供方。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Consumer:&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">调用远程服务的服务消费方。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Registry:&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">服务注册与发现的注册中心。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>Monitor:&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">统计服务的调用次调和调用时间的监控中心。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>Container:&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">服务运行容器。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px; font-family:宋体"><span style="font-size:18px"><br style="margin:0px; padding:0px">
+</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">调用关系说明：</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>0.&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">服务容器负责启动，加载，运行服务提供者。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>1.&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">服务提供者在启动时，向注册中心注册自己提供的服务。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>2.&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">服务消费者在启动时，向注册中心订阅自己所需的服务。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>3.&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">注册中心返回服务提供者地址列表给消费者，如果有变更，注册中心将基于长连接推送变更数据给消费者。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>4.&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">服务消费者，从提供者地址列表中，基于软负载均衡算法，选一台提供者进行调用，如果调用失败，再选另一台调用。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>5.&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px; font-family:宋体"><span style="font-size:18px"><br style="margin:0px; padding:0px">
+</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><br style="margin:0px; padding:0px">
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;<span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;</span>Dubbo<span style="margin:0px; padding:0px; font-family:宋体">提供了很多协议，</span><span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">协</span>议、RMI<span style="margin:0px; padding:0px; font-family:宋体">协议</span>、<span style="margin:0px; padding:0px; font-family:Calibri">Hessian</span><span style="margin:0px; padding:0px; font-family:宋体">协议，</span>我们查看<span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">源代码，有各种协议的实现，如图所示：</span></span></span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img border="0" alt="" src="http://doc.okbase.net/picture/addon/2014/11/14/A090028465-112508.png" style="margin:0px; padding:0px; border:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><br style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</span>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>我们之前没用<span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">之前时，大部分都使用</span>Hessian来使用我们服务的暴露和调用，利用<span style="margin:0px; padding:0px; font-family:Calibri">HessianProxyFactory</span><span style="margin:0px; padding:0px; font-family:宋体">调用远程接口。</span></span></span></p>
+<span style="font-size:18px"><br style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</span>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="margin:0px; padding:0px; font-family:宋体"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>上面是参考了</span><span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">官方网介绍，接下来我们来介绍</span><span style="margin:0px; padding:0px; font-family:Calibri">SpringMVC</span><span style="margin:0px; padding:0px; font-family:宋体">、</span><span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">、</span><span style="margin:0px; padding:0px; font-family:Calibri">Zookeeper</span><span style="margin:0px; padding:0px; font-family:宋体">整合使用。</span><br style="margin:0px; padding:0px">
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px; font-family:宋体"><span style="font-size:18px"><br style="margin:0px; padding:0px">
+</span></span></p>
+<span style="font-size:18px"><span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><strong><span style="margin:0px; padding:0px">第三：Dubbo与<span style="margin:0px; padding:0px; font-family:Calibri">Zookeeper、SpringMVC</span><span style="margin:0px; padding:0px; font-family:宋体">整合使用</span></span></strong></span><span style="font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"></span></span>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px; font-family:宋体"><span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;<span style="margin:0px; padding:0px">第一步：在<span style="margin:0px; padding:0px; font-family:Calibri">Linux</span><span style="margin:0px; padding:0px; font-family:宋体">上安装</span><span style="margin:0px; padding:0px; font-family:Calibri">Zookeeper</span></span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="margin:0px; padding:0px"></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;<span style="margin:0px; padding:0px">Zookeeper<span style="margin:0px; padding:0px; font-family:宋体">作为</span><span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">服务的注册中心，</span><span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">原先基于数据库的注册中心，没采用</span><span style="margin:0px; padding:0px; font-family:Calibri">Zookeeper</span><span style="margin:0px; padding:0px; font-family:宋体">，</span><span style="margin:0px; padding:0px; font-family:Calibri">Zookeeper</span><span style="margin:0px; padding:0px; font-family:宋体">一个分布式的服务框架，是树型的目录服务</span>的数据存储，能做到集群管理数据&nbsp;，这里能很好的作为<span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">服务的注册中心，</span><span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">能与</span><span style="margin:0px; padding:0px; font-family:Calibri">Zookeeper</span><span style="margin:0px; padding:0px; font-family:宋体">做到集群部署，当提供者出现断电等异常停机时，</span><span style="margin:0px; padding:0px; font-family:Calibri">Zookeeper</span><span style="margin:0px; padding:0px; font-family:宋体">注册中心能自动删除提供者信息，当提供者重启时，能自动恢复注册数据，以及订阅请求。我们先在</span><span style="margin:0px; padding:0px; font-family:Calibri">linux</span><span style="margin:0px; padding:0px; font-family:宋体">上安装</span><span style="margin:0px; padding:0px; font-family:Calibri">Zookeeper</span><span style="margin:0px; padding:0px; font-family:宋体">，我们安装最简单的单点，集群比较麻烦。</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; </span></span></p>
+<p><span style="font-size:18px">先需要安装JdK，从Oracle的Java网站下载，安装很简单，就不再详述。</span></p>
+<p><span style="font-size:18px"><a target="_blank" target="_blank" name="minor1.1"></a>单机模式</span></p>
+<p><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>单机安装非常简单，只要获取到 Zookeeper 的压缩包并解压到某个目录如：C:\zookeeper-3.4.5\下，Zookeeper 的启动脚本在 bin 目录下，Windows 下的启动脚本是 zkServer.cmd。</span></p>
+<p><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>在你执行启动脚本之前，还有几个基本的配置项需要配置一下，Zookeeper 的配置文件在 conf 目录下，这个目录下有 zoo_sample.cfg 和 log4j.properties，你需要做的就是将 zoo_sample.cfg
+ 改名为 zoo.cfg，因为 Zookeeper 在启动时会找这个文件作为默认配置文件。下面详细介绍一下，这个配置文件中各个配置项的意义。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><pre name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;# The number of milliseconds of each tick
+tickTime=2000
+# The number of ticks that the initial 
+# synchronization phase can take
+initLimit=10
+# The number of ticks that can pass between 
+# sending a request and getting an acknowledgement
+syncLimit=5
+# the directory where the snapshot is stored.
+# do not use /tmp for storage, /tmp here is just 
+# example sakes.
+dataDir=C:\\zookeeper-3.4.5\\data
+dataLogDir=C:\\zookeeper-3.4.5\\log
+# the port at which the clients will connect
+clientPort=2181
+#
+# Be sure to read the maintenance section of the 
+# administrator guide before turning on autopurge.
+#
+# http://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_maintenance
+#
+# The number of snapshots to retain in dataDir
+#autopurge.snapRetainCount=3
+# Purge task interval in hours
+# Set to &quot;0&quot; to disable auto purge feature
+#autopurge.purgeInterval=1&lt;/span&gt;</pre></p>
+<ul>
+<li><span style="font-size:18px">tickTime：这个时间是作为 Zookeeper 服务器之间或客户端与服务器之间维持心跳的时间间隔，也就是每个 tickTime 时间就会发送一个心跳。</span></li><li><span style="font-size:18px">dataDir：顾名思义就是 Zookeeper 保存数据的目录，默认情况下，Zookeeper 将写数据的日志文件也保存在这个目录里。</span></li><li><span style="font-size:18px">dataLogDir：顾名思义就是 Zookeeper 保存日志文件的目录</span></li><li><span style="font-size:18px">clientPort：这个端口就是客户端连接 Zookeeper 服务器的端口，Zookeeper 会监听这个端口，接受客户端的访问请求。</span></li></ul>
+<p><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>当这些配置项配置好后，你现在就可以启动 Zookeeper 了，启动后要检查 Zookeeper 是否已经在服务，可以通过 netstat – ano 命令查看是否有你配置的 clientPort 端口号在监听服务。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="margin:0px; padding:0px"></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;<span style="margin:0px; padding:0px">第二步：配置d<span style="margin:0px; padding:0px; font-family:Calibri">ubbo-admin</span>的管理页面，方便我们管理页面</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>(1)下载<span style="margin:0px; padding:0px; font-family:Calibri">dubbo-admin-2.4.1.war</span>包，在<span style="margin:0px; padding:0px; font-family:Calibri">windows</span>的<span style="margin:0px; padding:0px; font-family:Calibri">tomcat</span>部署，先把<span style="margin:0px; padding:0px; font-family:Calibri">dubbo-admin-2.4.1</span>放在<span style="margin:0px; padding:0px; font-family:Calibri">tomcat</span>的<span style="margin:0px; padding:0px; font-family:Calibri">webapps/ROOT</span>下，然后进行解压</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>(2)然后到<span style="margin:0px; padding:0px; font-family:Calibri">webapps/ROOT/WEB-INF</span>下，有一个<span style="margin:0px; padding:0px; font-family:Calibri">dubbo.properties</span>文件，里面指向Zookeeper&nbsp;，使用的是Zookeeper&nbsp;的注册中心，如图所示：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<pre name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;dubbo.registry.address=zookeeper://127.0.0.1:2181
+dubbo.admin.root.password=root
+dubbo.admin.guest.password=guest&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span><span style="margin:0px; padding:0px">(3)然后启动<span style="margin:0px; padding:0px; font-family:Calibri">tomcat</span>服务，用户名和密码：<span style="margin:0px; padding:0px; font-family:Calibri">root,并访问服务，显示登陆页面，说明dubbo-admin部署成功，</span>如图所示：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp;&nbsp;<img src="10070178091826" alt=""></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="margin:0px; padding:0px">&nbsp;</span><span style="margin:0px; padding:0px">&nbsp;<span style="margin:0px; padding:0px">第三步：SpringMVC与<span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span>的整合，这边使用的<span style="margin:0px; padding:0px; font-family:Calibri">Maven</span>的管理项目</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="margin:0px; padding:0px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span><span style="margin:0px; padding:0px">第一：</span></span><span style="margin:0px; padding:0px">我们先开发服务注册的，就是提供服务，项目结构如图所示：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="1833086472199" alt=""></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span><span style="margin:0px; padding:0px">（1）test-maven-api项目加入了一个服务接口，代码如下：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px"></span></span><pre name="code" class="java">public interface TestRegistryService {
+   public String hello(String name);
+}</pre><br>
+<br>
+</p>
+<span style="font-size:18px"><span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;</span>（2）test-maven-console在pom<span style="margin:0px; padding:0px; font-family:Calibri">.xml</span>加入<span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span>和Zookeeper的<span style="margin:0px; padding:0px; font-family:Calibri">jar</span>包、引用<span style="margin:0px; padding:0px; font-family:Calibri">test-maven-api</span>的<span style="margin:0px; padding:0px; font-family:Calibri">jar</span>包，代码如下：</span><span style="font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"></span></span>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp;&nbsp;</span><pre name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;&lt;dependency&gt;
+  		&lt;groupId&gt;cn.test&lt;/groupId&gt;
+  		&lt;artifactId&gt;test-maven-api&lt;/artifactId&gt;
+  		&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+  	&lt;/dependency&gt;
+  
+      &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+            &lt;artifactId&gt;dubbo&lt;/artifactId&gt;
+            &lt;version&gt;2.5.3&lt;/version&gt;
+        &lt;/dependency&gt;
+        
+         &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.zookeeper&lt;/groupId&gt;
+			&lt;artifactId&gt;zookeeper&lt;/artifactId&gt;
+			&lt;version&gt;3.4.6&lt;/version&gt;
+        &lt;/dependency&gt;
+  
+      &lt;dependency&gt;
+     	 &lt;groupId&gt;com.github.sgroschupf&lt;/groupId&gt;
+		 &lt;artifactId&gt;zkclient&lt;/artifactId&gt;
+		 &lt;version&gt;0.1&lt;/version&gt;
+&lt;/dependency&gt;&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span></p>
+<p><span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>(3)test-maven-console实现具体的服务，代码如下：</span></span></p>
+<p><span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><span style="font-size:18px"></span></span><pre name="code" class="java">@Service(&quot;testRegistryService&quot;)
+public class TestRegistryServiceImpl implements TestRegistryService {
+	public String hello(String name) {	
+		return &quot;hello&quot;+name;
+	}
+}</pre><br>
+</p>
+<span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>(4)我们服务以及实现好了，这时要暴露服务，代码如下：<br style="margin:0px; padding:0px">
+</span></span>
+<p><span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><span style="font-size:18px">&nbsp;&nbsp;</span></span></p>
+<p><span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><span style="font-size:18px"></span></span><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+ 	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; 
+ 	xmlns:jee=&quot;http://www.springframework.org/schema/jee&quot;
+	xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
+	&lt;span style=&quot;color:#cc0000;&quot;&gt;xmlns:dubbo=&quot;http://code.alibabatech.com/schema/dubbo&quot;&lt;/span&gt;
+	xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+	&lt;span style=&quot;color:#990000;&quot;&gt;http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd&lt;/span&gt;
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd&quot;
+	default-lazy-init=&quot;false&quot; &gt;
+   &lt;!-- 提供方应用名称信息，这个相当于起一个名字，我们dubbo管理页面比较清晰是哪个应用暴露出来的 --&gt;
+   &lt;dubbo:application name=&quot;dubbo_provider&quot;&gt;&lt;/dubbo:application&gt;
+   &lt;!-- 使用zookeeper注册中心暴露服务地址 --&gt;  
+   &lt;dubbo:registry address=&quot;zookeeper://127.0.0.1:2181&quot; check=&quot;false&quot; subscribe=&quot;false&quot; register=&quot;&quot;&gt;&lt;/dubbo:registry&gt;
+  &lt;!-- 要暴露的服务接口 --&gt;  
+  &lt;dubbo:service interface=&quot;cn.test.dubbo.registry.service.TestRegistryService&quot; ref=&quot;testRegistryService&quot; /&gt;  	
+&lt;/beans&gt;</pre><br>
+<br>
+</p>
+<span style="font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><span style="font-size:18px">&nbsp;&nbsp;</span></span>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">说明：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;&nbsp;dubbo:registry&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">标签一些属性的说明：</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">1</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>register<span style="margin:0px; padding:0px; font-family:宋体">是否向此注册中心注册服务，如果设为</span><span style="margin:0px; padding:0px; font-family:Calibri">false</span><span style="margin:0px; padding:0px; font-family:宋体">，将只订阅，不注册</span>。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">2</span><span style="margin:0px; padding:0px; font-family:宋体">）</span><span style="margin:0px; padding:0px; font-family:Calibri">check</span>注册中心不存在时，是否报错。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">3</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>subscribe<span style="margin:0px; padding:0px; font-family:宋体">是否向此注册中心订阅服务，如果设为</span><span style="margin:0px; padding:0px; font-family:Calibri">false</span><span style="margin:0px; padding:0px; font-family:宋体">，将只注册，不订阅</span>。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">4</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>timeout<span style="margin:0px; padding:0px; font-family:宋体">注册中心请求超时时间</span><span style="margin:0px; padding:0px; font-family:Calibri">(</span><span style="margin:0px; padding:0px; font-family:宋体">毫秒</span><span style="margin:0px; padding:0px; font-family:Calibri">)</span>。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp;&nbsp;<span style="margin:0px; padding:0px"><span style="margin:0px; padding:0px; font-family:Calibri">5</span><span style="margin:0px; padding:0px; font-family:宋体">）</span><span style="margin:0px; padding:0px; font-family:Calibri">address</span><span style="margin:0px; padding:0px; font-family:宋体">可以</span>Zookeeper<span style="margin:0px; padding:0px; font-family:宋体">集群配置</span>，地址可以多个以逗号隔开等。</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; dubbo:service<span style="margin:0px; padding:0px; font-family:宋体">标签的一些属性说明：</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">1</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>interface服务接口的路径</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">2</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>ref引用对应的实现类的<span style="margin:0px; padding:0px; font-family:Calibri">Bean</span><span style="margin:0px; padding:0px; font-family:宋体">的</span><span style="margin:0px; padding:0px; font-family:Calibri">ID</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp;<span style="margin:0px; padding:0px"><span style="margin:0px; padding:0px; font-family:Calibri">3</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>registry向指定注册中心注册，在多个注册中心时使用，&#20540;为<span style="margin:0px; padding:0px; font-family:Calibri">&lt;dubbo:registry&gt;</span><span style="margin:0px; padding:0px; font-family:宋体">的</span><span style="margin:0px; padding:0px; font-family:Calibri">id</span><span style="margin:0px; padding:0px; font-family:宋体">属性，多个注册中心</span><span style="margin:0px; padding:0px; font-family:Calibri">ID</span><span style="margin:0px; padding:0px; font-family:宋体">用逗号分隔，如果不想将该服务注册到任何</span><span style="margin:0px; padding:0px; font-family:Calibri">registry</span><span style="margin:0px; padding:0px; font-family:宋体">，可将&#20540;设为</span><span style="margin:0px; padding:0px; font-family:Calibri">N/A</span></span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">4</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>register&nbsp;默认true&nbsp;，该协议的服务是否注册到注册中心。</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px"><br style="margin:0px; padding:0px">
+</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;<span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp;
+</span>&nbsp;(5)启动项目，然后我们在<span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span><span style="margin:0px; padding:0px; font-family:宋体">管理页面上显示，已经暴露的服务，但显示还没有消费者，因为我们还没实现消费者服务，如图所示：</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="margin:0px; padding:0px; font-family:宋体"><span style="font-size:18px">&nbsp;&nbsp;<img src="638768233723" alt=""></span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><span style="margin:0px; padding:0px">&nbsp; &nbsp;第二：我们在开发服务消费者，就是调用服务，我们在新建一个新的消费者项目：</span><br style="margin:0px; padding:0px">
+<br style="margin:0px; padding:0px">
+&nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>（1）test-maven-server-console的<span style="margin:0px; padding:0px; font-family:Calibri">pom.xml</span>引入<span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span>和Zookeeper的<span style="margin:0px; padding:0px; font-family:Calibri">jar</span>包、<span style="margin:0px; padding:0px; font-family:Calibri">test-maven-api</span>的<span style="margin:0px; padding:0px; font-family:Calibri">jar</span>包，因为引入<span style="margin:0px; padding:0px; font-family:Calibri">test-maven-api</span>的<span style="margin:0px; padding:0px; font-family:Calibri">jar</span>包，我们在项目中调用像在本地调用一样。代码如下：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp;&nbsp;</span><pre name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;&lt;dependency&gt;
+  		&lt;groupId&gt;cn.test&lt;/groupId&gt;
+  		&lt;artifactId&gt;test-maven-api&lt;/artifactId&gt;
+  		&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+  	&lt;/dependency&gt;
+  
+      &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+            &lt;artifactId&gt;dubbo&lt;/artifactId&gt;
+            &lt;version&gt;2.5.3&lt;/version&gt;
+        &lt;/dependency&gt;
+        
+         &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.zookeeper&lt;/groupId&gt;
+			&lt;artifactId&gt;zookeeper&lt;/artifactId&gt;
+			&lt;version&gt;3.4.6&lt;/version&gt;
+        &lt;/dependency&gt;
+  
+      &lt;dependency&gt;
+     	 &lt;groupId&gt;com.github.sgroschupf&lt;/groupId&gt;
+		 &lt;artifactId&gt;zkclient&lt;/artifactId&gt;
+		 &lt;version&gt;0.1&lt;/version&gt;
+&lt;/dependency&gt;&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></span><span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">（2）test-maven-server-console项目的具体实现，代码如下：</span><br style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<br style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">&nbsp; &nbsp; &nbsp;</span></span><pre name="code" class="java">@Controller
+public class IndexController {
+	
+	@Autowired
+	private TestRegistryService testRegistryService;
+	
+	@RequestMapping(&quot;/hello&quot;)
+	public String index(Model model){
+	     String name=testRegistryService.hello(&quot;zz&quot;);
+	     System.out.println(&quot;xx==&quot;+name);
+		return &quot;&quot;;
+	}
+
+}</pre><br>
+<br>
+<span style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px"><br style="margin:0px; padding:0px">
+<span style="font-family:verdana,Arial,Helvetica,sans-serif; font-size:18px; line-height:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>(3)我们要引用的地址，代码如下：</span><br style="margin:0px; padding:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">&nbsp; &nbsp;</span><pre name="code" class="java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+ 	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; 
+ 	xmlns:jee=&quot;http://www.springframework.org/schema/jee&quot;
+	xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
+	&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;&lt;span style=&quot;color:#990000;&quot;&gt;xmlns:dubbo=&quot;http://code.alibabatech.com/schema/dubbo&quot;&lt;/span&gt;&lt;/span&gt;
+	xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+	&lt;span style=&quot;color:#990000;&quot;&gt;http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd&lt;/span&gt;
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd&quot;
+	default-lazy-init=&quot;false&quot; &gt;
+
+   &lt;dubbo:application name=&quot;dubbo_consumer&quot;&gt;&lt;/dubbo:application&gt;
+   &lt;!-- 使用zookeeper注册中心暴露服务地址 --&gt;  
+   &lt;dubbo:registry address=&quot;zookeeper://192.168.74.129:2181&quot; check=&quot;false&quot;&gt;&lt;/dubbo:registry&gt; 
+     &lt;!-- 要引用的服务 --&gt;  
+   &lt;dubbo:reference interface=&quot;cn.test.dubbo.registry.service.TestRegistryService&quot; id=&quot;testRegistryService&quot;&gt;&lt;/dubbo:reference&gt;
+&lt;/beans&gt;</pre><br>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+</p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">说明：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;&nbsp;dubbo:reference&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">的一些属性的说明：</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">1</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>interface调用的服务接口</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">2</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>check&nbsp;启动时检查提供者是否存在，<span style="margin:0px; padding:0px; font-family:Calibri">true</span><span style="margin:0px; padding:0px; font-family:宋体">报错，</span><span style="margin:0px; padding:0px; font-family:Calibri">false</span><span style="margin:0px; padding:0px; font-family:宋体">忽略</span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp;&nbsp;&nbsp;<span style="margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">3</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>registry&nbsp;<span style="margin:0px; padding:0px; font-family:宋体">从指定注册中心注册获取服务列表，在多个注册中心时使用，&#20540;为</span><span style="margin:0px; padding:0px; font-family:Calibri">&lt;dubbo:registry&gt;</span><span style="margin:0px; padding:0px; font-family:宋体">的</span><span style="margin:0px; padding:0px; font-family:Calibri">id</span><span style="margin:0px; padding:0px; font-family:宋体">属性，多个注册中心</span><span style="margin:0px; padding:0px; font-family:Calibri">ID</span><span style="margin:0px; padding:0px; font-family:宋体">用逗号分隔</span></span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp;<span style="margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;<span style="margin:0px; padding:0px; font-family:Calibri">4</span><span style="margin:0px; padding:0px; font-family:宋体">）</span>loadbalance&nbsp;负载均衡策略，可选&#20540;：<span style="margin:0px; padding:0px; font-family:Calibri">random,roundrobin,leastactive</span><span style="margin:0px; padding:0px; font-family:宋体">，分别表示：随机，轮循，最少活跃调用</span></span></span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">&nbsp; &nbsp;</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">(4)项目启动，<span style="margin:0px; padding:0px; font-family:Calibri">Dubbo</span>管理页面，能看到消费者，如图所示：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp;<img src="10717968689522" alt=""></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="margin:0px; padding:0px"><span style="font-size:18px">(5)然后访问消费者项目，<span style="margin:0px; padding:0px; font-family:Calibri">Controller</span>层能像调用本地一样调用服务的具体实现，如图所示：</span></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px">&nbsp;&nbsp;<img src="49539219617563" alt=""></span></p>
+<p style="margin-top:0px; margin-bottom:0px; padding-top:0px; padding-bottom:0px; font-family:verdana,Arial,Helvetica,sans-serif; line-height:24px">
+<span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">总结：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 经过一系列的操作之后，我们感觉，的确很简单，dubbo给我们封装了很多操作，让我们不需要过多考虑具体的实现细节，配置化生成咱们的应用，这样的思想，现在在IT行业正在盛行！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/47667235'>原文链接</a>

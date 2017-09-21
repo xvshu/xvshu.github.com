@@ -1,0 +1,161 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; JAVA必备——Struts</div><div style="color:blue" align=center>JAVA必备——Struts</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; 在我们的开发中，有一个经典的框架，就是</span><span lang="en-US" style="font-family:Calibri">SSH</span><span lang="zh-CN" style="font-family:SimSun">，他们分别是：Struts，</span><span lang="en-US" style="font-family:SimSun">Spring，Hibernate</span><span lang="zh-CN" style="font-family:SimSun">，我们队他们神交已久，在以前的博客中我介绍了</span><span lang="en-US" style="font-family:SimSun">Hibernate</span><span lang="zh-CN" style="font-family:SimSun">，今天我们也逐步揭开Struts的神秘面纱，一起来看看这个熟悉的老朋友！</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<h1><span style="font-size:18px">简介</span></h1>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 首先我们还是去维基百科上看看他的介绍：</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; Struts是</span><span lang="en-US">Apache软件基金会（ASF）赞助的一个开源项目。它最初是Jakarta项目中的一个子项目，并在2004年3月成为ASF的顶级项目。它通过采用JavaServlet／JSP技术，实现了基于Java EEWeb应用的Model-View-Controller（MVC）设计模式的应用框架，是MVC经典设计模式中的一个经典产品。</span></span></p>
+<p lang="en-US" style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 不要被</span><span lang="en-US">MVC</span><span lang="zh-CN">吓住，我们马上去看看他是什么？</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; MVC模式（</span><span lang="en-US">Model-View-Controller）是软件工程中的一种软件架构模式，把软件系统分为三个基本部分：模型（Model）、视图（View）和控制器（Controller）。</span></span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; MVC模式最早由</span><span lang="en-US">Trygve Reenskaug在1978年提出[1] ，是施乐帕罗奥多研究中心（XeroxPARC）在20世纪80年代为程序语言Smalltalk发明的一种软件设计模式。MVC模式的目的是实现一种动态的程序设计，使后续对程序的修改和扩展简化，并且使程序某一部分的重复利用成为可能。除此之外，此模式通过对复杂度的简化，使程序结构更加直观。软件系统通过对自身基本部分分离的同时也赋予了各个基本部分应有的功能。专业人员可以通过自身的专长分组：</span></span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; （控制器</span><span lang="en-US">Controller）- 负责转发请求，对请求进行处理。</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; （视图</span><span lang="en-US">View） - 界面设计人员进行图形界面设计。</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; （模型</span><span lang="en-US">Model） - 程序员编写程序应有的功能（实现算法等等）、数据库专家进行数据管理和数据库设计(可以实现具体的功能)。</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">下面让我们通过一个简单的例子认识他：</span></p>
+<h1><span style="font-size:18px">&nbsp;实例：</span></h1>
+<h2><span style="font-size:18px">Struts环境搭建</span></h2>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 1.首先要下载</span><span lang="en-US">struts的jar包，地址http://struts.apache.org/</span></span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 2.解压后将</span><span lang="en-US">lib文件夹里的jar包都加入到项目中</span></span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 3.在</span><span lang="en-US">webapps文件夹中解压struts-blank.war，将其中的struts-config.xml拷贝到项目中</span></span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 4.配置</span><span lang="en-US">web.xml部署ActionServlet。这个&#26684;式是相对固定的，所以一般复制即可</span></span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span><pre code_snippet_id="407601" snippet_file_name="blog_20140626_1_767787" name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;&lt;servlet&gt;  
+    &lt;servlet-name&gt;action&lt;/servlet-name&gt;  
+    &lt;servlet-class&gt;org.apache.struts.action.ActionServlet&lt;/servlet-class&gt;  
+    &lt;init-param&gt;  
+        &lt;param-name&gt;config&lt;/param-name&gt;  
+        &lt;param-value&gt;/WEB-INF/struts-config.xml&lt;/param-value&gt;  
+    &lt;/init-param&gt;  
+    &lt;init-param&gt;  
+        &lt;param-name&gt;debug&lt;/param-name&gt;  
+        &lt;param-value&gt;2&lt;/param-value&gt;  
+    &lt;/init-param&gt;  
+    &lt;init-param&gt;  
+        &lt;param-name&gt;detail&lt;/param-name&gt;  
+        &lt;param-value&gt;2&lt;/param-value&gt;  
+    &lt;/init-param&gt;  
+    &lt;load-on-startup&gt;2&lt;/load-on-startup&gt;  
+&lt;/servlet&gt;  
+   
+&lt;servlet-mapping&gt;  
+    &lt;servlet-name&gt;action&lt;/servlet-name&gt;  
+    &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;  
+&lt;/servlet-mapping&gt;  
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span></p>
+<p style="margin:0in; font-family:Calibri">
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 5.配置</span><span lang="en-US">struts-config.xml部署Action、ActionForm。其中type均为你项目中Action和ActionForm所在包的完整路径；name可以随便起，但是Action中的name必须与它用到的ActionForm的name相一致；再有就是action中要添加scope=&quot;request&quot;这个属性，因为scope默认是session，这个可以根据实际情况自己定。</span></span></p>
+<span style="font-size:18px"><br>
+</span>
+<p style="margin:0in; font-family:Calibri"><pre code_snippet_id="407601" snippet_file_name="blog_20140626_2_4639244" name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;&lt;struts-config&gt;  
+    &lt;form-beans&gt;  
+        &lt;form-bean name=&quot;loginForm&quot; type=&quot;com.wang.struts.LoginActionForm&quot;&gt;&lt;/form-bean&gt;  
+        &lt;!-- 可以有多个ActionForm --&gt;  
+    &lt;/form-beans&gt;  
+   
+    &lt;action-mappings&gt;  
+        &lt;action path=&quot;/login&quot; type=&quot;com.wang.struts.LoginAction&quot; name=&quot;loginForm&quot; scope=&quot;request&quot;&gt;  
+            &lt;forward name=&quot;success&quot; path=&quot;/login_success.jsp&quot;&gt;&lt;/forward&gt;  
+            &lt;forward name=&quot;error&quot; path=&quot;/login_error.jsp&quot;&gt;&lt;/forward&gt;  
+        &lt;/action&gt;  
+        &lt;!-- 可以有多个Action --&gt;  
+    &lt;/action-mappings&gt;  
+&lt;/struts-config&gt;  
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; 6.</span><span lang="zh-CN" style="font-family:SimSun">编写</span><span lang="en-US" style="font-family:Calibri">action</span><span lang="zh-CN" style="font-family:SimSun">类：</span><br>
+</span></p>
+<p style="margin:0in; font-family:Calibri"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"><br>
+</span></span></p>
+<p style="margin:0in; font-family:Calibri"><span lang="zh-CN" style="font-family:SimSun"></span><pre code_snippet_id="407601" snippet_file_name="blog_20140626_3_1400641" name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;package com.action;
+
+import java.util.Map;
+
+import com.entity.User;
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class loginaction extends ActionSupport {
+
+	private User user;
+	
+	
+	public User getUser() {
+		return user;
+	}
+
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+
+	@Override
+	public String execute() throws Exception {
+		
+		if(&quot;admin&quot;.equals(user.getUserName()) &amp;&amp; &quot;admin&quot;.equals(user.getPassWord()) ){	
+			//System.out.println(&quot;you are success!&quot;);
+			Map&lt;String, Object&gt; session = (Map)ActionContext.getContext().get(&quot;session&quot;);
+			session.put(&quot;userName&quot;, user.getUserName());
+			return &quot;success&quot;;
+		}else{
+			//System.out.println(&quot;your user name is wrong !&quot;);
+			return &quot;error&quot;;
+		}
+		
+		//System.out.println(&quot;hello!&quot;);
+		//return super.execute();
+	}
+
+}
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; 7.</span><span lang="zh-CN" style="font-family:SimSun">编写登陆页面</span></span></p>
+<p style="margin:0in"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"></span></span><pre code_snippet_id="407601" snippet_file_name="blog_20140626_4_8510702" name="code" class="html">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot;
+    pageEncoding=&quot;UTF-8&quot;%&gt;
+&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
+&lt;title&gt;SS2_Test_Login&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+	&lt;form action=&quot;login&quot;&gt;
+		User login &lt;hr/&gt;
+		User Name: &lt;input name=&quot;user.userName&quot; type=&quot;text&quot;&gt;&lt;br/&gt;
+		User PassWord: &lt;input name=&quot;user.PassWord&quot; type=&quot;text&quot;&gt;
+		&lt;input id=&quot;Btn_Login&quot; type=&quot;submit&quot; value=&quot;OK&quot;&gt;
+	&lt;/form&gt;
+	
+&lt;/body&gt;
+&lt;/html&gt;
+</pre><br>
+</p>
+<p style="margin:0in; font-family:SimSun">我们看看他是怎么运行的：</p>
+<br>
+<p style="margin:0in"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="24204148713537" alt=""><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:18px"></span></span></p>
+<p style="margin:0in">这个具体的运行，我们才刚刚接触，暂且认为，他就是一个三层的调用吧！</p>
+<h1>MVC体现：</h1>
+<p style="margin:0in"><span lang="zh-CN" style="font-family:SimSun">而这和</span><span lang="en-US" style="font-family:Calibri">MVC</span><span lang="zh-CN" style="font-family:SimSun">有什么关系呢？听听百科的解释：</span></p>
+<p style="margin:0in; font-family:SimSun">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun"><span lang="zh-CN">MVC结构</span><span lang="en-US">[编辑]</span></p>
+<p style="margin:0in; font-family:SimSun"><span lang="zh-CN">&nbsp; &nbsp; 在</span><span lang="en-US">Struts中，已经由一个名为ActionServlet的Servlet充当控制器（Controller）的角色，根据描述模型、视图、控制器对应关系的struts-config.xml的配置文件，转发视图（View）的请求，组装响应数据模型（Model）。在MVC的模型（Model）部分，经常划分为两个主要子系统（系统的内部数据状态与改变数据状态的逻辑动作），这两个概念子系统分别具体对应Struts里的ActionForm与Action两个需要继承实现超类。在这里，Struts可以与各种标准的数据访问技术结合在一起，包括EnterpriseJava
+ Beans（EJB）, JDBC与JNDI。在Struts的视图（View）端，除了使用标准的JavaServerPages（JSP）以外，还提供了大量的标签库使用，同时也可以与其他表现层组件技术（产品）进行整合，比如VelocityTemplates，XSLT等。通过应用Struts的框架，最终用户可以把大部分的关注点放在自己的业务逻辑（Action）与映射关系的配置文件（struts-config.xml）中。</span></p>
+<p style="margin:0in; font-family:SimSun">&nbsp;</p>
+<h1>总结：</h1>
+<p style="margin:0in; font-family:SimSun"><span lang="zh-CN">&nbsp; &nbsp; 写完了这个测试，我们发现，</span><span lang="en-US">Struts</span><span lang="zh-CN">给我们带来了很大的方便，将后台处理和前台显示通过</span><span lang="en-US">xml</span><span lang="zh-CN">配置文件实现了自动适配，自动处理！给我们的编程带来了很大的好处，这样我们写的后台处理和前台处理代码就会带来很大的复用性！</span></p>
+<p style="margin:0in; font-family:SimSun">&nbsp; &nbsp; 而通过这个实例，我们对框架的理解也更深刻一点，框架是一种另外意义上的抽象，框架提供的是公共服务，他是种对横向上的抽象。通过这个例子，我们也更理解面向对象的设计了！</p>
+&nbsp; &nbsp; 每一种技术的学习，其实都不难，那么难在哪呢？难在你认为他“高大上”了，其实拨开所有技术的脸皮，不还是ascii码的组合，面向对象技术，设计模式的应用吗？这么看来，这个世界，还是简单的！<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/34902181'>原文链接</a>

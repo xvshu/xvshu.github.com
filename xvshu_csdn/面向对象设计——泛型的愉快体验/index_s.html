@@ -1,0 +1,157 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 面向对象设计——泛型的愉快体验</div><div style="color:blue" align=center>面向对象设计——泛型的愉快体验</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在实际的项目中，我们经常看到有人写了很多代码，抽象了很多类，而这些类无不是采用了泛型和委托，应用了这辆种技术后，经常有人给我们说，代码的复用性和耦合性就降低了，那作为一个合&#26684;的面向对象的程序设计人员，这种技术成为了我们的必备技能，今天就跟着我一起来一次轻松愉快的旅行！</span></p>
+<h1><span style="font-size:18px">定义（如果吃力，请直接看我对他的注解）：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 泛型是程序设计语言的一种特性。允许程序员在强类型程序设计语言中编写代码时定&nbsp;义一些可变部分，那些部分在使用前必须作出指明。各种程序设计语言和其编译器、运行环境对泛型的支持均不一样。将类型参数化以达到代码复用提高软件开发工作效率的一种数据类型。泛型类是引用类型，是堆对象，主要是引入了类型参数这个概念。</span></p>
+<h2><span style="font-size:18px">注解：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 泛型就是一个黑盒子，我们设计代码的时候不需要知道黑子里是什么类型，我们关心的是对黑盒子的处理，这样，我们就不是针对具体的对象编程，我们就相当于定义了一套逻辑（执行标准），而我们在真正用的时候，给的是什么类型，他就具有了这个逻辑（执行标准）！</span></p>
+<h2><span style="font-size:18px">生活举例：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在我们的生活中，泛型的例子其实已经伴随了我们很久，就是快递，我们想想，快递公司关心的重点是什么？不是我们要邮寄什么东西，而是他怎么选择路径，并尽最大的努力节省成本，所以他们定义自己快递活动的时候，就将所有的快递件当成黑箱子处理看，他做规划，是北京到四川，火车怎么走，那条路线，轮船怎么走，那条路线，运送到哪个快递员手里最节省成本，这样定义的好处是我们用10元人民币，就像一件重量合适的物品从北京运送到了广东（我们这边的物价，地界不同可能会有出入）</span></p>
+<p><span style="font-size:18px">我们看看这幅图再理解一下：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><img src="39475087097120" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;是不是觉得，有那么点眉头了呢！但是还是落不到实处，因为我们是程序猿，我们习惯用代码交流，基于此，我做了一个c#里的小例子，仅供大家参考批评：</span></p>
+<h1><span style="font-size:18px">实例：</span></h1>
+<h2><span style="font-size:18px">背景：</span></h2>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; 快递公司要对快递包裹这个类进行封装，且大包裹里可以放N多小包裹，在运送之前要将包裹打包</span></p>
+<h2><span style="font-size:18px">类说明：</span></h2>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; bagList~~~大包裹，可以包含小包裹</span></p>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; bag~~~~~~包裹类，有具体的物品</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">包裹代码：</span></h2>
+<p>
+<pre code_snippet_id="409954" snippet_file_name="blog_20140628_1_8948389" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;//一个快递包裹仓库
+    public class bagList&lt;T&gt;
+    {
+
+        //包裹类
+        private class bag
+        {
+
+            //实例包裹里的物品
+            public bag(T t)
+            {
+                Something = t;
+            }
+
+            //收件人地址
+            private string address;
+            public string Address
+            {
+                get { return address; }
+                set { address = value; }
+            }
+
+            
+
+            //收件人邮寄物品
+            private T something;
+            public T Something
+            {
+                get { return something; }
+                set { something = value; }
+            }
+
+            //下一个包裹
+            private bag next;
+            public bag Next
+            {
+                get { return next; }
+                set { next = value; }
+            }
+
+        }
+
+        //一次快递的包裹集合-仓库
+        private bag head;
+
+        //初识化这个快递包裹仓库
+        public bagList()
+        {
+            head = null;
+        }
+
+        //增加一个包裹到仓库
+        public void AddHead(T t)
+        {
+
+            //实例一个包裹
+            bag Cbag = new bag(t);
+
+            //新包裹装到仓库中
+            Cbag.Next= head;
+
+            //仓库的大门给快递员
+            head = Cbag;
+        }
+
+        //取出仓库中所有的包裹
+        //foreach语句必须实现的方法
+        public IEnumerator&lt;T&gt; GetEnumerator()
+        {
+            //实例一个包裹仓库
+            bag baglist = head;
+
+            //逐次取出所有的包裹
+            while (baglist != null)
+            {
+                //转换为迭代器类型——为了将结果逐次输出
+                yield return baglist.Something;
+                //转换为下一步要输出的对象
+               baglist = baglist.Next;
+            }
+        }
+    }&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<p>
+<h2><span style="font-size:18px">客户端代码（快递员）：</span></h2>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p>
+<pre code_snippet_id="409954" snippet_file_name="blog_20140628_2_2471183" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;    class Program
+    {
+        static void Main(string[] args)
+        {
+            //实例一个大包裹可以装快递员收到的包裹
+            bagList&lt;int&gt; baglist = new bagList&lt;int&gt;();
+
+            //装0-9个物品到大包裹里
+            for (int bag = 0; bag &lt; 10; bag++)
+            {
+                baglist.AddHead(bag);
+            }
+
+            //将0-9个物品显示出来
+            foreach (int i in baglist)
+            {
+                System.Console.WriteLine(i + &quot;包裹已经入库！&quot;);
+            }
+
+            //所有包裹打包结束
+            System.Console.WriteLine(&quot;快递包裹打包完成&quot;);
+        }
+    }&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<p>
+<h2><span style="font-size:18px">运行结果：</span></h2>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><img src="7315457046463" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; 有人曾经说过：“凡事就怕认真二字”。这句话现在来看真的很有道理，尤其是这次的研究，我发现，不是我们学不会，而是我们不会学，我们对待学习，放纵多余谨慎，将就多余斟酌，马虎多余认真，这样的学习，最大的表现就是我们顶着面向对象程序设计员的帽子，却浑然不知，我们经不起深入与字字必究的代码检查！这个也是在看完公司的代码后，给我的最大感触！我们在以后的学习中，我们还是要有点“学究”精神的！<br>
+<br>
+</span></p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/35633061'>原文链接</a>

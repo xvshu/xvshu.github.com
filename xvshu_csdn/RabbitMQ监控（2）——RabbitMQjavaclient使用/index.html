@@ -1,0 +1,87 @@
+﻿<div style="color:blue" align=center>RabbitMQ监控（2）——RabbitMQjavaclient使用</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+本文旨在为大家打开java关于rabbitmq操作的窗户，简单应用，帮助理解官方文档，详细内容，还是要参考官方文档，这里是官方文档的中文过渡区<br>
+<h1>一，基础概念：</h1>
+&nbsp; &nbsp; &nbsp; 每个rabbitmq-server叫做一个Broker，等着tcp连接进入。<br>
+&nbsp; &nbsp; &nbsp; 在rabbitmq-server进程内有Exchange，定义了这个消息的发送类型。（一对多、直连、多对多等等）<br>
+&nbsp; &nbsp; &nbsp; &nbsp; Queue是进程内的逻辑队列，有多个，有名字。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; Binding联系Exchane与Queue。<br>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; Routing key由生产者指定。Binding key由消费者指定。二者联合决定一条消息的来去。</p>
+<h1>二简单范例：</h1>
+<p><br>
+</p>
+<p>maven依赖</p>
+<p><pre code_snippet_id="1620640" snippet_file_name="blog_20160323_1_4907410" name="code" class="html">&lt;dependency&gt;
+  &lt;groupId&gt;com.rabbitmq&lt;/groupId&gt;
+  &lt;artifactId&gt;amqp-client&lt;/artifactId&gt;
+  &lt;version&gt;3.6.1&lt;/version&gt;
+&lt;/dependency&gt;</pre><br>
+<br>
+</p>
+&nbsp; &nbsp; &nbsp;&nbsp;<br>
+<p>连接范例：</p>
+<p><pre code_snippet_id="1620640" snippet_file_name="blog_20160323_2_7350408" name="code" class="java">ConnectionFactory factory = new ConnectionFactory();
+factory.setUsername(userName);
+factory.setPassword(password);
+factory.setVirtualHost(virtualHost);
+factory.setHost(hostName);
+factory.setPort(portNumber);
+Connection conn = factory.newConnection();</pre><br>
+<br>
+</p>
+<br>
+<p>简便方式：</p>
+<p><pre code_snippet_id="1620640" snippet_file_name="blog_20160323_3_9443959" name="code" class="java">ConnectionFactory factory = new ConnectionFactory();
+factory.setUri(&quot;amqp://userName:password@hostName:portNumber/virtualHost&quot;);
+Connection conn = factory.newConnection();</pre><br>
+<br>
+</p>
+以上是得到一个rabbitmq连接最最基础的代码。<br>
+<p>最后这个channel就可以用来收和发消息了。</p>
+<p><pre code_snippet_id="1620640" snippet_file_name="blog_20160323_4_349814" name="code" class="java">Channel channel = conn.createChannel();</pre><br>
+</p>
+<p>提醒：</p>
+<p>请在程序结尾处关闭链接，否则比较耗费资源：</p>
+<p><pre code_snippet_id="1620640" snippet_file_name="blog_20160323_5_491518" name="code" class="java">channel.close();
+conn.close();</pre></p>
+<p>&nbsp;</p>
+<p>使用Exchanges and Queues<br>
+</p>
+<p><pre code_snippet_id="1620640" snippet_file_name="blog_20160323_6_5093324" name="code" class="java">channel.exchangeDeclare(exchangeName, &quot;direct&quot;, true);
+String queueName = channel.queueDeclare().getQueue();
+channel.queueBind(queueName, exchangeName, routingKey);</pre><br>
+发送消息：</p>
+<p><pre code_snippet_id="1620640" snippet_file_name="blog_20160323_7_6871230" name="code" class="java">byte[] messageBodyBytes = &quot;Hello, world!&quot;.getBytes();
+channel.basicPublish(exchangeName, routingKey, null, messageBodyBytes);</pre><br>
+接收消息</p>
+<p><pre code_snippet_id="1620640" snippet_file_name="blog_20160323_8_6664270" name="code" class="java">boolean autoAck = false;
+channel.basicConsume(queueName, autoAck, &quot;myConsumerTag&quot;,
+     new DefaultConsumer(channel) {
+         @Override
+         public void handleDelivery(String consumerTag,
+                                    Envelope envelope,
+                                    AMQP.BasicProperties properties,
+                                    byte[] body)
+             throws IOException
+         {
+             String routingKey = envelope.getRoutingKey();
+             String contentType = properties.getContentType();
+             long deliveryTag = envelope.getDeliveryTag();
+             // (process the message components here ...)
+             channel.basicAck(deliveryTag, false);
+         }
+     });</pre><br>
+<br>
+</p>
+<p>参考官方文档：</p>
+<p><a target="_blank" href="http://www.rabbitmq.com/api-guide.html" target="_blank">http://www.rabbitmq.com/api-guide.html</a><br>
+</p>
+<p>官方api</p>
+<p><a target="_blank" href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.6.1/rabbitmq-java-client-javadoc-3.6.1/" target="_blank">http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.6.1/rabbitmq-java-client-javadoc-3.6.1/</a><br>
+</p>
+<p><br>
+</p>
+<h1>总结：</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;简单易行，这样的工具，使我们需要的，也是我们想要的，看着国外N多好用的中间件，一个接一个出现，国内虽然这些年也改变了不少，但是我们和国外优秀的团队和开发理念上还是有差距的，随着阅读外国api的次数增多，量的累计，我相信，我们也会慢慢优秀起来，追赶超越！</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50962290'>原文链接</a>

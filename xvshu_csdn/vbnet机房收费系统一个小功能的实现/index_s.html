@@ -1,0 +1,264 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; vbnet机房收费系统一个小功能的实现</div><div style="color:blue" align=center>vbnet机房收费系统一个小功能的实现</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p>&nbsp;<span style="font-size:18px">&nbsp; &nbsp; &nbsp;&nbsp;</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">经过不懈的努力，和不断地完善，今天终于将一个简单的功能利用上次画的包图实现了，让我对三层和设计模式有了一点新的理解</span></p>
+<p><span style="font-size:18px">代码：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"></span></p>
+<pre name="code" class="vb">'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：上机窗体的编码
+'创建日期：2013年1月30日
+'版本号：1.0.0
+'**********************************************/
+
+
+'上机窗体
+Public Class FrmOnLine
+
+    '上机
+    Private Sub ButOnLine_Click(sender As Object, e As EventArgs) Handles ButOnLine.Click
+        Dim card As New Model.CardModel
+        Dim lineFacade As New Facade.LineFacade
+
+        card.Card_Id = TxtCardId.Text
+        card.Card_PassWord = TxtPassWord.Text
+        If lineFacade.Online(card) Then
+            MsgBox(&quot;登陆成功！&quot;)
+        End If
+    End Sub
+
+End Class
+
+
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：实体层卡的的编码
+'创建日期：2013年1月30日
+'版本号：1.0.0
+'**********************************************/
+Public Class CardModel
+    Private cardId As Integer
+    Private password As String
+    Private level As String
+    Private balance As String
+
+    '卡号的读取
+    Public Property Card_Id As Integer
+        Get
+            Return cardId
+        End Get
+        Set(value As Integer)
+            cardId = value
+        End Set
+    End Property
+
+    '密码的读取
+    Public Property Card_PassWord As String
+        Get
+            Return password
+        End Get
+        Set(value As String)
+            password = value
+        End Set
+    End Property
+
+    '级别的读取
+    Public Property Card_Level As String
+        Get
+            Return level
+        End Get
+        Set(value As String)
+            level = value
+        End Set
+    End Property
+
+    '余额的读取
+    Public Property Card_Balance As String
+        Get
+            Return balance
+        End Get
+        Set(value As String)
+            balance = value
+        End Set
+    End Property
+
+
+End Class
+
+
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：基本数据接口的编码
+'创建日期：2013年1月30日
+'版本号：1.0.0
+'**********************************************/
+'卡表的服务接口
+Public Interface ICardSeverDAL
+    '测试卡号密码是否正确
+    Function Test(card As Model.CardModel) As Boolean
+
+    '增加卡号
+    Function Add(card As Model.CardModel) As Boolean
+
+    '删除卡号
+    Function Delete(card As Model.CardModel) As Boolean
+
+    '编辑卡号
+    Function Edit(card As Model.CardModel) As Boolean
+
+    '查询卡号
+    Function CheckInformation(card As Model.CardModel) As Model.CardForStudentModel()
+
+
+End Interface
+
+
+
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：上下机工厂
+'创建日期：2013年1月30日
+'版本号：1.0.0
+'**********************************************/
+
+Imports System.Reflection
+
+'关于上下机的工厂
+Public Class LineFactory
+
+
+   
+
+    '创造卡表的服务类
+    Public Function CreatCardSeverDAL() As IDAL.ICardSeverDAL
+        Dim ICardDAL As IDAL.ICardSeverDAL
+        Dim asmName As String
+        Dim className As String
+
+        asmName = &quot;DAL&quot;
+        className = asmName + &quot;.&quot; + &quot;SqlseverCardSeverDAL&quot;
+
+        '利用反射生成需要的类
+        ICardDAL = CType(Assembly.Load(asmName).CreateInstance(className), IDAL.ICardSeverDAL)
+        Return ICardDAL
+
+    End Function
+End Class
+
+
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：上下机外观
+'创建日期：2013年1月30日
+'版本号：1.0.0
+'**********************************************/
+
+'上下机的外观类
+Public Class LineFacade
+    Dim lineObject As BLL.LineBll
+
+    Sub New()
+        lineObject = New BLL.LineBll
+    End Sub
+
+    '上机
+    Public Function Online(card As Model.CardModel) As Boolean
+        Return lineObject.TestUser(card)
+    End Function
+
+End Class
+
+
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：数据操作层的编码
+'创建日期：2013年1月30日
+'版本号：1.0.0
+'**********************************************/
+
+
+
+'D层关于上下机的一类
+'卡表
+Public Class SqlseverCardSeverDAL : Implements IDAL.ICardSeverDAL
+
+
+    Private str_SqlConnection As String
+
+    '连接数据库
+    Public Sub New()
+        str_SqlConnection = ConfigurationManager.AppSettings(&quot;SqlConnectionString&quot;)
+    End Sub
+
+    
+
+    '测试卡是否存在
+    Public Function Test(card As CardModel) As Boolean Implements ICardSeverDAL.Test
+        Dim sqlString As String
+        Dim MyCmd As SqlCommand
+        Dim MyConn As SqlConnection
+        Dim MyReader As SqlDataReader
+
+        sqlString = &quot;select * from T_Cardinfo where card_id='&quot; &amp; card.Card_Id &amp; &quot;' and password='&quot; &amp; card.Card_PassWord &amp; &quot;'&quot;
+        MyConn = New SqlConnection(str_SqlConnection)
+        MyCmd = New SqlCommand(sqlString, MyConn)
+        Try
+            MyConn.Open()
+            MyReader = MyCmd.ExecuteReader
+
+
+            If MyReader.Read() Then
+
+                MyReader.Close()
+                MyConn.Close()
+
+                Return True
+            Else
+
+                Return False
+            End If
+
+        Catch ex As Exception
+            MsgBox(ex.Message)
+            Return Nothing
+        End Try
+End Function
+End class
+
+
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：商务逻辑层的编码
+'创建日期：2013年1月30日
+'版本号：1.0.0
+'**********************************************/
+
+'B层的上下机类
+Public Class LineBll
+
+    '测试用户是否存在
+    Public Function TestUser(card As Model.CardModel) As Boolean
+        Dim lineFactory As New Factory.LineFactory
+        Dim icard As IDAL.ICardSeverDAL
+        icard = lineFactory.CreatCardSeverDAL
+
+        Return icard.Test(card)
+
+    End Function
+End Class
+</pre><br>
+<br>
+<p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/8566463'>原文链接</a>

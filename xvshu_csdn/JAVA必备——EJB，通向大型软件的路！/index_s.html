@@ -1,0 +1,240 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; JAVA必备——EJB，通向大型软件的路！</div><div style="color:blue" align=center>JAVA必备——EJB，通向大型软件的路！</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<span style="font-size:18px"><br>
+<br>
+</span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 从接触java开始，就对java的标准，神交已久，今天先给大家简单介绍下，什么事ejb，然后咱们一起完成一个小例子，完成对ejb的熟悉过程，在这其间一起体会ejb带给我们的编码变化！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">简介（来自百度）：</span></h1>
+<span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; EJB是sun的服务器端组件模型，设计目标与核心应用是部署分布式应用程序。凭借java跨平台的优势，用EJB技术部署的分布式系统可以不限于特定的平台。EJB (Enterprise JavaBean)是J2EE的一部分，定义了一个用于开发基于组件的企业多重应用程序的标准。其特点包括网络服务支持和核心开发工具(SDK)。 在J2EE里，Enterprise Java
+ Beans(EJB)称为Java 企业Bean，是Java的核心代码，分别是会话Bean（Session Bean），实体Bean（Entity Bean）和消息驱动Bean（MessageDriven Bean）。<br>
+<span style="white-space:pre"></span><br>
+</span>
+<h1><span style="font-size:18px">实例：</span></h1>
+<span style="font-size:18px"><br>
+<br>
+</span>
+<h2><span style="font-size:18px">1，安装jboss服务器：iis</span></h2>
+<span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; （1）从官网下载安装包（绿色）<br>
+<span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; （2）解压到指定文件夹<br>
+<span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; （3）配置MyEclipse<br>
+<span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 在工具栏的windows下选择preferences…<br>
+<span style="white-space:pre"><img src="504753210062985" alt=""></span><br>
+<br>
+<br>
+</span>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 2，新建ejb项目：</span></h2>
+<h3><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; （1）在工具栏上选择file-&gt;new-&gt;EJB Project</span></h3>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="34136167505155" alt=""></span></p>
+<span style="font-size:18px"><span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span></span>
+<h3><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; （2）在src下建立实体，接口和接口的实现：</span></h3>
+<p><span style="font-size:18px"><span style="white-space:pre"></span></span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="31311437894523" alt=""></span></p>
+<span style="font-size:18px"><span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a target="_blank" target="_blank" href="#fujian2">
+代码附加在附件二中！</a><br>
+<span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span></span>
+<h3><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; （3）发布到jboss上</span></h3>
+<span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 在Server选项夹上右键 -&gt; add deployment -&gt; project -&gt; 选择自己的ejb项目 -&gt; finish -&gt; 单击启动按钮&nbsp;<br>
+</span>
+<p><span style="font-size:18px"><span style="white-space:pre"></span></span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="21474975413082" alt=""></span></p>
+<span style="font-size:18px"><span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span></span>
+<h3><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; （4）编写客户端：</span></h3>
+<span style="font-size:18px"><span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; （4.1）加入服务端的接口及必备jar包<br>
+</span>
+<p><span style="font-size:18px"><span style="white-space:pre"></span></span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="493066210101024" alt="" align="middle" width="907" height="475"></span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; （4.2）编写代码：<br>
+</span>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 编写包含Main函数的类：在服务端运行</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;具体参看<a target="_blank" target="_blank" href="#fujian2">附件二</a>内容</span></p>
+<h3><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; （5）编写JNDI配置文件：为了让程序找到（第一次使用，跟着做就行，以后肯定会仔细研究）</span></h3>
+<span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 具体参看<a target="_blank" target="_blank" href="#fujian1">附件一</a>。<br>
+<span style="white-space:pre"></span></span>
+<h3><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; （6）运行结果显示为：0</span></h3>
+<span style="font-size:18px"><span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span><br>
+</span>
+<h1><span style="font-size:18px">总结：</span></h1>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 今天我们初识了ejb这个神交已久的老朋友，感觉使用起来还是很方便的，简单写写接口和实现，配置下文件，我们就可以远程调用某个接口，这个和我们编写C#代码有了很多神&#20284;的地方，我们在编写c#代码时，分层的学习是个重要的切入点，而ejb就是对分布式进行了分层，我们不太关心具体的分布式是怎么实现的，我们仅关心，他好用，好上手，让用户感觉简单，这就足够了！<br>
+<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 还是那句话，在生活中，我们不乏这样的例子，所有有前台的店面或者商场就是这样，他对一个复杂的业务进行封装，比如我们的移动营业厅，具体的业务操作交给营业员，而我们只需提出要求就好！<br>
+<span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span></span>
+<h1><span id="fujian1" name="fujian1" style="font-size:18px">附件一（配置文件）：</span></h1>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px"></span><pre name="code" class="html">名称为jndi.properties
+内容为：
+java.naming.factory.initial=org.jnp.interfaces.NamingContextFactory
+java.naming.factory.url.pkgs=org.jboss.naming:org.jnp.interfaces
+java.naming.provider.url=localhost</pre><br>
+<br>
+<span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span>
+<h1><span id="fujian2" style="font-size:18px">附件二（代码）：</span></h1>
+<span style="font-size:18px"><span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span></span>
+<h2><span style="font-size:18px">1.EJB服务端代码区：</span></h2>
+<span style="font-size:18px"><span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span></span>
+<h3><span style="font-size:18px">1.1实体类：</span></h3>
+<span style="font-size:18px"><br>
+<span style="white-space:pre"></span></span><pre name="code" class="java">package com.ejb.test;
+
+import java.io.Serializable;
+
+/**
+ * 
+ * @author 许恕
+ * 用户实体
+ *
+ */
+public class User implements Serializable {
+	
+	//用户id
+	private int id;
+	//用户姓名
+	private String userName;
+	//用户密码
+	private String passWord;
+	
+	//获取用户id
+	public int getId() {
+		return id;
+	}
+	
+	//设置用户id
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	//获取用户姓名
+	public String getUserName() {
+		return userName;
+	}
+	
+	//设置用户姓名
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	
+	//获取用户密码
+	public String getPassWord() {
+		return passWord;
+	}
+	
+	//设置用户密码
+	public void setPassWord(String passWord) {
+		this.passWord = passWord;
+	}
+}
+</pre><br>
+<br>
+<span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span>
+<h3><span style="font-size:18px">1.2接口类：</span></h3>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"></span></p>
+<pre name="code" class="java">package com.ejb.test;
+
+/**
+ * 
+ * @author 许恕
+ *管理用户接口
+ */
+public interface IUserManger {
+	
+	//增加用户
+	public void addUser(User user);
+}
+</pre><br>
+<br>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h3><span style="font-size:18px">1.3实现类：</span></h3>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"></span></p>
+<pre name="code" class="java">package com.ejb.test;
+
+import javax.ejb.Remote;
+import javax.ejb.Stateless;
+
+@Stateless 	
+@Remote		
+public class UserMangerRemoteBean implements IUserManger {
+
+	//增加用户
+	public void addUser(User user) {
+		System.out.println(&quot;user is saved , and user.name={&quot;+user.getUserName()+&quot;}&quot;);
+		user.setId(10);
+		
+	}
+
+}
+</pre><br>
+<br>
+<p>
+<span style="font-size:18px"><span style="white-space:pre"></span><br>
+<span style="white-space:pre"></span></span>
+<h2><span style="font-size:18px">2.客户端代码：</span></h2>
+<p><br>
+</p>
+<p>
+<pre name="code" class="java">package com.ejb.test3;
+
+import javax.naming.InitialContext;
+
+import com.ejb.test.IUserManger;
+import com.ejb.test.User;
+
+public class UserManagerClient {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) throws Exception {
+		
+		
+		InitialContext context =new InitialContext();
+		
+		//第一次会话-远程
+		IUserManger ejbRemote =  (IUserManger)context.lookup(&quot;UserMangerRemoteBean/remote&quot;);
+		
+		User user = new User();
+		user.setUserName(&quot;huangjin&quot;);
+		ejbRemote.addUser(user);
+		System.out.println(user.getId());
+	}
+
+}
+</pre><br>
+<br>
+<p>
+<p><br>
+</p>
+<p><br>
+</p>
+<span style="white-space:pre"></span>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/32331969'>原文链接</a>

@@ -1,0 +1,70 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; hibernate动态表名映射只有想不到，没有做不到</div><div style="color:blue" align=center>hibernate动态表名映射只有想不到，没有做不到</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; 最近的一个项目有一个需求，有N个考核单位，要对每个考核单位生成一张考核情况表，这样做的目的是横切数据库，这这个需求的实现中，我的组员遇到了一个技术问题，我将我的解决办法和整个思考过程与大家分享，</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">思路：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 用一个配置文件，一个类去映射多个表，（每个表的结构相同）。按照平时的做法，有多少个表就要 写多少个配置文件，岂不是很麻烦。怎样才能只写一个配置文件就能达到上述目的呢？&nbsp;经过研究，发现Hibernate中的NamingStrategy可以达到这个目的。它是用来定义表名和列名映射规 则的一个接口。我们要通过实现这个接口来实现自己的命名策略。这个接口中包含的十个方法，其中的 public String classToTableName(String
+ className)是通过类名来映射表名的。实现我们的想法就要用 到这个方法。好了，下面来看怎么做：&nbsp;</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">步骤：</span></h1>
+<span style="font-size:18px">1、自定义一个类MyNamingStrategy来实现NamingStrategy。(这样你要实现10个方法，如果其他方法&nbsp;不需要，我们可以通过继承它的一个适配器类DefaultNamingStrategy来只实现我们需要的方法)好了，我&nbsp;们就继承DefaultNamingStrategy 吧。&nbsp;<br>
+<br>
+<br>
+2、实现public String classToTableName(String className)方法来实现自己命名策略。&nbsp;<br>
+<br>
+<br>
+我这的业务需要是每隔一个月就要换一个表。比如1月用biz_1，那么2月就用biz_2….但是这些表的结构是相同的。我们要做的就是通过获得月份来动态的选择表。我们从这个方法中这样写：&nbsp;<br>
+</span>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><pre name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;/**
+ *这个类是重新定义一个hibernate的命名规范
+**/
+public class MyNamingStrategy extends DefaultNamingStrategy { 
+
+	//这是为了实现单例
+	public static final MyNamingStrategy INSTANCE = new MyNamingStrategy(); 
+
+	
+	//重新定义名称映射关系
+	public String classToTableName(String className) { 
+
+		//自己的名称定义规则
+		return “biz_” + Calendar.getInstance().get(Calendar.DAY_OF_MONTH); 
+
+
+	} 
+
+} &lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">好了，这样就可以根据月份来动态的选择表名了。&nbsp;<br>
+<br>
+<br>
+3、使用命名策略。&nbsp;<br>
+<br>
+<br>
+要使用这个命名策略可以这样：&nbsp;<br>
+<br>
+<br>
+</span><pre name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;Configuration cfg = new Configuration() 
+	.setNamingStrategy(MyNamingStrategy.INSTANCE) 
+	.configure(“hibernate.cfg.xml”)
+	.addFile(“biz.hbm.xml”); &lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</span>
+<p><span style="font-size:18px">ok,这样就可以实现我们的动态表名映射啦！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">很多时候，我是经常被自己的思维所束缚，这是我的一种思维惯性，而且我只要找到一种解决问题的方法，就会当作宝典收藏，别人有比你好的，也会有种排斥的信息，二者恰恰是阻碍我们进步的牢&#31548;，我们应该冲破这曾牢&#31548;，我们应该更大胆些，想到且看到我们和以前截然不同的一面！</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/39187779'>原文链接</a>

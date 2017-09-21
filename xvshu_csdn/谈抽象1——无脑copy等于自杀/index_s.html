@@ -1,0 +1,50 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 谈抽象1——无脑copy等于自杀</div><div style="color:blue" align=center>谈抽象1——无脑copy等于自杀</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 最近被外派帮助国内某公司做政府某部门OA系统，听说他们那有个成熟的java框架，使用了很长时间，抱着学习的态度，我进入这个公司，当我熟悉了一周后，留下了很多疑问，而这些疑问，也诱发了这次关于“抽象”这个问题的思考，大家和我一起来研究研究这些疑问！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">1，概览：</span></h1>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; 初步接触这个系统，公司的技术总监，就和我们交流了这个框架，按照总监的话就是“这个就是个简单的ssh框架，没什么！”，事实证明，虽然看&#20284;简单，但是还是有不少的点可以研究的！</span></p>
+<h2><span style="font-size:18px"><br>
+</span></h2>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 疑问：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 随着对框架的深入，我们产生了几个疑问，踢给了总监：</span></p>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; （1）既然用了hibernate，为什么还大量使用了原生sql？</span></p>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; （2）对基础操作的封装为什么大量使用了聚合，继承基本没有用？</span></p>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; （3）前台为什么没用框架，而是一些技术的组合？</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; 非常感谢我们的总监，无私的回答了这些问题：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 总监答案：</span></h2>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; （1）关于sql与hql的选择，当初他们做了不同的尝试，发现：hql虽然封装的好，但是有几个缺点：速度慢，效率低，难处理复杂表。基于这些，他们选择了部分hql部分sql，对于这些，我们对于单表且简单的操作用hql，对于单表复杂或者多表的操作使用原生的sql，通过这样平衡面向对象和效率之间的问题！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; （2）关于继承，他们也考虑过，但是继承实现的关系太强，如果过多的使用继承就会造成类的功能过于多，而聚合是个不错的解决方案，这样再扩充或者改变的时候，就会方便一些！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; （3）前台框架他们也有用过一些，但是他们觉得自己写，更有兼容性，用基本的html搭建的页面兼容性更好，而在一些诶需要特殊效果的地方，则使用一些ext的控件，这样也是个很好的选择！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">2，深入：</span></h1>
+<div><span style="font-size:18px"><br>
+</span></div>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 随着我写了一些代码，我发现总监的想法很丰满，但是显示很骨感！对于我的第一个疑问，我是比较同意总监的意见的，在一些特殊需要的场合，做特殊的处理，这是种很好的平衡，我们设计一个框架的时候，这种平衡也是要考虑的，我们的封装绝不是隔绝最基础的实现，而是在基础的实现上，做了封装，对我们常规的操作有一个系统的抽象和封装！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 但是第二个问题，我是持久自己的一些看法的，对于继承的强关系，这的确是个问题，但是这不是阻碍我们使用的问题，在抽象这个层面，继承其技术基础一直为我们提供最优质的服务，我们回顾下面向对象的三个特征：封装，继承，多态。这三者相互作用相互碰撞才有了我们的面向对象的思维！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们再看看这样的设计经验：多组合，少继承，低耦合，高内聚，这里我们要澄清，少继承是在一定的范围内说的，在保证内聚性方面，继承是个比较好的选择，我们看看我们的java类哪个不是继承了object这个类，这也间接的说明了问题！而且在编码中，我发现，不用继承，我会写很多重复的代码，我就不如针对同的业务抽象不同的父类，这样，减少了至少70%的工作！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 对于第三点，我想说，前台的框架的选择是个头疼的故事，但是还是有很多经典的额框架是我们一直用的，起码我们不就一直在用jquery吗？而今的框架已经越来越简单且强大了一味的闭门造车，我想，这个时代，已经不是那个时代了！顺便吐槽一下，公司没有网啊，整个楼层只有三台公用电脑可以上网，每天还限制为2g流量，亲，这是21世纪吗？我是不是穿越了！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">3，改造：</span></h1>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 吐槽了这么多，其实，我还是对这个框架比较满意的，虽然这样和那样的问题依然不少，但是我发现这些都不影响他的适用性，在经过我给它动了个小手术后，他的代码量已经大幅下降了，适当的使用继承这个利器，我们就是在为自己创造时间！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 观察身边的程序猿们，我们是不是经常这么做，从别人那copy下他的代码，然后改几个属性，功能就万事大吉了，如果有了新任务，按我们要凭借这自己超强的记忆力，改动我们所有copy的代码，然后在从新做一边单元测试！</span></p>
+<p><span style="font-size:18px">我们提出一个观点：一个框架搭建好之后，任何地方的封装，都是一个高智慧含量的复制！<br>
+<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 这就又牵扯一个话题了，到底什么是复制？人copy和维护代码是一种极其昂贵的成本，而让机器自己copy维护代码是节省了千万倍成本的复制！人的作用现在来看，就在于抽象和总结了，底下的，简单的复制性活动交给机器，就像现在的3d打印一样，这是个革命，已经不是技术的革命了，而是思想的革命，智慧生物要发挥它应有的作用，copy是不需要智慧的，就交给机器吧！这是我们这个时代的潮流！</span><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/39648413'>原文链接</a>

@@ -1,0 +1,89 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; java工程积累——权限验证在Ajax中失效的解决方案</div><div style="color:blue" align=center>java工程积累——权限验证在Ajax中失效的解决方案</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 最近在公司做的项目一直测试和使用都很好,客户反响也很不错,但是,就在前两天,客户提出了一个bug,但是全队都愁眉不展,在今天做公交车的时候,我突然想到了一种可能,就是我们习以为常的ajax提交出了问题!</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">起因:</span></h1>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 需求:在判断用户session有没有超时的情况,我们使用的是在所有的请求前通过aop进行判断,如果session中,用户登录信息丢失,则重新登录,否则继续!<br>
+bug情况:在页面提交,跳转下正常判断,但是在用户session过期后,直接使用Ajax提交时,提交失败!<br>
+<br>
+<br>
+</span>
+<h1><span style="font-size:18px">初期方案:</span></h1>
+<span style="font-size:18px"><br>
+<br>
+方案1：<br>
+<span style="white-space:pre"></span>修改session失效时间（未治本）<br>
+方案2：<br>
+<span style="white-space:pre"></span>抽象公共js，先验证session是否登陆，未登录，则返回登陆页面（个人认为最好，因为在不改动原有的基础上，增加，而不是修改）<br>
+方案3：<br>
+<span style="white-space:pre"></span>抽象公共ajax方案，用到ajax方法的，统一调用这个方法<br>
+<br>
+<br>
+利弊分析:&nbsp;<br>
+&nbsp; &nbsp; &nbsp; &nbsp;修改session失效时间（未治本）治标不治本,还会导致系统性能下降,应该是调试到一个合适的时间,或者用cookie方案代替!<br>
+&nbsp; &nbsp; &nbsp; &nbsp;抽象公共js, 抽象公共ajax方案,每个调用都需要更改,改动太大,造成系统维护工作增加!<br>
+<br>
+<br>
+</span>
+<h1><span style="font-size:18px">更优雅方案:</span></h1>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;首先建了个拦截器，来判断session超时。用户登录后会保存用户信息在一个session里，在session的监听里，session超时会销毁保存在session里的用户信息，而拦截器就通过session里是否有用户信息来判断session超时。（我总觉得这种方法不怎么好。不知还有什么更好的办法。）<br>
+</span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;拦截器是spring-mvc的拦截器，在拦截器里判断是不是ajax请求：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p>
+<pre code_snippet_id="605353" snippet_file_name="blog_20150216_1_4854106" name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;1.	public boolean preHandle(HttpServletRequest request,  
+2.	             HttpServletResponse response, Object handler) throws Exception  
+3.	     {  
+4.	         if (request.getSession().getAttribute(&quot;user&quot;) == null)//判断session里是否有用户信息  
+5.	            {  
+6.	             if (request.getHeader(&quot;x-requested-with&quot;) != null  
+7.	                     &amp;&amp; request.getHeader(&quot;x-requested-with&quot;)  
+8.	                             .equalsIgnoreCase(&quot;XMLHttpRequest&quot;))//如果是ajax请求响应头会有，x-requested-with；  
+9.	             {  
+10.	                 response.setHeader(&quot;sessionstatus&quot;, &quot;timeout&quot;);//在响应头设置session状态  
+11.	                 return false;  
+12.	             }  
+13.	               
+14.	         }  
+15.	         return true;  
+16.	     } 
+&lt;/span&gt;</pre>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;这样，如果session超时，而且是ajax请求，就会在响应头里，sessionstatus有一个timeout；<br>
+<br>
+<br>
+&nbsp; &nbsp; &nbsp; &nbsp;再用一个全局的方法来处理，session超时要跳转的页面。<br>
+&nbsp; &nbsp; &nbsp; &nbsp;jquery 可以用$.ajaxSetup 方法，ext也有类&#20284;的方法<br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<pre code_snippet_id="605353" snippet_file_name="blog_20150216_2_4457870" name="code" class="javascript">&lt;span style=&quot;font-size:18px;&quot;&gt;1.	//全局的ajax访问，处理ajax清求时sesion超时  
+2.	         $.ajaxSetup({   
+3.	             contentType:&quot;application/x-www-form-urlencoded;charset=utf-8&quot;,   
+4.	             complete:function(XMLHttpRequest,textStatus){   
+5.	                     var sessionstatus=XMLHttpRequest.getResponseHeader(&quot;sessionstatus&quot;); //通过XMLHttpRequest取得响应头，sessionstatus，  
+6.	                     if(sessionstatus==&quot;timeout&quot;){   
+7.	                                 //如果超时就处理 ，指定要跳转的页面  
+8.	                                         window.location.replace(&quot;${path}/common/login.do&quot;);   
+9.	                                 }   
+10.	                      }   
+11.	             }   
+12.	           });
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<h1><span style="font-size:18px">总结:</span></h1>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;一个合&#26684;的工程师,可以为系统bug及时提供解决方案,但是一个优秀的工程师,绝不止步于此,他会分析各个方案的优劣,选择一种更优雅的方案,或者提供这种方案!<br>
+&nbsp; &nbsp; &nbsp; &nbsp;当我们适应了合&#26684;的工程师这个称谓,我们是否在朝着优秀的工程师迈进呢?<br>
+</span>
+<p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/43850339'>原文链接</a>

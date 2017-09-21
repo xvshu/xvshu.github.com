@@ -1,0 +1,73 @@
+﻿<div style="color:blue" align=center>WF40——升级技能：委托应用</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<h1><span style="font-size:18px">回顾：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在一个月前，我们刚刚回顾了面对象至关重要的部分：委托，具体请移步我们博客：<a target="_blank" href="http://blog.csdn.net/xvshu/article/details/37704281">面向对象——一起来复习委托与事件！</a>关于这篇博客的具体内容，不再赘述，在这里我们主要讨论在工作流中的应用及他的具体如何解耦我们的业务，界面！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">对比：</span></h1>
+<h2><span style="font-size:18px">普通实现：</span></h2>
+<p><span style="font-size:18px"><img src="45613709123831" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">工作流的理想实现：</span></h2>
+<p><span style="font-size:18px"><img src="20317617982037" alt=""><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;认真观察我们发现，状态信息有工作流自带的持久层维护，我们要做的和下文章的自然就变成了调用逻辑，在这一层，怎么解耦，就提上了日程，结果我们发现，解决这个问题，非委托不能胜任！具体的情况呢，请大家先看代码：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">代码示例：</span></h1>
+<p><pre name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt; public delegate T DelegateEvent&lt;T&gt;(T message);
+    public sealed class CodeActivityevent&lt;T&gt; : CodeActivity
+    {
+
+       
+        /// &lt;summary&gt;
+        /// 传入参数，案件实体
+        /// &lt;/summary&gt;
+        public InArgument&lt;T&gt; CaseIn { get; set; }
+        public InArgument&lt;DelegateEvent&lt;T&gt;&gt; WFEventIn { get; set; }
+        
+
+        /// &lt;summary&gt;
+        /// 传出参数，案件实体
+        /// &lt;/summary&gt;
+        public OutArgument&lt;T&gt; CaseOut { get; set; }
+
+        /// &lt;summary&gt;
+        /// 执行创建案件
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
+        protected override void Execute(CodeActivityContext context)
+        {
+            //获取传入参数的两种方法
+            T CaseUse = CaseIn.Get&lt;T&gt;(context);
+            DelegateEvent&lt;T&gt; WFEvent = WFEventIn.Get&lt;DelegateEvent&lt;T&gt;&gt;(context);
+            CaseUse = context.GetValue(this.CaseIn);
+            //调用业务逻辑层，将获取的实体传入，接收返回的实体，并将其付给传出参数
+
+            //TODO:基础活动：修改实体的逻辑层
+            //返回的案件实体CaseBack
+            T CaseBack = WFEvent(CaseUse);
+
+            //将返回的实体传出
+            //CaseOut.Set(context, info);
+            context.SetValue(CaseOut, CaseBack);
+
+        }
+    }&lt;/span&gt;</pre></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">关键代码：</span>
+<p><span style="font-size:18px">1，</span><pre name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt; public delegate T DelegateEvent&lt;T&gt;(T message);&lt;/span&gt;</pre><span style="font-size:18px">2，<br>
+</span><pre name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;DelegateEvent&lt;T&gt; WFEvent = WFEventIn.Get&lt;DelegateEvent&lt;T&gt;&gt;(context);&lt;/span&gt;</pre><pre name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt; //返回的案件实体CaseBack
+            T CaseBack = WFEvent(CaseUse);&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;有了这些代码我们就可在设计工作流界面配置具体的操作，而操作在具体的类中并不写死，传入的方法是什么就是什么！</span></p>
+<p><span style="font-size:18px">配置实现：</span></p>
+<h1><span style="font-size:18px"><img src="30141627077293" alt=""><br>
+</span><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 使用泛型后，具体执行方法也和前台进行了解耦，在显示层我们剩余的工作，就是收集数据，传入工作流，剩余的工作交予工作流处理，而工作流是我们配置出来的，通过配置工作流生成xml做到业务逻辑的灵活变动和扩展的实现，但是什么样的抽象都是有限制的，抽象的粒度是要均衡的，经我们研究，对节点的抽象，及部分公共流程的抽象，是我们可以控制的范围之内，这样我们就可以尽量适应客户的变化！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 经过这一系列的抽象，我们发现，我们开发的工作流，已经脱离了我们当初简单使用的范畴，通过对泛型，委托的技术积累，我们对任何业务的抽象，都那么水到渠成，这时，我认识到一个道理，我们重要的不仅仅是了解更多的技术，还有对技术应用场景的深入剖析，和面向对象认识的提升！</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/38966111'>原文链接</a>

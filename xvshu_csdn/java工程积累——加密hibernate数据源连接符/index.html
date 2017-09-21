@@ -1,0 +1,133 @@
+﻿<div style="color:blue" align=center>java工程积累——加密hibernate数据源连接符</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 最近很多公司因为安全问题被各种折磨，我们公司出于这方面的考虑，需要对数据库连接进行加密，在网上很容易就找到了解决方案，在这里分享给大家，但是这个解决方案的内容，也引起了我对程序的思考！</span></p>
+<h1><span style="font-size:18px">解决方案：</span></h1>
+<h2><span style="font-size:18px">环境要求:</span></h2>
+<p><span style="font-size:18px">Spring管理数据库连接</span></p>
+<h2><span style="font-size:18px">配置步骤</span></h2>
+<h3><span style="font-size:18px">1，&nbsp; 配置spring文件</span></h3>
+<p>
+<pre code_snippet_id="605568" snippet_file_name="blog_20150216_1_6228433" name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;&lt;!—加密解密类--&gt;
+&lt;!—加密解密类：因为它继承了配置类，所以它可以更改配置规则--&gt;
+&lt;beanclass=&quot;com.zlwy.common.util.ZLWYPropertyPlaceholderConfigurer&quot;&gt;
+           &lt;propertyname=&quot;location&quot;&gt;
+                    &lt;!—加载此配置文件之前走加密类--&gt;
+                    &lt;value&gt;classpath:config.properties&lt;/value&gt;
+           &lt;/property&gt;
+           &lt;propertyname=&quot;fileEncoding&quot;&gt;
+                    &lt;value&gt;utf-8&lt;/value&gt;
+           &lt;/property&gt;
+&lt;/bean&gt;
+&lt;bean id=&quot;dataSource&quot;
+           class=&quot;org.apache.commons.dbcp.BasicDataSource&quot;
+           destroy-method=&quot;close&quot;&gt;
+           &lt;propertyname=&quot;driverClassName&quot;&gt;
+                    &lt;!--&lt;value&gt;com.microsoft.sqlserver.jdbc.SQLServerDriver&lt;/value&gt; --&gt;
+                    &lt;!--&lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt; --&gt;
+                    &lt;!--&lt;value&gt;oracle.jdbc.driver.OracleDriver&lt;/value&gt; --&gt;
+                    &lt;value&gt;${ClassString}&lt;/value&gt;
+           &lt;/property&gt;
+           &lt;property name=&quot;url&quot;&gt;
+                    &lt;!--数据库配置文件从配置文件读取--&gt;
+                     &lt;value&gt;${ConnectionString}&lt;/value&gt; 
+                    &lt;!--&lt;value&gt;jdbc:mysql://localhost:3306/frame?useOldAliasMetadataBehavior=true&lt;/value&gt;--&gt;
+                    &lt;!--&lt;value&gt;jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL =TCP)(HOST=localhost)(PORT=1521))(LOAD_BALANCE=YES))(CONNECT_DATA=(SERVICE=DEDICATED)(SERVICE_NAME=orcl)))&lt;/value&gt;--&gt;
+                    &lt;!--
+                             &lt;value&gt;jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL= TCP)(HOST=172.20.104.230)(PORT=1521))(LOAD_BALANCE=YES))(CONNECT_DATA=(SERVICE=DEDICATED)(SERVICE_NAME=orcl)))&lt;/value&gt;
+                    --&gt;
+                   
+           &lt;/property&gt;
+           &lt;propertyname=&quot;username&quot;&gt;
+ 
+                    &lt;value&gt;${UserName}&lt;/value&gt;
+ 
+           &lt;/property&gt;
+           &lt;propertyname=&quot;password&quot;&gt;
+ 
+                    &lt;value&gt;${PassWord}&lt;/value&gt;
+ 
+           &lt;/property&gt;
+           &lt;propertyname=&quot;maxActive&quot;&gt;
+        &lt;value&gt;1000&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;propertyname=&quot;maxIdle&quot;&gt;
+        &lt;value&gt;500&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;propertyname=&quot;maxWait&quot;&gt;
+        &lt;value&gt;5000&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;!--
+        &lt;propertyname=&quot;validationQuery&quot;&gt;
+        &lt;value&gt;select 1 from dual&lt;/value&gt;
+        &lt;/property&gt;
+             --&gt;
+&lt;/bean&gt;&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<h3><span style="font-size:18px">2，&nbsp; 编写加密解密类</span></h3>
+<p>
+<pre code_snippet_id="605568" snippet_file_name="blog_20150216_2_3290922" name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;packagecom.zlwy.common.util;
+ 
+importjava.io.IOException;
+importjava.util.Properties;
+ 
+importorg.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+ 
+importsun.misc.BASE64Decoder;
+importsun.misc.BASE64Encoder;
+ 
+/**
+ * &lt;p&gt;Title      : 中国铁路总公司社会保障管理系统[数据库配置文件中的加密配置]&lt;/p&gt;
+ * &lt;p&gt;Description: [出于安全的考虑，我们将数据库链接的用户名密码在配置文件中进行加密，
+ *                                          并在此进行逻辑解密]&lt;/p&gt;
+ * &lt;p&gt;Copyright  : Copyright (c) 2015&lt;/p&gt;
+ * &lt;p&gt;Company    : 铁科院电子所&lt;/p&gt;
+ * &lt;p&gt;Department : 动车部&lt;/p&gt;
+ * @author      : lujc
+ * @version     : 1.0
+ * @date 2015-1-16
+ */
+publicclass ZLWYPropertyPlaceholderConfigurer extends
+           PropertyPlaceholderConfigurer {
+@Override
+protected void convertProperties(Properties properties) {
+           try {
+                    BASE64Decoder decoder = newBASE64Decoder();
+                    String classString  = new String(decoder.decodeBuffer(properties.getProperty(&quot;ClassString&quot;)));
+                    String connectionString  = newString(decoder.decodeBuffer(properties.getProperty(&quot;ConnectionString&quot;)));
+                    String userName  = newString(decoder.decodeBuffer(properties.getProperty(&quot;UserName&quot;)));
+                    String password  = newString(decoder.decodeBuffer(properties.getProperty(&quot;PassWord&quot;)));
+                    //映射到咱们的配置文件中，这个可以通过程序更改
+                    properties.put(&quot;ClassString&quot;,classString);
+                    properties.put(&quot;ConnectionString&quot;,connectionString);
+                    properties.put(&quot;UserName&quot;,userName);
+                    properties.put(&quot;PassWord&quot;,password);
+                   
+                    System.out.println(&quot;解析数据库加密参数完成....&quot;);
+           } catch (IOExceptione) {
+                    e.printStackTrace();
+                    System.out.println(&quot;解析数据库加密参数失败....&quot;);
+           }
+}
+public static void main(String[] args) throwsException{
+           String msg = &quot;semssems&quot;;
+           BASE64Encoder encode = newBASE64Encoder();
+           String jiami =encode.encode(msg.getBytes());
+           BASE64Decoder decoder = newBASE64Decoder();
+           String jiemi = newString(decoder.decodeBuffer(jiami));
+           System.out.println(&quot;加密前：&quot;+msg);
+           System.out.println(&quot;加密后&quot;+jiami);
+           System.out.println(&quot;解密后&quot;+jiemi);
+          
+}
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<h1><span style="font-size:18px">&nbsp;总结：</span></h1>
+<div><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们工作中，总会遇到很多问题，但是，我们对于问题的解决，是否止步于解决了呢？很多人就是止步于此，所以很多人拥有解决问题的能力，但是很难积累优化的能力，以及对需求的敏感！就像这个问题，这不仅仅是对数据源的加密，我们扩展想想问题，这个问题的本质是对固定字符的变量化，那我们在扩展，每个大公司都有很多备份的数据库，而动态的切换数据源是否就是这么实现的呢？这不就是大数据的一部分呢？</span></div>
+<div><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 穷或者富，缺乏的不是能力，而是野心！</span></div>
+<p><span style="font-size:18px">&nbsp;</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/43853281'>原文链接</a>

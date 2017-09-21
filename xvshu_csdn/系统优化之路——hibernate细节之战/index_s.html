@@ -1,0 +1,38 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 系统优化之路——hibernate细节之战</div><div style="color:blue" align=center>系统优化之路——hibernate细节之战</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 这两天在系统上线，测试提了一个BUG但是到我的机器上不能复现，和测试沟通后，在log里找到了bug的详细信息，显示在测试和我同时插入数据时，发现数据库爆出了违反唯一性约束的错误，当时我就意识到，有可能是ID生成策略的问题，经过几番教验发现，真的是细节决定成败！</span></p>
+<h1><span style="font-size:18px">问题：</span></h1>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; 并发插入新数据，违反唯一性约束</span></p>
+<h1><span style="font-size:18px">原因：</span></h1>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; &nbsp; ID生成策略：</span></p>
+<h2><span style="font-size:18px">以前：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; increment&nbsp;<br>
+&nbsp; &nbsp; &nbsp; &nbsp; ----表示新增数据操作时由hibernate自动生成主键&#20540;。其生成的&#20540;为：先查询该主键列的最大&#20540;，然后在最大&#20540;的基础上加上1.适用于采用代理主键形式的主键列。同样不能用于主键列是自动增长的表。但是，该主键生成策略也有些缺点。&nbsp;<br>
+&nbsp; &nbsp; &nbsp; &nbsp; （1）新增数据前先查询一遍，影响了性能。&nbsp;<br>
+&nbsp; &nbsp; &nbsp; &nbsp; （2）主键的类型只能为数&#20540;型的int或者long&nbsp;<br>
+&nbsp; &nbsp; &nbsp; &nbsp; （3）并发操作时的冲突问题。&nbsp;</span></p>
+<h2><span style="font-size:18px">更改：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; native&nbsp;<br>
+&nbsp; &nbsp; &nbsp; &nbsp; ----表示根据不同的数据库采用不同的主键生成策略。比如，当前数据库为sqlserver，则会采用identity，如为oracle，则采用&nbsp;oracle中的sequence等。区分数据库的不同是以hibernate主配置文件中sessionFactory中配置的数据库方言。&nbsp;<br>
+</span></p>
+<h2><span style="font-size:18px"><br>
+更改时考虑：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 1，&nbsp;increment 时，id类型已经为number，修改为其他类型，影响已有模块的逻辑！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 2，改动较少，对数据库的改动，仅仅是发个sql，不改变数据库和代码结构！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">发散：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在数据库配置中我们有一点疏忽，&nbsp;&lt;class name=&quot;com.zlwy.rcss.entity.BBriefDict&quot; table=&quot;B_BRIEF_DICT&quot; schema=&quot;SEMS&quot;&gt; 大家看schema=&quot;SEMS&quot;，在oracle中这是规定只能有sems用户操作，虽然安全了一些，但是在移植数据库到用户机器的时候，发现，用户那的用户命名和我们不一样，我们要更改所有的表，去了这句话，虽然安全性降低了一点，但是移植性大大增加！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 细节决定成败，理论必须用于实践，HIbernate理论已经学了一年了，例子也敲了不少，真正用于项目才发现，理论离项目还很远，需要我们补充很多细节上的东西，需要我们了解80%配置的大概信息与功能，需要我们根据要求能迅速作出合适的变更，需要我们熟练基本的操作，在现场能迅速解决客户的问题，而且针对有过变成经验的客户，我们的专业与熟练恰恰是提升公司于个人声誉的重要手段！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp;</span></p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/40660121'>原文链接</a>

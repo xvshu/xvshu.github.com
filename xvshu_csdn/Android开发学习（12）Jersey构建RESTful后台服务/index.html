@@ -1,0 +1,158 @@
+﻿<div style="color:blue" align=center>Android开发学习（12）Jersey构建RESTful后台服务</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><p>安卓和后台服务的交互方式，REST是一种风格，这种交互，涉及两个方面，一个是后台服务 ，一个是App，我们今天先搭建一个简单的RESTful风格的后台服务，App访问会在下边博客介绍。</p>
+
+<p>先来简单了解下概念，方便我们搭建相关服务：</p>
+
+<h1 id="概念">概念</h1>
+
+
+
+<h2 id="restful">RESTful</h2>
+
+<blockquote>
+  <p>REST（英文：Representational State Transfer，简称REST）描述了一个架构样式的网络系统，比如 web 应用程序。它首次出现在 2000 年 Roy Fielding 的博士论文中，他是 HTTP 规范的主要编写者之一。在目前主流的三种Web服务交互方案中，REST相比于SOAP（Simple Object Access protocol，简单对象访问协议）以及XML-RPC更加简单明了，无论是对URL的处理还是对Payload的编码，REST都倾向于用更加简单轻量的方法设计和实现。值得注意的是REST并没有一个明确的标准，而更像是一种设计的风格。</p>
+</blockquote>
+
+
+
+<h2 id="jersey">Jersey</h2>
+
+<blockquote>
+  <p>Jersey RESTful 框架是开源的RESTful框架, 实现了JAX-RS (JSR 311 &amp; JSR 339) 规范。它扩展了JAX-RS 参考实现， 提供了更多的特性和工具， 可以进一步地简化 RESTful service 和 client 开发。尽管相对年轻，它已经是一个产品级的 RESTful service 和 client 框架。</p>
+</blockquote>
+
+<p>接下来我们开始搭建我们自己的RESTful后台服务;</p>
+
+
+
+<h1 id="搭建步骤">搭建步骤</h1>
+
+<ul>
+<li><p>使用哦maven创建一个简单的web项目 <br>
+参考博客：<a href="http://www.micmiu.com/software/common/intellij-idea-create-maven-web/" target="_blank">图文介绍IntelliJ IDEA 创建基于Maven构建的Web项目</a></p></li>
+<li><p>加入Jersey引用</p></li>
+</ul>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml">    <span class="hljs-tag">&lt;<span class="hljs-title">dependency</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">groupId</span>&gt;</span>org.glassfish.jersey.containers<span class="hljs-tag">&lt;/<span class="hljs-title">groupId</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">artifactId</span>&gt;</span>jersey-container-servlet<span class="hljs-tag">&lt;/<span class="hljs-title">artifactId</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">version</span>&gt;</span>2.17<span class="hljs-tag">&lt;/<span class="hljs-title">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">dependency</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">groupId</span>&gt;</span>org.glassfish.jersey.core<span class="hljs-tag">&lt;/<span class="hljs-title">groupId</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">artifactId</span>&gt;</span>jersey-client<span class="hljs-tag">&lt;/<span class="hljs-title">artifactId</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">version</span>&gt;</span>2.17<span class="hljs-tag">&lt;/<span class="hljs-title">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">dependency</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">groupId</span>&gt;</span>org.glassfish.jersey.media<span class="hljs-tag">&lt;/<span class="hljs-title">groupId</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">artifactId</span>&gt;</span>jersey-media-json-jackson<span class="hljs-tag">&lt;/<span class="hljs-title">artifactId</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">version</span>&gt;</span>2.17<span class="hljs-tag">&lt;/<span class="hljs-title">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">dependency</span>&gt;</span></code></pre>
+
+<ul>
+<li>修改web.xml</li>
+</ul>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-doctype">&lt;!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" &gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-title">web-app</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">display-name</span>&gt;</span>jerseyDemo<span class="hljs-tag">&lt;/<span class="hljs-title">display-name</span>&gt;</span>
+
+  <span class="hljs-tag">&lt;<span class="hljs-title">servlet</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">servlet-name</span>&gt;</span>jersey-restful<span class="hljs-tag">&lt;/<span class="hljs-title">servlet-name</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">servlet-class</span>&gt;</span>
+      org.glassfish.jersey.servlet.ServletContainer
+    <span class="hljs-tag">&lt;/<span class="hljs-title">servlet-class</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">init-param</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">param-name</span>&gt;</span>jersey.config.server.provider.packages<span class="hljs-tag">&lt;/<span class="hljs-title">param-name</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-title">param-value</span>&gt;</span>com.xvshu.cn<span class="hljs-tag">&lt;/<span class="hljs-title">param-value</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">init-param</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">load-on-startup</span>&gt;</span>1<span class="hljs-tag">&lt;/<span class="hljs-title">load-on-startup</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-title">servlet</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-title">servlet-mapping</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">servlet-name</span>&gt;</span>jersey-restful<span class="hljs-tag">&lt;/<span class="hljs-title">servlet-name</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">url-pattern</span>&gt;</span>/rest/*<span class="hljs-tag">&lt;/<span class="hljs-title">url-pattern</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-title">servlet-mapping</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-title">web-app</span>&gt;</span></code></pre>
+
+<ul>
+<li>新增rest服务</li>
+</ul>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">package</span> com.xvshu.cn.rest;
+
+<span class="hljs-keyword">import</span> javax.ws.rs.GET;
+<span class="hljs-keyword">import</span> javax.ws.rs.Path;
+<span class="hljs-keyword">import</span> javax.ws.rs.PathParam;
+<span class="hljs-keyword">import</span> javax.ws.rs.Produces;
+
+<span class="hljs-javadoc">/**
+ * Created by xvshu on 2017/8/16.
+ */</span>
+<span class="hljs-annotation">@Path</span>(<span class="hljs-string">"/user"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserRestServide</span> {</span>
+
+    <span class="hljs-annotation">@GET</span>
+    <span class="hljs-annotation">@Path</span>(<span class="hljs-string">"/{from}/{userName}/{passWord}"</span>)
+    <span class="hljs-annotation">@Produces</span>(<span class="hljs-string">"text/plain;charset=UTF-8"</span>)
+    <span class="hljs-keyword">public</span> String <span class="hljs-title">sayHello2UserByText</span>(@<span class="hljs-title">PathParam</span>("userName") String username,@<span class="hljs-title">PathParam</span>("passWord") String passWord,@<span class="hljs-title">PathParam</span>("from") String from) {
+        String result = <span class="hljs-string">"false"</span>;
+
+        System.out.println(<span class="hljs-string">"==&gt;rest/from:"</span>+String.valueOf(from)+<span class="hljs-string">" user:"</span>+String.valueOf(username)+<span class="hljs-string">" pass:"</span>+String.valueOf(passWord));
+        username=username.trim();
+        passWord=passWord.trim();
+        <span class="hljs-keyword">if</span>(username.equals(<span class="hljs-string">"admin"</span>) &amp;&amp; passWord.equals(<span class="hljs-string">"admin"</span>)){
+            result=<span class="hljs-string">"true"</span>;
+        }
+        <span class="hljs-keyword">return</span> result;
+    }
+}
+</code></pre>
+
+<ul>
+<li>发布 <br>
+项目正常打包发布至tomcat，完成部署</li>
+</ul>
+
+<p>结果展示</p>
+
+<p>前台请求 <br>
+<img src="51157115775583" alt="rest_web" title=""></p>
+
+<p>后台日志 <br>
+<img src="18467555757989" alt="rest_service" title=""></p>
+
+
+
+<h1 id="总结">总结</h1>
+
+<p>Jersey框架的原理非常类似与spring mvc，这个框架的学习非常轻松，和以前的spring mvc相似成都几乎100%，相信有同样学习经验的同学应该有所感受，如果对spring mvc感兴趣，请移步我的相关博客：<a href="http://blog.csdn.net/xvshu/article/details/42435167" target="_blank">http://blog.csdn.net/xvshu/article/details/42435167</a></p>
+
+<blockquote>
+  <p><strong>源码地址：</strong> <br>
+  <a href="https://github.com/xvshu/jersey_demo" target="_blank">git_jersey_demo</a></p>
+</blockquote></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/77261630'>原文链接</a>

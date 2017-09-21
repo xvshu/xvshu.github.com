@@ -1,0 +1,963 @@
+﻿<div style="color:blue" align=center>项目修炼之路（4）aop+注解的自动缓存</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在项目中，使用缓存的方式有很多种，一般我们会封装出一个工具类以供使用，但是这样对代码的侵入性还是太强，在这里给大家介绍一种，使用自定义注解自动缓存内容，降低缓存与逻辑代码的耦合性，也省去了大家封装的时间，注意：key生成策略为（标识字符&#43;首个参数&#20540;）</span></p>
+<h1><span style="font-size:18px">一，代码实现：</span></h1>
+<h2><span style="font-size:18px">1，自定义注解：</span></h2>
+<p>
+<pre code_snippet_id="1580714" snippet_file_name="blog_20160217_1_407979" name="code" class="java">@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Documented
+public @interface Cacheable {
+    String value();
+
+    String key() default &quot;&quot;;
+
+    int expireSeconds() default 0;
+}</pre><span style="font-size:18px"><br>
+</span>
+<h2><span style="font-size:18px">2，aop代码：</span></h2>
+<p>
+<pre code_snippet_id="1580714" snippet_file_name="blog_20160217_2_1520012" name="code" class="java">public class CacheInterceptor implements MethodInterceptor {
+    private final ExpressionEvaluator evaluator = new ExpressionEvaluator();
+
+    public CacheInterceptor() {
+    }
+
+    private Object generateKey(String key, MethodInvocation invocation) {
+        return &quot;&quot;.equals(key)?(null != invocation.getArguments() &amp;&amp; invocation.getArguments().length != 0?invocation.getArguments()[0]:&quot;&quot;):this.evaluator.key(key, invocation.getMethod(), this.createEvaluationContext(invocation, ExpressionEvaluator.NO_RESULT));
+    }
+
+    private EvaluationContext createEvaluationContext(MethodInvocation invocation, Object result) {
+        Class targetClass = AopProxyUtils.ultimateTargetClass(invocation.getThis());
+        if(targetClass == null &amp;&amp; invocation.getThis() != null) {
+            targetClass = invocation.getThis().getClass();
+        }
+
+        return this.evaluator.createEvaluationContext(invocation.getMethod(), invocation.getArguments(), invocation.getThis(), targetClass, result);
+    }
+
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        Annotation[] annotations = invocation.getMethod().getAnnotations();
+        if(null != annotations &amp;&amp; annotations.length &gt; 0) {
+            Cacheable cacheable = (Cacheable)invocation.getMethod().getAnnotation(Cacheable.class);
+            CacheEvict evict = (CacheEvict)invocation.getMethod().getAnnotation(CacheEvict.class);
+            if(null == cacheable &amp;&amp; null == evict) {
+                return invocation.proceed();
+            } else {
+                Object obj;
+                Object key;
+                if(null != cacheable) {
+                    key = this.generateKey(cacheable.key(), invocation);
+                    obj = RedisUtils.get(cacheable.value() + key.toString(), invocation.getMethod().getReturnType());
+                    if(null == obj) {
+                        obj = invocation.proceed();
+                        if(null != obj) {
+                            RedisUtils.set(cacheable.value() + key, obj, cacheable.expireSeconds());
+                        }
+                    }
+
+                    return obj;
+                } else if(null != evict) {
+                    key = this.generateKey(evict.key(), invocation);
+                    if(evict.beforeInvocation()) {
+                        RedisUtils.del(evict.value() + key);
+                    }
+
+                    obj = invocation.proceed();
+                    if(!evict.beforeInvocation()) {
+                        RedisUtils.del(evict.value() + key);
+                    }
+
+                    if(null != obj &amp;&amp; evict.cacheAgain()) {
+                        RedisUtils.set(evict.value() + key, obj, evict.expireSeconds());
+                    }
+
+                    return obj;
+                } else {
+                    return invocation.proceed();
+                }
+            }
+        } else {
+            return invocation.proceed();
+        }
+    }
+}</pre><span style="font-size:18px"><br>
+</span>
+<h2><span style="font-size:18px">3，spring配置：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 具体类实现参看文尾：《附录：redis相关类》<br>
+</span></p>
+<p>
+<pre code_snippet_id="1580714" snippet_file_name="blog_20160217_3_5838410" name="code" class="html">&lt;bean id=&quot;redisPoolConfig&quot; class=&quot;com.~~.cache.redis.RedisPoolConfig&quot;&gt;
+        &lt;property name=&quot;maxActive&quot; value=&quot;3024&quot;/&gt;
+        &lt;property name=&quot;maxIdle&quot; value=&quot;120&quot;/&gt;
+        &lt;property name=&quot;minIdle&quot; value=&quot;10&quot;/&gt;
+        &lt;property name=&quot;maxWait&quot; value=&quot;3000&quot;/&gt;
+        &lt;property name=&quot;timeOut&quot; value=&quot;30000&quot;/&gt;
+    &lt;/bean&gt;
+    &lt;bean id=&quot;redisDataSource&quot; class=&quot;com.el.cache.redis.RedisDataSource&quot;&gt;
+        &lt;constructor-arg index=&quot;0&quot; value=&quot;192.168.~~.~~&quot;/&gt;
+        &lt;constructor-arg index=&quot;1&quot; value=&quot;~~~9&quot;/&gt;
+        &lt;constructor-arg index=&quot;2&quot; value=&quot;&quot;/&gt;
+        &lt;constructor-arg index=&quot;3&quot; value=&quot;&quot;/&gt;
+        &lt;constructor-arg index=&quot;4&quot; value=&quot;12&quot;/&gt;
+        &lt;constructor-arg index=&quot;5&quot; ref=&quot;redisPoolConfig&quot;/&gt;
+    &lt;/bean&gt;
+    &lt;bean id=&quot;redisClient&quot; class=&quot;com.~~.cache.redis.RedisClient&quot;&gt;
+        &lt;property name=&quot;dataSource&quot; ref=&quot;redisDataSource&quot;/&gt;
+    &lt;/bean&gt;
+    &lt;bean class=&quot;com.~~.cache.redis.utils.RedisUtils&quot;&gt;
+        &lt;property name=&quot;redisClient&quot; ref=&quot;redisClient&quot;/&gt;
+    &lt;/bean&gt;
+    &lt;bean id=&quot;cacheInterceptor&quot; class=&quot;com.~~.cache.redis.interceptor.CacheInterceptor&quot;/&gt;
+    &lt;bean class=&quot;org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator&quot;&gt;
+        &lt;property name=&quot;beanNames&quot;&gt;
+            &lt;list&gt;
+                &lt;value&gt;*Service&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;interceptorNames&quot;&gt;
+            &lt;list&gt;
+                &lt;value&gt;cacheInterceptor&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;</pre>
+<p>
+<h1><span style="font-size:18px">二，具体应用：</span></h1>
+<p>
+<pre code_snippet_id="1580714" snippet_file_name="blog_20160217_4_680196" name="code" class="java">public interface IUserAreaFranchiseeService {
+  &lt;span style=&quot;color:#ff6600;&quot;&gt; &lt;span style=&quot;background-color: rgb(192, 192, 192);&quot;&gt; @Cacheable(value = RedisKeyUtils.USER_AREA_ID, expireSeconds = RedisKeyUtils.USER_AREA_ID_TIME)&lt;/span&gt;&lt;/span&gt;
+    public Integer getUserAreaIdByUid(Integer uid);
+}</pre>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在程序的道路上，我们发现，我们有很多重复发明轮子的过程，这是个不可或缺的过程，纵观现代工业的发展史，在最初的蒸汽机时代，没有统一的标准，大家各自为政，在巨大利益的诱惑面前，一系列资本涌入，开始打天下，制定标准，最后，一定是“最合适”的企业生存了，映射到现在，不也是一样吗？</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;java在制定标准，各种民间资本在各自领域抢占高地，我们重复发明轮子，不是因为轮子不好用，而是因为轮子还没有被简化，当我们制作的轮子足够简单时，就是标准时，这个世界从来不是现有标准，再有产品！而是现有产品，再有标准！或者叫，现有认知，才有标准。所以，要成为制作标准的公司，前几个阶段，是不可或缺的！人的成长，也是一样！<br>
+<br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">附录：redis相关类：</span></h1>
+<p><span style="font-size:18px">RedisPoolConfig：</span></p>
+<p>
+<pre code_snippet_id="1580714" snippet_file_name="blog_20160217_5_1933932" name="code" class="java">public class RedisPoolConfig extends GenericObjectPoolConfig {
+    private String user;
+    private String password;
+    private int timeOut;
+    private int maxActive = 8;
+    private long maxWait = -1L;
+
+    public RedisPoolConfig() {
+        this.setTestWhileIdle(true);
+        this.setMinEvictableIdleTimeMillis(60000L);
+        this.setTimeBetweenEvictionRunsMillis(30000L);
+        this.setNumTestsPerEvictionRun(-1);
+    }
+
+    public int getMaxActive() {
+        return this.maxActive;
+    }
+
+    public void setMaxActive(int maxActive) {
+        this.maxActive = maxActive;
+    }
+
+    public long getMaxWait() {
+        return this.maxWait;
+    }
+
+    public void setMaxWait(long maxWait) {
+        this.maxWait = maxWait;
+    }
+
+    public String getUser() {
+        return this.user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public int getTimeOut() {
+        return this.timeOut;
+    }
+
+    public void setTimeOut(int timeOut) {
+        this.timeOut = timeOut;
+    }
+}&lt;/span&gt;</pre>
+<p>
+<p><span style="font-size:18px">RedisDataSource：<br>
+</span></p>
+<p>
+<pre code_snippet_id="1580714" snippet_file_name="blog_20160217_6_2315616" name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;public class RedisDataSource {
+    private RedisPoolConfig poolConfig;
+    private GenericObjectPool pool;
+    private String host;
+    private int port;
+    private String user;
+    private String password;
+    private int db;
+
+    public RedisDataSource(String host, int port, String user, String password, RedisPoolConfig poolConfig) {
+        this(host, port, user, password, 0, poolConfig);
+    }
+
+    public RedisDataSource(String host, int port, String user, String password, int db, RedisPoolConfig poolConfig) {
+        this.host = host;
+        this.port = port;
+        this.user = user;
+        this.password = password;
+        this.db = db;
+        this.poolConfig = poolConfig;
+        this.poolConfig.setPassword(this.password);
+        this.poolConfig.setUser(this.user);
+        RedisDataSource.PooledRedisFactory redisFactory = null;
+
+        try {
+            redisFactory = this.createRedisFactory();
+        } catch (Exception var9) {
+            throw new JedisConnectionException(var9.getMessage(), var9);
+        }
+
+        this.pool = new GenericObjectPool(redisFactory, this.poolConfig);
+    }
+
+    protected RedisDataSource.PooledRedisFactory createRedisFactory() throws Exception {
+        RedisDataSource.PooledRedisFactory redisFactory = new RedisDataSource.PooledRedisFactory();
+        PooledObject redis = null;
+
+        try {
+            redis = redisFactory.makeObject();
+        } finally {
+            if(redis != null) {
+                redisFactory.destroyObject(redis);
+            }
+
+        }
+
+        return redisFactory;
+    }
+
+    public void close() {
+        try {
+            if(this.pool != null) {
+                this.pool.close();
+            }
+
+        } catch (RuntimeException var2) {
+            throw var2;
+        } catch (Exception var3) {
+            throw new JedisConnectionException(&quot;Cannot close connection pool&quot;, var3);
+        }
+    }
+
+    public PooledRedis getRedis() {
+        try {
+            return (PooledRedis)this.pool.borrowObject();
+        } catch (Exception var2) {
+            throw new JedisConnectionException(&quot;Cannot get a connection&quot;, var2);
+        }
+    }
+
+    public String getHost() {
+        return this.host;
+    }
+
+    public int getPort() {
+        return this.port;
+    }
+
+    public class PooledRedisFactory extends BasePooledObjectFactory&lt;PooledRedis&gt; {
+        public PooledRedisFactory() {
+        }
+
+        public PooledRedis create() throws Exception {
+            PooledRedis redis = new PooledRedis(RedisDataSource.this.host, RedisDataSource.this.port, RedisDataSource.this.db, RedisDataSource.this.poolConfig.getTimeOut() &gt; 0?RedisDataSource.this.poolConfig.getTimeOut():2000, RedisDataSource.this.user == null?RedisDataSource.this.poolConfig.getUser():RedisDataSource.this.user, RedisDataSource.this.password == null?RedisDataSource.this.poolConfig.getPassword():RedisDataSource.this.password, RedisDataSource.this.pool);
+            redis.connect();
+            return redis;
+        }
+
+        public PooledObject wrap(PooledRedis obj) {
+            return new DefaultPooledObject(obj);
+        }
+
+        public void destroyObject(PooledObject&lt;PooledRedis&gt; p) throws Exception {
+            PooledRedis jedis = (PooledRedis)p.getObject();
+            if(jedis.isConnected()) {
+                try {
+                    try {
+                        jedis.quit();
+                    } catch (Exception var4) {
+                        ;
+                    }
+
+                    jedis.disconnect();
+                } catch (Exception var5) {
+                    ;
+                }
+            }
+
+        }
+
+        public boolean validateObject(PooledObject p) {
+            try {
+                PooledRedis e = (PooledRedis)p.getObject();
+                if(!e.isConnected()) {
+                    e.connect();
+                }
+
+                return e.isConnected()?e.ping().equals(&quot;PONG&quot;):false;
+            } catch (Exception var3) {
+                var3.printStackTrace();
+                return false;
+            }
+        }
+
+        public void activateObject(PooledObject&lt;PooledRedis&gt; pooledJedis) throws Exception {
+            BinaryJedis jedis = (BinaryJedis)pooledJedis.getObject();
+            if(jedis.getDB().longValue() != (long)RedisDataSource.this.db) {
+                jedis.select(RedisDataSource.this.db);
+            }
+
+        }
+    }
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+RedisClient：<br>
+</span>
+<p>
+<p>
+<pre code_snippet_id="1580714" snippet_file_name="blog_20160217_7_9109249" name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;public class RedisClient implements InvocationHandler, IRedisClient {
+    protected final Log log = LogFactory.getLog(this.getClass());
+    private RedisDataSource dataSource;
+    private String namespace = &quot;&quot;;
+    private int retryTimes = 3;
+    private List&lt;String&gt; excludeMethods = new ArrayList() {
+        {
+            this.add(&quot;keys&quot;);
+            this.add(&quot;flushDB&quot;);
+            this.add(&quot;flushAll&quot;);
+        }
+    };
+
+    public RedisClient() {
+    }
+
+    public RedisCommands getRedis() {
+        return (RedisCommands)Proxy.newProxyInstance(RedisCommands.class.getClassLoader(), new Class[]{RedisCommands.class}, this);
+    }
+
+    public boolean set(Object key, Object value) {
+        return this.set(key, value, 0);
+    }
+
+    public boolean setIfNot(Object key, Object value) {
+        return this.setIfNot(key, value, 0);
+    }
+
+    public boolean set(Object key, Object value, int expireSeconds) {
+        try {
+            RedisCommands e = this.getRedis();
+            e.set(ByteSerializer.serializer.serialize(this.namespace + key), ByteSerializer.serializer.serialize(value));
+            if(expireSeconds &gt; 0) {
+                e.expire(ByteSerializer.serializer.serialize(this.namespace + key), expireSeconds);
+            }
+
+            return true;
+        } catch (Exception var5) {
+            this.log.error(&quot;=set=&gt;&quot;, var5);
+            return false;
+        }
+    }
+
+    public boolean mset(Object[] keys, Object[] values) {
+        return this.mset(keys, values, 0);
+    }
+
+    public boolean msetIfNot(Object[] keys, Object[] values) {
+        return this.msetIfNot(keys, values, 0);
+    }
+
+    public boolean mset(Object[] keys, Object[] values, int expireSeconds) {
+        if(null != keys &amp;&amp; values != null) {
+            try {
+                final ArrayList e = new ArrayList(keys.length + values.length);
+
+                for(int redisCommands = 0; redisCommands &lt; keys.length; ++redisCommands) {
+                    e.add(ByteSerializer.serializer.serialize(this.namespace + keys[redisCommands]));
+                    e.add(ByteSerializer.serializer.serialize(this.namespace + values[redisCommands]));
+                }
+
+                RedisCommands var8 = this.getRedis();
+                var8.nativeExecute(new RetryJedisOperation(&quot;mset&quot;, this.retryTimes) {
+                    public void exeJedis(Jedis jedis) {
+                        jedis.mset((byte[][])e.toArray(new byte[0][0]));
+                    }
+                });
+                if(expireSeconds &gt; 0) {
+                    for(int i = 0; i &lt; e.size(); i += 2) {
+                        var8.expire((byte[])e.get(i), expireSeconds);
+                    }
+                }
+
+                return true;
+            } catch (Exception var7) {
+                this.log.error(&quot;=mset=&gt;&quot;, var7);
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public boolean msetIfNot(Object[] keys, Object[] values, int expireSeconds) {
+        if(null != keys &amp;&amp; values != null) {
+            try {
+                final ArrayList e = new ArrayList(keys.length + values.length);
+
+                for(int redisCommands = 0; redisCommands &lt; keys.length; ++redisCommands) {
+                    e.add(ByteSerializer.serializer.serialize(this.namespace + keys[redisCommands]));
+                    e.add(ByteSerializer.serializer.serialize(this.namespace + values[redisCommands]));
+                }
+
+                RedisCommands var8 = this.getRedis();
+                var8.nativeExecute(new RetryJedisOperation(&quot;msetIfNot&quot;, this.retryTimes) {
+                    public void exeJedis(Jedis jedis) {
+                        jedis.msetnx((byte[][])e.toArray(new byte[0][0]));
+                    }
+                });
+                if(expireSeconds &gt; 0) {
+                    for(int i = 0; i &lt; e.size(); i += 2) {
+                        var8.expire((byte[])e.get(i), expireSeconds);
+                    }
+                }
+
+                return true;
+            } catch (Exception var7) {
+                this.log.error(&quot;=msetIfNot=&gt;&quot;, var7);
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public &lt;T&gt; List&lt;T&gt; mget(Object[] keys, final Class&lt;T&gt; clazz) {
+        try {
+            if(null == keys) {
+                return null;
+            } else {
+                RedisCommands e = this.getRedis();
+                final ArrayList list = new ArrayList(keys.length);
+                Object[] result = keys;
+                int len$ = keys.length;
+
+                for(int i$ = 0; i$ &lt; len$; ++i$) {
+                    Object key = result[i$];
+                    list.add(ByteSerializer.serializer.serialize(this.namespace + key));
+                }
+
+                final ArrayList var10 = new ArrayList(list.size());
+                e.nativeExecute(new RetryJedisOperation(&quot;mget&quot;, this.retryTimes) {
+                    public void reset() {
+                        super.reset();
+                        var10.clear();
+                    }
+
+                    public void exeJedis(Jedis paramJedis) {
+                        try {
+                            List e = paramJedis.mget((byte[][])list.toArray(new byte[0][0]));
+                            if(!CollectionUtils.isEmpty(e)) {
+                                Iterator i$ = e.iterator();
+
+                                while(i$.hasNext()) {
+                                    byte[] by = (byte[])i$.next();
+                                    var10.add(ByteSerializer.serializer.deserialize(by, clazz));
+                                }
+                            }
+                        } catch (JedisDataException var5) {
+                            this.log.error(&quot;=mget=&gt;JedisDataException error:&quot;, var5);
+                            throw var5;
+                        } catch (Exception var6) {
+                            this.log.error(&quot;=mget=&gt;nativeExecute error:&quot;, var6);
+                        }
+
+                    }
+                });
+                return var10;
+            }
+        } catch (Exception var9) {
+            this.log.error(&quot;=mget=&gt;error;&quot;, var9);
+            return null;
+        }
+    }
+
+    public boolean hset(Object key, Object field, Object value) {
+        return this.hset(key, field, value, 0);
+    }
+
+    public boolean hset(Object key, Object field, Object value, int expireSeconds) {
+        try {
+            RedisCommands e = this.getRedis();
+            e.hset(ByteSerializer.serializer.serialize(this.namespace + key), ByteSerializer.serializer.serialize(field), ByteSerializer.serializer.serialize(value));
+            if(expireSeconds &gt; 0) {
+                e.expire(ByteSerializer.serializer.serialize(this.namespace + key), expireSeconds);
+            }
+
+            return true;
+        } catch (Exception var6) {
+            this.log.error(&quot;=set=&gt;&quot;, var6);
+            return false;
+        }
+    }
+
+    public &lt;T&gt; T hget(Object key, Object field, Class&lt;T&gt; clazz) {
+        try {
+            RedisCommands e = this.getRedis();
+            return ByteSerializer.serializer.deserialize(e.hget(ByteSerializer.serializer.serialize(this.namespace + key), ByteSerializer.serializer.serialize(field)), clazz);
+        } catch (Exception var5) {
+            this.log.error(&quot;=hget=&gt;&quot;, var5);
+            return null;
+        }
+    }
+
+    public &lt;T&gt; List&lt;T&gt; hmget(Object key, Object field, Class&lt;T&gt; clazz) {
+        try {
+            RedisCommands e = this.getRedis();
+            List list = e.hmget(ByteSerializer.serializer.serialize(this.namespace + key), new byte[][]{ByteSerializer.serializer.serialize(field)});
+            if(null != list &amp;&amp; !list.isEmpty()) {
+                ArrayList result = new ArrayList(list.size());
+                Iterator i$ = list.iterator();
+
+                while(i$.hasNext()) {
+                    byte[] bytes = (byte[])i$.next();
+                    result.add(ByteSerializer.serializer.deserialize(bytes, clazz));
+                }
+
+                return result;
+            }
+        } catch (Exception var9) {
+            this.log.error(&quot;=hmget=&gt;&quot;, var9);
+        }
+
+        return new ArrayList(0);
+    }
+
+    public boolean setIfNot(Object key, Object value, int expireSeconds) {
+        try {
+            RedisCommands e = this.getRedis();
+            e.setnx(ByteSerializer.serializer.serialize(this.namespace + key), ByteSerializer.serializer.serialize(value));
+            if(expireSeconds &gt; 0) {
+                e.expire(ByteSerializer.serializer.serialize(this.namespace + key), expireSeconds);
+            }
+
+            return true;
+        } catch (Exception var5) {
+            this.log.error(&quot;=setIfNot=&gt;&quot;, var5);
+            return false;
+        }
+    }
+
+    public boolean setIfExists(Object key, Object value, int expireSeconds) {
+        try {
+            RedisCommands e = this.getRedis();
+            e.setex(ByteSerializer.serializer.serialize(this.namespace + key), expireSeconds, ByteSerializer.serializer.serialize(value));
+            return true;
+        } catch (Exception var5) {
+            this.log.error(&quot;=setIfExists=&gt;&quot;, var5);
+            return false;
+        }
+    }
+
+    public Long ttl(Object key) {
+        return this.getExpireTime(key);
+    }
+
+    public Long incr(Object key) {
+        return this.incr(key, 0);
+    }
+
+    public Long incrBy(Object key, long step) {
+        return this.incrBy(key, step, 0);
+    }
+
+    public Long incrByIfNot(Object key, long step, long defaultValue) {
+        return this.incrByIfNot(key, step, defaultValue, 0);
+    }
+
+    public Long incrByIfNot(final Object key, final long step, final long defaultValue, final int expireSeconds) {
+        final HashSet set = new HashSet(1);
+        this.getRedis().nativeExecute(new JedisOperation() {
+            public void call(Jedis paramJedis) {
+                try {
+                    Long e = paramJedis.incrBy(ByteSerializer.serializer.serialize(RedisClient.this.namespace + key), step);
+                    if(null != e &amp;&amp; step == e.longValue()) {
+                        paramJedis.setnx(ByteSerializer.serializer.serialize(RedisClient.this.namespace + key), ByteSerializer.serializer.serialize(Long.valueOf(defaultValue)));
+                        set.add(Long.valueOf(defaultValue));
+                    } else {
+                        set.add(e);
+                    }
+
+                    if(expireSeconds &gt; 0) {
+                        paramJedis.expire(ByteSerializer.serializer.serialize(RedisClient.this.namespace + key), expireSeconds);
+                    }
+                } catch (Exception var3) {
+                    RedisClient.this.log.error(&quot;=incrByIfNot=&gt;&quot;, var3);
+                    set.add(Long.valueOf(defaultValue));
+                }
+
+            }
+        });
+        return (Long)set.iterator().next();
+    }
+
+    public Long decr(Object key) {
+        return this.decr(key, 0);
+    }
+
+    public Long decrBy(Object key, long step) {
+        return this.decrBy(key, step, 0);
+    }
+
+    public Long getExpireTime(Object key) {
+        try {
+            RedisCommands e = this.getRedis();
+            return e.ttl(ByteSerializer.serializer.serialize(this.namespace + key));
+        } catch (Exception var3) {
+            this.log.error(&quot;=ttl=&gt;&quot;, var3);
+            return null;
+        }
+    }
+
+    public Long incr(Object key, int expireSeconds) {
+        try {
+            RedisCommands e = this.getRedis();
+            Long result = e.incr(ByteSerializer.serializer.serialize(this.namespace + key));
+            if(expireSeconds &gt; 0) {
+                e.expire(ByteSerializer.serializer.serialize(this.namespace + key), expireSeconds);
+            }
+
+            return result;
+        } catch (Exception var5) {
+            this.log.error(&quot;=incr=&gt;&quot;, var5);
+            return null;
+        }
+    }
+
+    public Long incrBy(Object key, long step, int expireSeconds) {
+        try {
+            RedisCommands e = this.getRedis();
+            Long result = e.incrBy(ByteSerializer.serializer.serialize(this.namespace + key), step);
+            if(expireSeconds &gt; 0) {
+                e.expire(ByteSerializer.serializer.serialize(this.namespace + key), expireSeconds);
+            }
+
+            return result;
+        } catch (Exception var7) {
+            this.log.error(&quot;=incr=&gt;&quot;, var7);
+            return null;
+        }
+    }
+
+    public Long decrBy(Object key, long step, int expireSeconds) {
+        try {
+            RedisCommands e = this.getRedis();
+            Long result = e.decrBy(ByteSerializer.serializer.serialize(this.namespace + key), step);
+            if(expireSeconds &gt; 0) {
+                e.expire(ByteSerializer.serializer.serialize(this.namespace + key), expireSeconds);
+            }
+
+            return result;
+        } catch (Exception var7) {
+            this.log.error(&quot;=incr=&gt;&quot;, var7);
+            return null;
+        }
+    }
+
+    public Long decr(Object key, int expireSeconds) {
+        try {
+            RedisCommands e = this.getRedis();
+            Long result = e.decr(ByteSerializer.serializer.serialize(this.namespace + key));
+            if(expireSeconds &gt; 0) {
+                e.expire(ByteSerializer.serializer.serialize(this.namespace + key), expireSeconds);
+            }
+
+            return result;
+        } catch (Exception var5) {
+            this.log.error(&quot;=incr=&gt;&quot;, var5);
+            return null;
+        }
+    }
+
+    public boolean del(Object key) {
+        try {
+            RedisCommands e = this.getRedis();
+            return e.del(ByteSerializer.serializer.serialize(this.namespace + key)).longValue() &gt; 0L;
+        } catch (Exception var3) {
+            this.log.error(&quot;=del=&gt;&quot;, var3);
+            return false;
+        }
+    }
+
+    public boolean exists(Object key) {
+        try {
+            RedisCommands e = this.getRedis();
+            return e.exists(ByteSerializer.serializer.serialize(this.namespace + key)).booleanValue();
+        } catch (Exception var3) {
+            this.log.error(&quot;=exists=&gt;&quot;, var3);
+            return false;
+        }
+    }
+
+    public &lt;T&gt; T get(Object key, Class&lt;T&gt; clazz) {
+        try {
+            RedisCommands e = this.getRedis();
+            return ByteSerializer.serializer.deserialize(e.get(ByteSerializer.serializer.serialize(this.namespace + key)), clazz);
+        } catch (Exception var4) {
+            this.log.error(&quot;=get=&gt;&quot;, var4);
+            return null;
+        }
+    }
+
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if(&quot;close&quot;.equals(method.getName())) {
+            return null;
+        } else if(args != null &amp;&amp; args.length &gt; 0) {
+            return this.execute(method, args);
+        } else if(&quot;toString()&quot;.equals(method.getName())) {
+            return &quot;no method toString.&quot;;
+        } else {
+            throw new UnsupportedOperationException(method.getName() + &quot;is not supported.&quot;);
+        }
+    }
+
+    private Object execute(Method method, Object[] args) throws Throwable {
+        PooledRedis redis = this.dataSource.getRedis();
+        if(&quot;nativeExecute&quot;.equals(method.getName())) {
+            try {
+                redis.nativeExecute((JedisOperation)args[0]);
+            } finally {
+                redis.close();
+            }
+
+            return null;
+        } else if(this.excludeMethods.contains(method.getName())) {
+            throw new IllegalAccessException(&quot;not supported method=&quot; + method.getName());
+        } else {
+            Object e;
+            try {
+                e = method.invoke(redis, args);
+            } catch (InvocationTargetException var13) {
+                this.log.error(&quot;=&quot; + method.getName() + &quot;=&gt;error: key=&quot; + args[0], var13);
+                throw var13.getCause();
+            } finally {
+                redis.close();
+            }
+
+            return e;
+        }
+    }
+
+    public String getNamespace() {
+        return this.namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public RedisDataSource getDataSource() {
+        return this.dataSource;
+    }
+
+    public void setDataSource(RedisDataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public List&lt;String&gt; getExcludeMethods() {
+        return this.excludeMethods;
+    }
+
+    public int getRetryTimes() {
+        return this.retryTimes;
+    }
+
+    public void setRetryTimes(int retryTimes) {
+        this.retryTimes = retryTimes;
+    }
+
+    public void setExcludeMethods(List&lt;String&gt; excludeMethods) {
+        this.excludeMethods = excludeMethods;
+    }
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+RedisUtils：<br>
+</span>
+<p>
+<p>
+<pre code_snippet_id="1580714" snippet_file_name="blog_20160217_8_6459291" name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;public class RedisUtils implements ApplicationContextAware {
+    private static IRedisClient redisClient;
+    protected static ApplicationContext applicationContext;
+
+    public RedisUtils() {
+    }
+
+    public void setRedisClient(IRedisClient redisClient) {
+        redisClient = redisClient;
+    }
+
+    public static IRedisClient getRedisClient() {
+        if(null == redisClient) {
+            Class var0 = RedisUtils.class;
+            synchronized(RedisUtils.class) {
+                if(null == redisClient) {
+                    redisClient = (IRedisClient)applicationContext.getBean(&quot;redisClient&quot;, IRedisClient.class);
+                }
+            }
+        }
+
+        if(null == redisClient) {
+            throw new RuntimeException(&quot;redisClient is null.&quot;);
+        } else {
+            return redisClient;
+        }
+    }
+
+    public static RedisCommands getRedis() {
+        return redisClient.getRedis();
+    }
+
+    public static void nativeExecute(JedisOperation jedis) {
+        getRedis().nativeExecute(jedis);
+    }
+
+    public static boolean set(Object key, Object value) {
+        return redisClient.set(key, value);
+    }
+
+    public static boolean mset(Object[] keys, Object[] values) {
+        return redisClient.mset(keys, values);
+    }
+
+    public static boolean mset(Object[] keys, Object[] values, int expireSeconds) {
+        return redisClient.mset(keys, values, expireSeconds);
+    }
+
+    public static boolean msetIfNot(Object[] keys, Object[] values) {
+        return redisClient.msetIfNot(keys, values);
+    }
+
+    public static boolean msetIfNot(Object[] keys, Object[] values, int expireSeconds) {
+        return redisClient.msetIfNot(keys, values, expireSeconds);
+    }
+
+    public static boolean set(Object key, Object value, int expireSeconds) {
+        return getRedisClient().set(key, value, expireSeconds);
+    }
+
+    public static boolean setIfNot(Object key, Object value) {
+        return redisClient.setIfNot(key, value);
+    }
+
+    public static boolean setIfNot(Object key, Object value, int expireSeconds) {
+        return getRedisClient().setIfNot(key, value, expireSeconds);
+    }
+
+    public static boolean setIfExists(Object key, Object value, int expireSeconds) {
+        return getRedisClient().setIfExists(key, value, expireSeconds);
+    }
+
+    public static &lt;T&gt; T get(Object key, Class&lt;T&gt; clazz) {
+        return getRedisClient().get(key, clazz);
+    }
+
+    public static &lt;T&gt; List&lt;T&gt; mget(Object[] key, Class&lt;T&gt; clazz) {
+        return getRedisClient().mget(key, clazz);
+    }
+
+    public static boolean del(Object key) {
+        return getRedisClient().del(key);
+    }
+
+    public static boolean exists(Object key) {
+        return getRedisClient().exists(key);
+    }
+
+    public static Long incr(Object key) {
+        return getRedisClient().incr(key);
+    }
+
+    public static Long incrBy(Object key, long step) {
+        return getRedisClient().incrBy(key, step);
+    }
+
+    public static Long incrByIfNot(Object key, long step, long defaultValue) {
+        return getRedisClient().incrByIfNot(key, step, defaultValue);
+    }
+
+    public static Long incrByIfNot(Object key, long step, long defaultValue, int expireSeconds) {
+        return getRedisClient().incrByIfNot(key, step, defaultValue, expireSeconds);
+    }
+
+    public static Long decr(Object key) {
+        return getRedisClient().decr(key);
+    }
+
+    public static Long decrBy(Object key, long step) {
+        return getRedisClient().decrBy(key, step);
+    }
+
+    public static Long incr(Object key, int expireSeconds) {
+        return getRedisClient().incr(key, expireSeconds);
+    }
+
+    public static Long incrBy(Object key, long step, int expireSeconds) {
+        return getRedisClient().incrBy(key, step, expireSeconds);
+    }
+
+    public static Long decrBy(Object key, long step, int expireSeconds) {
+        return getRedisClient().decrBy(key, step, expireSeconds);
+    }
+
+    public static Long decr(Object key, int expireSeconds) {
+        return getRedisClient().decr(key, expireSeconds);
+    }
+
+    public static boolean hset(Object key, Object field, Object value) {
+        return getRedisClient().hset(key, field, value);
+    }
+
+    public static boolean hset(Object key, Object field, Object value, int expireSeconds) {
+        return getRedisClient().hset(key, field, value, expireSeconds);
+    }
+
+    public static &lt;T&gt; T hget(Object key, Object field, Class&lt;T&gt; clazz) {
+        return getRedisClient().hget(key, field, clazz);
+    }
+
+    public static &lt;T&gt; List&lt;T&gt; hmget(Object key, Object field, Class&lt;T&gt; clazz) {
+        return getRedisClient().hmget(key, field, clazz);
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        applicationContext = applicationContext;
+    }
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50681026'>原文链接</a>

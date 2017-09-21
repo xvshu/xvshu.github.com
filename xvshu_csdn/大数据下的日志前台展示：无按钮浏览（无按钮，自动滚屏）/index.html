@@ -1,0 +1,357 @@
+﻿<div style="color:blue" align=center>大数据下的日志前台展示：无按钮浏览（无按钮，自动滚屏）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 最近为了提升用户使用的便捷性，要求在日志查询界面加入双击某条日志，查看相关日志的功能，就好像我通过这条日志定位到日志文件中的某行，然后就像在文件中查看一样，上下滚动，看全部的日志，以下，和大家分享这是如何做到的。</p>
+<h1>自动滚屏 ：</h1>
+<div>原理图：</div>
+<div><img src="38234889209276" alt=""><br>
+</div>
+<h2>html部分：</h2>
+<div><br>
+</div>
+<h3>搜索窗口：</h3>
+<div><br>
+</div>
+<div><pre code_snippet_id="1569974" snippet_file_name="blog_20160129_1_523968" name="code" class="html">&lt;table class=&quot;easyui-datagrid&quot; id=&quot;resultContext&quot; title=&quot;搜索结果&quot; style=&quot;width:98%;height:600px;&quot;
+               data-options=&quot;singleSelect:true,collapsible:true,nowrap:false,&lt;span style=&quot;color:#ff0000;background-color: rgb(255, 255, 153);&quot;&gt;onDblClickRow:showMore&quot;&lt;/span&gt; pagination=&quot;true&quot;&gt;
+            &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th data-options=&quot;field:&#39;localHostIp&#39;,align:&#39;left&#39;&quot; style=&quot;width:10%&quot;&gt;Ip&lt;/th&gt;
+                &lt;th data-options=&quot;field:&#39;localHostName&#39;,align:&#39;left&#39;,hidden:true&quot; &gt;机器名称&lt;/th&gt;
+                &lt;th data-options=&quot;field:&#39;domain&#39;,align:&#39;left&#39;,hidden:true&quot;&gt;域名&lt;/th&gt;
+                &lt;th data-options=&quot;field:&#39;contextType&#39;,align:&#39;left&#39;&quot; formatter=&quot;getLowercaseletters&quot; style=&quot;width:10%&quot;&gt;日志类型&lt;/th&gt;
+                &lt;th data-options=&quot;field:&#39;context&#39;,align:&#39;left&#39;&quot;  style=&quot;width:78%&quot;&gt;日志内容&lt;/th&gt;
+                &lt;th data-options=&quot;field:&#39;level&#39;,align:&#39;left&#39;,hidden:true&quot; &gt;级别&lt;/th&gt;
+                &lt;th data-options=&quot;field:&#39;created&#39;,align:&#39;left&#39;,hidden:true&quot; formatter=&quot;getLocalTime&quot; &gt;生成日期&lt;/th&gt;
+                &lt;th data-options=&quot;field:&#39;remark&#39;,align:&#39;left&#39;,hidden:true&quot;&gt;备注&lt;/th&gt;
+            &lt;/tr&gt;
+            &lt;/thead&gt;
+        &lt;/table&gt;</pre><pre code_snippet_id="1569974" snippet_file_name="blog_20160129_2_7427068" name="code" class="html">function showMore(){
+
+            var row = $(&quot;#resultContext&quot;).datagrid(&quot;getSelected&quot;);
+            var showMoreUrl =&quot;&quot;;
+            showMoreUrl =&quot;$!homeModule.getTarget(&quot;/es/showmore.action&quot;)&quot;;
+            showMoreUrl = showMoreUrl+&quot;?created_begain_more_info=&quot;+row.created+&quot;&amp;localHostIp=&quot;+row.localHostIp+&quot;&amp;domain=&quot;+row.domain;
+            w&lt;span style=&quot;color:#ff0000;background-color: rgb(255, 255, 153);&quot;&gt;indow.open(showMoreUrl)&lt;/span&gt;;
+
+        }</pre><br>
+<br>
+</div>
+<p><br>
+</p>
+<h3>展示更多窗口：</h3>
+<div><br>
+</div>
+<p>
+<pre code_snippet_id="1569974" snippet_file_name="blog_20160129_3_6488976" name="code" class="html">  &lt;div id=&quot;showmore_main_father&quot; style=&quot;width:99%; height:730px;background-color: white&quot; &gt;
+        &lt;div id =&quot;showmore_main&quot; style=&quot;position:absolute; width:99%; height:730px; overflow:scroll;background-color: white&quot;&gt;
+            &lt;div id =&quot;showmore_center&quot; style=&quot;width:99%;&quot;&gt;showmore_center&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div align=&quot;center&quot; style=&quot; width:100%;background-color: white&quot;&gt;
+        &lt;div style=&quot;height:15px;&quot;&gt;
+            &lt;img id=&quot;img_Loading_up&quot; style=&quot;whith:100px;height: 15px;&quot; src=&quot;$!homeModule.getTarget(&quot;/common/images/loading/l3.gif&quot;)&quot;&gt;&lt;/img&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;</pre><pre code_snippet_id="1569974" snippet_file_name="blog_20160129_4_3283393" name="code" class="html">&lt;/pre&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;h2&gt;js部分：&lt;/h2&gt;&lt;p&gt;&lt;/p&gt;&lt;pre code_snippet_id=&quot;1569974&quot; snippet_file_name=&quot;blog_20160129_5_393454&quot; name=&quot;code&quot; class=&quot;html&quot;&gt;&lt;script type=&quot;text/javascript&quot;&gt;
+
+        /*---------------------&lt;span style=&quot;color:#ff0000;background-color: rgb(255, 255, 153);&quot;&gt;检测鼠标滚动&lt;/span&gt;---start---------------------*/
+        var scrollFunc=function(e){
+            //var direct=0;
+            e=e || window.event;
+
+            if(e.wheelDelta){//IE/Opera/Chrome
+                if(e.wheelDelta==120) {
+                    mourseMoveUp();
+                } else {
+                    mourseMoveDown();
+                }
+            }else if(e.detail){//Firefox
+
+                if(e.detail==-3) {
+                    mourseMoveUp();
+                }else {
+                    mourseMoveDown();
+                }
+
+            }
+
+        } /*注册事件*/
+
+        if(document.addEventListener){ document.addEventListener(&#39;DOMMouseScroll&#39;,scrollFunc,false); }
+        window.onmousewheel=document.onmousewheel=scrollFunc;//IE/Opera/Chrome
+        /*---------------------检测鼠标滚动---end---------------------*/
+
+
+        var newmove = 0 ;
+        var oldmove = 0 ;
+        var old_scrollTop=0;
+        var new_scrollTop=0;
+        var count =0;
+
+        $(document).ready(function(){
+
+            /*-------------------有滚轮的滚动事件---------------------*/
+            $(&quot;#showmore_main&quot;).scroll(function(){
+                var newscrollTop=$(&quot;#showmore_main&quot;).scrollTop();
+                old_scrollTop=new_scrollTop
+                new_scrollTop=newscrollTop;
+
+            })
+        })
+
+
+        var count = 0;
+        function mourseMoveUp(){
+            oldmove = newmove;
+            newmove= new_scrollTop;
+            if(oldmove == newmove){
+                count=count+1;
+                if(count&gt;20){
+                    ShowInfoUP();
+                    count=0;
+                }
+
+            }else{
+                count = 0;
+            }
+        }
+
+        function mourseMoveDown(){
+            oldmove = newmove;
+            newmove= new_scrollTop;
+            if(oldmove == newmove){
+                count=count+1;
+                if(count&gt;20){
+                    ShowInfoDOWN();
+                    count=0;
+                }
+
+            }else{
+                count = 0;
+            }
+        }
+
+
+
+        var searchMsgJson =$!msg;
+        var domain = &quot;$!searchWords.domain&quot;;
+        var created_begain_more_info = &quot;$!searchWords.created_begain_more_info&quot;;
+        var localHostIp =&quot; $!searchWords.localHostIp&quot;;
+        var upcount = -1;
+        var downcount = 0;
+        var commandtype = &quot;&quot;;
+
+
+
+
+        $(function () {
+            var easyuijson = {};
+            var searchMsg = &quot;&quot;;
+            var hits = searchMsgJson.hits.hits;
+            var printStr = &quot;&quot;;
+            //组合符合easyui格式的json串
+            for (var i = 0; i &lt; hits.length; i++) {
+                hits[i] = hits[i]._source[&quot;@message&quot;];
+                printStr =&quot;&lt;input type=&#39;text&#39; style=&#39;width:0px;height:1px;&#39;  id=&#39;printStrTop&#39;&gt;&lt;/input &gt;&quot;+ hits[i].context+&quot;&lt;/br&gt;&quot;+ printStr ;
+            }
+
+            $(&quot;#showmore_center&quot;).html(printStr);
+            $(&#39;#img_Loading_up&#39;).hide();
+            findDimensions();
+
+        });
+
+        function ShowInfoUP(){
+            upcount=upcount+1;
+            commandtype=&quot;lte&quot;;
+            addLogInfo();
+        }
+
+        function ShowInfoDOWN(){
+            downcount=downcount+1;
+            commandtype=&quot;gte&quot;;
+            addLogInfo();
+        }
+
+        function addLogInfo() {
+            load();
+            $.ajax({
+                type: &quot;POST&quot;,
+                data:{
+                    created_begain_more_info : created_begain_more_info,
+                    localHostIp:localHostIp,
+                    domain:domain,
+                    upcount:upcount,
+                    downcount:downcount,
+                    commandtype:commandtype
+                },
+                url: &#39;$!homeModule.getTarget(&#39;/es/showMoreLogInfo.action&#39;)&#39;,
+                dataType: &quot;json&quot;,
+                error: function(request) {
+                    $.messager.alert(&quot;警告&quot;,&quot;加载出错！&quot;);
+                },
+                success: function(result) {
+
+                    $(&quot;#printStrTop&quot;).attr(&quot;id&quot;,&quot;printStrTop_old&quot;);
+                    var reslutJson = eval(&quot;(&quot; + result + &quot;)&quot;);
+                    var hits = reslutJson.hits.hits;
+                    var printStr = &quot;&quot;;
+                    //组合符合easyui格式的json串
+                    for(var i=0;i&lt;hits.length;i++){
+                        hits[i] = hits[i]._source[&quot;@message&quot;];
+
+                        printStr = hits[i].context+&quot;&lt;/br&gt;&quot; +printStr;
+                        if(i==(hits.length-1)){
+                            printStr = &quot;&lt;input type=&#39;text&#39; style=&#39;width:0px;height:1px;&#39;  id=&#39;printStrTop&#39;&gt;&lt;/input &gt;&quot;+hits[i].context+&quot;&lt;/br&gt;&quot; +printStr;
+                        }
+
+                    }
+
+                    var htmlString = $(&quot;#showmore_center&quot;).html();
+                    if(commandtype==&quot;gte&quot;){
+                        htmlString = htmlString +printStr;
+                    }else{
+                        htmlString = printStr +  htmlString ;
+                    }
+
+                    $(&quot;#showmore_center&quot;).html(htmlString);
+                    disLoad();
+
+                    if(hits.length==0){
+                        if(commandtype==&quot;gte&quot;){
+                            $.messager.alert(&quot;警告&quot;,&quot;已到底！&quot;);
+                            downcount=downcount-1;
+                        }else{
+                            $.messager.alert(&quot;警告&quot;,&quot;已到顶！&quot;);
+                            upcount=upcount-1;
+                        }
+                        $(&quot;#printStrTop_old&quot;).attr(&quot;id&quot;,&quot;printStrTop&quot;);
+                    }else{
+                        if(commandtype==&quot;lte&quot;){
+                            $(&quot;#printStrTop_old&quot;).focus();
+                        }
+
+                    }
+
+                }
+            });
+        }
+
+        //弹出加载层
+        function load(){
+                $(&#39;#img_Loading_up&#39;).show();
+        }
+
+        //取消加载层
+        function disLoad() {
+                $(&#39;#img_Loading_up&#39;).hide();
+        }
+
+        /*--------------------get windows height---------------------*/
+
+        var winWidth = 0;
+        var winHeight = 0;
+        function findDimensions() //函数：获取尺寸
+        {
+            //获取窗口宽度
+            if (window.innerWidth)
+                winWidth = window.innerWidth;
+            else if ((document.body) &amp;&amp; (document.body.clientWidth))
+                winWidth = document.body.clientWidth;
+            //获取窗口高度
+            if (window.innerHeight)
+                winHeight = window.innerHeight;
+            else if ((document.body) &amp;&amp; (document.body.clientHeight))
+                winHeight = document.body.clientHeight;
+            //通过深入Document内部对body进行检测，获取窗口大小
+            if (document.documentElement &amp;&amp; document.documentElement.clientHeight &amp;&amp; document.documentElement.clientWidth)
+            {
+                winHeight = document.documentElement.clientHeight;
+                winWidth = document.documentElement.clientWidth;
+            }
+
+            $(&quot;#showmore_main_father&quot;).css(&quot;height&quot;,winHeight*0.95 +&quot;px&quot;);
+            $(&quot;#showmore_main&quot;).css(&quot;height&quot;,winHeight*0.95 +&quot;px&quot;);
+
+        }
+        findDimensions();
+        //调用函数，获取数值
+        window.onresize=findDimensions;
+
+        /*--------------------get windows height------end---------------*/
+    &lt;/script&gt;
+</pre><br>
+<br>
+<p>
+<p><br>
+</p>
+<h2>后台action：</h2>
+<div><br>
+</div>
+<p>
+<pre code_snippet_id="1569974" snippet_file_name="blog_20160129_6_1963618" name="code" class="java">public void showMoreLogInfo(){
+        log.info(&quot;==getMoreInfo&gt;&quot;);
+        String  created_begain_more_info  = request.getParameter(&quot;created_begain_more_info&quot;);
+        String  localHostIp = request.getParameter(&quot;localHostIp&quot;);
+        String  domain = request.getParameter(&quot;domain&quot;);
+        String  upcount = request.getParameter(&quot;upcount&quot;);
+        String  downcount = request.getParameter(&quot;downcount&quot;);
+        String  commandtype = request.getParameter(&quot;commandtype&quot;);
+
+
+        String result=&quot;&quot;;
+        //设置查询条件
+        Map&lt;String,String&gt; searchWords = new  HashMap&lt;String,String&gt; ();
+
+        searchWords.put(&quot;domain&quot;,domain);
+        searchWords.put(&quot;SearchType&quot;,&quot;or&quot;);
+        searchWords.put(&quot;HightLight&quot;,&quot;no&quot;);
+
+        searchWords.put(&quot;localHostIp&quot;,localHostIp);
+        searchWords.put(&quot;created_begain_more_info&quot;,created_begain_more_info);
+        searchWords.put(&quot;created_begain_filter&quot;,commandtype);
+
+        ESSerach esSerachs = new ESSerach();
+        esSerachs.setSerachWord(searchWords);
+        esSerachs.setSize(showMoreSize);
+
+
+        if(commandtype.equals(&quot;gte&quot;)){
+            esSerachs.setFrom(Integer.valueOf(downcount)*showMoreSize);
+        }else{
+            esSerachs.setFrom(Integer.valueOf(upcount)*showMoreSize);
+        }
+
+
+
+        esSerachs.setIndex(&quot;logstash&quot;);
+        esSerachs.setOrderFile(&quot;created&quot;);
+
+        //执行查询
+        result =iesService.SearchStringByFile(esSerachs);
+        writeJson(result);
+    }</pre><br>
+<p>
+<p><br>
+</p>
+<h1>结果：</h1>
+<p>
+<p><br>
+</p>
+<p><img src="6230549708459" alt=""><br>
+</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<h1>总结：</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 刚开始认为比较困哪的实现效果，实际做起来有半天就搞定了，这个世界上就没有难事，很多时候，我们被自己难住了，从能做的开始做，慢慢自己就会有思路，想想我们还是猿猴是的样子，什么都不会，从能做的做起，一步步继承下去，就是一个文明，困难的是你认为困哪啊！</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50608794'>原文链接</a>

@@ -1,0 +1,184 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 三层快速一览——微小的例子</div><div style="color:blue" align=center>三层快速一览——微小的例子</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 今天再拿出来我在初学三层时写的小例子和将要做的做比较，我们看看加设计及模式和没有加设计模式的区别：</span></p>
+<p><span style="font-size:18px"></span></p>
+<pre name="code" class="vb">'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：商务逻辑层对用户登陆的类
+'创建日期：2013.1.30
+'版本号：
+'**********************************************/
+
+'对用户服务
+Public Class userServers
+
+    '测试用户是否存在
+    Public Shared Function TestingUser(ByVal UI_TestUser As Model.User) As Boolean
+
+        Dim DAl_TestUser As Model.User
+        Dim DAl_User = New DAL.User
+        DAl_TestUser = DAl_User.User_select(UI_TestUser.Name)
+
+        If DAl_TestUser Is Nothing Then
+            Return False
+        End If
+
+        If Trim(UI_TestUser.PassWord) = Trim(DAl_TestUser.PassWord) Then
+            Return True
+        Else
+            Return False
+        End If
+
+    End Function
+
+End Class
+
+
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：数据操作层对用户的操作
+'创建日期：2013.1.30
+'版本号：
+'**********************************************/
+
+Imports System
+Imports System.Data
+Imports System.Data.SqlClient
+Imports Model
+
+'对用户表的操作
+Public Class User
+
+    '连接字符
+    Private str_SqlConnection As String = &quot;Data Source=192.168.24.188;Initial Catalog=Charge;User ID=sa;Password=123456&quot;
+    'Dim str_SqlConnection As String = &quot;Data Source=localhost;Initial Catalog=Charge;Persist Security Info=True;User ID=sa;Password=123456&quot;
+
+    '查找用户
+    Public Function User_select(ByVal Name As String) As Model.User
+        Dim strSqlstring As String
+        strSqlstring = &quot;select * from user_info where user_id='&quot; &amp; Name &amp; &quot;'&quot;
+        'strSqlstring = &quot;Select * From user_info Where user_id='&quot; &amp; Name &amp; &quot;'&quot;
+        Dim seting As String
+        seting = str_SqlConnection
+
+        Dim MyConn As SqlConnection
+        MyConn = New SqlConnection(seting)
+
+        Dim MyCmd As SqlCommand
+        MyCmd = New SqlCommand(strSqlstring, MyConn)
+        Try
+            MyConn.Open()
+            Dim MyReader As SqlDataReader
+
+
+            MyReader = MyCmd.ExecuteReader
+
+            Dim testUser As New Model.User
+            If MyReader.Read() Then
+                testUser.Name = MyReader.GetFieldValue(Of String)(0)
+                testUser.PassWord = MyReader.GetFieldValue(Of String)(1)
+
+
+
+
+                MyReader.Close()
+                MyConn.Close()
+
+                Return testUser
+            Else
+                Return Nothing
+            End If
+
+        Catch ex As Exception
+            MsgBox(ex.Message)
+        End Try
+
+    End Function
+
+End Class
+
+
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：实体类
+'创建日期：2013.1.30
+'版本号：
+'**********************************************/
+
+'对user表的实体类
+Public Class User
+
+
+    Private _name As String
+
+    Private _password As String
+
+
+    '对user表中字段name的存取
+    Public Property Name() As String
+        Get
+            Return _name
+        End Get
+
+        Set(value As String)
+            _name = value
+        End Set
+    End Property
+
+    '对user表中字段密码的存取
+    Public Property PassWord() As String
+        Get
+            Return _password
+        End Get
+
+        Set(value As String)
+            _password = value
+        End Set
+    End Property
+
+
+End Class
+'/************************************************* 
+'作者：许恕
+'小组：  
+'说明：UI层登陆窗口
+'创建日期：2013.1.30
+'版本号：
+'**********************************************/
+
+
+Public Class frm_Landing
+
+
+    Private Sub cmd_Cancel_Click(sender As Object, e As EventArgs) Handles cmd_Cancel.Click
+        End
+    End Sub
+
+    '登陆
+    Private Sub cmd_OK_Click(sender As Object, e As EventArgs) Handles cmd_OK.Click
+
+        '构建实体类
+        Dim UI_TestUser As New Model.User
+        UI_TestUser.Name = txt_Name.Text
+        UI_TestUser.PassWord = txt_PassWord.Text
+
+        '测试登陆
+        If BLL.userServers.TestingUser(UI_TestUser) Then
+            MsgBox(&quot;登陆成功！&quot;)
+        Else
+            MsgBox(&quot;登陆失败！&quot;)
+        End If
+
+
+
+    End Sub
+End Class
+</pre><br>
+<br>
+<p>
+<p>&nbsp;</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/8497548'>原文链接</a>

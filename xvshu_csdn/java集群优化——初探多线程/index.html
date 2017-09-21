@@ -1,0 +1,146 @@
+﻿<div style="color:blue" align=center>java集群优化——初探多线程</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 要想使用多线程，咱们就有必要先了解下多线程，在不久以前，我写过相关的文章，在这简单回顾下，一个程序加上数据，就构成了一个进程，就好比快递公司是个进程，快递公司的方法就是送快递，快递员好比线程，他们都是送快递，只是负责区域不同，那么最简单的多线程是怎么实现的呢？</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;简单说实现多线程有很多种方法，而java这里主要有两种，一种是继续Thread类，另外一种是实现Runable接口，我们今天就先做个简单的demo入门：</span></p>
+<h1><span style="font-size:18px">1：简单实现多线程</span></h1>
+<h2><span style="font-size:18px">1.1多线程代码</span></h2>
+<p>
+<pre name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;/**
+ * 多线程测试类
+ *
+ * @author 许恕
+ * @version 3.0.0 , 2015年6月25日 上午10:50:22
+ */
+public class HelloWorld extends Thread {
+	
+	//标示这个类的名字
+	private String name;
+	
+	/**
+	 * 无参构造函数
+	 */
+	public HelloWorld(){
+		
+	}
+	
+	/**
+	 * 有参构造函数：将类的唯一标识符传入对象
+	 * @param strName 类的唯一标示符
+	 */
+	public HelloWorld(String strName){
+		name=strName;
+	}
+	
+	/**
+	 * 多线程规定好的方法，如果是继承Thread类则必须实现这个方法
+	 */
+	public void run(){
+		for(int i=0;i&lt;8;i++){
+			System.out.println(name+&quot;：这是第&quot;+i+&quot;次调用；&quot;);
+		}
+	}
+	
+	
+}&lt;/span&gt;</pre>
+<p>
+<h2><span style="font-size:18px">1.2，客户端：</span></h2>
+<p>
+<p>
+<pre name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;/**
+ * 实验多线程的客户端
+ *
+ * @author 许恕
+ * @version 3.0.0 , 2015年6月25日 上午10:53:35
+ */
+public class client_start {
+
+	/**
+	 * 测试多线程的主方法
+	 *
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		
+		//实例两个多线程类，许恕和李龙
+		HelloWorld xvshu = new HelloWorld(&quot;许恕&quot;);
+		HelloWorld lilong = new HelloWorld(&quot;李龙&quot;);
+		
+		//如果调用父类（Thread）中的start方法，是多线程执行的
+		System.out.println(&quot;调用父类（Thread）中的start：开始&quot;);
+		xvshu.start();
+		lilong.start();
+		System.out.println(&quot;调用父类（Thread）中的start：结束&quot;);
+		
+	}
+
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<p>
+<h1><span style="font-size:18px">2，升级版的例子</span></h1>
+<p>
+<p><span style="font-size:18px">在共享数据的基础上，实现多个窗口卖票：</span></p>
+<p><span style="font-size:18px">需求：</span></p>
+<p><span style="font-size:18px"><span style="white-space:pre"></span>共有N个窗口卖票，票数不变，一个窗口一个线程，各自卖票，卖完为止！</span></p>
+<p><span style="font-size:18px">多线程代码：</span></p>
+<p>
+<pre name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;/**
+ * 多线程测试类：卖票
+ *
+ * @author 许恕
+ * @version 3.0.0 , 2015年6月25日 上午10:50:22
+ */
+public class Ticket implements Runnable {
+	
+	//现在一共有多少票
+	private int ticketNum;
+	
+	/**
+	 * 无参构造函数
+	 */
+	public Ticket(){
+		
+	}
+	
+	/**
+	 * 有参构造函数：将一共有多少票传入对象
+	 * @param strName 类的唯一标示符
+	 */
+	public Ticket(int TicketNum){
+		ticketNum=TicketNum;
+	}
+	
+	/**
+	 * 多线程规定好的方法，如果是继承Thread类则必须实现这个方法
+	 */
+	public void run(){
+		while(ticketNum&gt;0){
+			try{
+				
+				//某窗口买出一张票
+				System.out.println(Thread.currentThread().getName()+&quot;正在卖票，剩余票数：&quot;+ticketNum--);
+				
+				//程序等待时间数
+				long sleepTime = 1000;
+				
+				
+				//程序等待1秒
+				Thread.sleep(sleepTime);
+				
+				
+				
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 你想到的，别人一定想到了，这是先定义别人是聪明，别人都给咱们解决了，解决问题之前要先宏观了解问题，然后相信每个开发猿，都为了服务大众，做了很多工作，包括这次一样，生活和代码，真实真的很想，越来越有体会，代码越深入，越生活！</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/46689303'>原文链接</a>

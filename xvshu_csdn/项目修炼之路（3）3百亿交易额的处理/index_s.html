@@ -1,0 +1,458 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 项目修炼之路（3）3百亿交易额的处理</div><div style="color:blue" align=center>项目修炼之路（3）3百亿交易额的处理</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><br>
+</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 现在公司项目中，都有几个核心业务，处理的数据量相较于其他是巨量的，而在我们公司，当下就与一个问题，在现在百亿交易额的处理中，有一个核心业务，就是每日发息（已符合最新法规），以前的发息任务，要跑将近3，4个小时，而我要为下一个交易量的增长，可能是千亿的交易额处理做技术准备，我们都知道，从数据来看，交易量的增长和数据的增长，有时候不是简单的线性关系，数据极有可能是交易量增长倍数的3-5倍，这就是一个挑战，今天和大家分享，这个挑战，我是如何度过的。</p>
+<h1>1，方向</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 大的方向，是我们要首先确定的，在问题处理上分三个层次处理</p>
+<p>
+<ul>
+<li>业务处理</li><li>数据处理</li><li>结构处理</li></ul>
+<p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;简单介绍下：</p>
+<p><span style="white-space:pre"></span>（1）业务处理</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 在业务上，首先确定一个原则：分析实时性业务的必要性，尽量做到非实时，为处理留时间</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 对应到业务上就是，发息：不是实时发息，虽然有发息时间，但是统一到流量不大的深夜执行，第二天用户收到利息；投资：采取排队机制，将投资结果非实时反馈给用户，为校验留时间；匹配：先做借贷匹配，做占用，然后线上实时匹配（就是做债权缓存池）</p>
+<p><br>
+</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; （2）数据处理</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 在数据上，也有一个原则就是500万，热表操作数据控制在500万内</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;在冷热数据处理上，用触发器在某个时刻，定时移动冷热数据（根据业务），保证热库中的数据是流畅可用的。</p>
+<p><br>
+</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; （3）结构处理</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 还是有个原则：按维度多线程处理，solr作为查询第一数据来源，修改时与数据库同步，查不到再走数据库。</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p>
+<h1>2，技术</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 今天只介绍数据批量提交与多线程结合的例子：</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 线程类：</p>
+<p><br>
+</p>
+<p>
+<pre code_snippet_id="1569959" snippet_file_name="blog_20160129_1_3620085" name="code" class="java">package com.xvshu.service.logic.dayinter;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Types;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.Callable;
+
+/**
+ * Created by Administrator on 2015/11/17.
+ */
+public&lt;span style=&quot;color:#ff0000;background-color: rgb(255, 255, 153);&quot;&gt; class InsertBatchThread implements Callable&lt;Integer&gt; &lt;/span&gt;{
+    private final static Logger LOGGER = LoggerFactory.getLogger(InsertBatchThread.class);
+    private final static String WST_TITLE = &quot;WST_&quot;;
+    private Integer vdate;
+    private Integer uid;
+    private Integer count;
+    private Integer SUCCESS =-1;
+    private Integer UNSUCCESS ;
+    private List&lt;Integer&gt; intErrorUsers=new ArrayList&lt;Integer&gt;();
+
+    private PushTaskHandler pushTaskHandler;
+
+    public PushTaskHandler getPushTaskHandler() {
+        if (null == pushTaskHandler) {
+            synchronized (this) {
+                if (null == pushTaskHandler) {
+                    pushTaskHandler = SpringContextUtils.getBean(&quot;pushTaskHandler&quot;);
+                }
+            }
+        }
+        return pushTaskHandler;
+    }
+
+    private IWstTaskService wstTaskService;
+
+    public IWstTaskService getWstTaskService() {
+        if (null == wstTaskService) {
+            synchronized (this) {
+                if (null == wstTaskService) {
+                    wstTaskService = SpringContextUtils.getBean(&quot;wstTaskService&quot;);
+                }
+            }
+        }
+        return wstTaskService;
+    }
+
+    private IOperateLogService operateLogService;
+    public IOperateLogService getOperateLogService() {
+        if (null == operateLogService) {
+            synchronized (this) {
+                if (null == operateLogService) {
+                    operateLogService = SpringContextUtils.getBean(&quot;operateLogService&quot;);
+                }
+            }
+        }
+        return operateLogService;
+    }
+
+    private ProCommFundsInfoMapper proCommFundsInfoMapper;
+    public ProCommFundsInfoMapper getProCommFundsInfoMapper() {
+        if (null == proCommFundsInfoMapper) {
+            synchronized (this) {
+                if (null == proCommFundsInfoMapper) {
+                    proCommFundsInfoMapper = SpringContextUtils.getBean(&quot;proCommFundsInfoMapper&quot;);
+                }
+            }
+        }
+        return proCommFundsInfoMapper;
+    }
+
+
+    private DataSource dataSource;
+    public DataSource getDataSource() {
+        if (null == dataSource) {
+            synchronized (this) {
+                if (null == dataSource) {
+                    dataSource = SpringContextUtils.getBean(&quot;dataSource&quot;);
+                }
+            }
+        }
+        return dataSource;
+    }
+
+    /**
+     * 无参构造函数
+     */
+    public InsertBatchThread(){
+
+    }
+
+    /**
+     * 构造函数
+     */
+    public InsertBatchThread(Integer vdate, Integer uid, Integer count){
+        this.vdate=vdate;
+        this.uid=uid;
+        this.count=count;
+        this.UNSUCCESS=count;
+        this.dataSource = getDataSource();
+   
+    }
+
+    /**
+     * 多线程规定好的方法，如果是继承Thread类则必须实现这个方法
+     */
+    public Integer call() {
+
+		//初始化时间，计算整个函数耗时用
+        long time = 0;
+        long timestart = System.currentTimeMillis();
+
+		//count能为-1否则无法查到数据
+        if(count.equals(-1)){
+            LOGGER.error(&quot;=call=&gt;--count:[&quot; + count + &quot;]----count uis -1 ---------time:&quot; + DateUtil.getCurrentTime());
+            return null;
+        }
+
+        Integer pageSize =Constant.WMPS_INTERWRAP_BATCHUSERSIZE;
+        Connection conn = null;
+		
+        //记录日志
+        LOGGER.info(&quot;=call=&gt;--count:[&quot; + count + &quot;]-------------begain time:&quot; + DateUtil.getCurrentTime());
+        int result = -1;
+        try {
+
+            conn= getDataSource().getConnection();
+            conn.setAutoCommit(false);
+            try {
+                //操作
+                List&lt;Integer&gt; listUsers = new ArrayList&lt;Integer&gt;();
+                if(uid == null){
+                    listUsers = getProCommFundsInfoMapper().selectUserForInsertBatch(vdate,count * pageSize, pageSize);
+                }else{
+                    listUsers.add(uid);
+                }
+                LOGGER.info(&quot;=call=&gt;--[&quot;+count+&quot;].[get -- listUsers] size:&quot;+listUsers.size()+&quot;-------------end time:&quot; + DateUtil.getCurrentTime());
+
+                LOGGER.info(&quot;=call=&gt;[&quot;+count+&quot;] beginuid:&quot;+listUsers.get(0)+&quot; enduid:&quot;+listUsers.get(listUsers.size() - 1));
+
+                time=System.currentTimeMillis();
+                List&lt;ProCommFundsInfo&gt; listOnePage = getProCommFundsInfoMapper().selectForInsertBatchByUser(vdate, listUsers.get(0), listUsers.get(listUsers.size() - 1));
+                LOGGER.info(&quot;=call=&gt;--[&quot;+count+&quot;].[get -- listOnePage] size:&quot;+listOnePage.size()+&quot;-------------spen time:&quot; + (System.currentTimeMillis()-time));
+
+                time=System.currentTimeMillis();
+                List&lt;ProCommFundsInfo&gt; listOnePageNew = getProCommFundsInfoMapper().selectForInsertBatchByUserNew(vdate, listUsers.get(0), listUsers.get(listUsers.size() - 1));
+                
+
+                //给procommanlist赋id值与初始状态
+                for(int i=0;i&lt;listOnePage.size();i++){
+                    if( listOnePage.get(i) == null ){
+                        listOnePage.remove(i);
+                        i--;
+                    }
+                    if(i&gt;=0){
+                        listOnePage.get(i).setId((int)SequenceHelp.get(SequenceHelp.D_PRO_COMM_FUNDS_INFO));
+                        listOnePage.get(i).setStatus(BigDecimal.ONE);
+                    }
+                }
+
+              
+                //------------------------开始操作数据库：--------begin--------------------------
+
+                 //批量插入proCommFundsInfo
+                time=System.currentTimeMillis();
+                proCommFundsInfoInsertBatch(listOnePage,conn);
+                LOGGER.info(&quot;=call=&gt;--[&quot;+count+&quot;].[set -- proCommFundsInfoInsertBatch]size:&quot;+listOnePage.size()+&quot;-------------spen time:&quot; + (System.currentTimeMillis()-time));
+
+               
+                //------------------------开始操作数据库：--------end------------------------
+                //提交事务
+                conn.commit();
+
+                //TODO:单独处理发站内信的问题
+                try {
+                    //发息成功，发站内信
+                    if(listOnePageDayInner!=null &amp;&amp; !listOnePageDayInner.isEmpty()){
+                        time=System.currentTimeMillis();
+                        List&lt;NoticetaskVoForBatch&gt; listNotice = new ArrayList&lt;NoticetaskVoForBatch&gt;();
+                        for (WmpsDayInter oneDayInter : listOnePageDayInner) {
+                            NoticetaskVoForBatch oneNotice = new NoticetaskVoForBatch();
+                            oneNotice.setNoticeNumber(Constant.NOTICE_YLB_HX);
+                            oneNotice.setTitleParams(new Object[]{&quot;恭喜您！您已成功收到口口口口的付息！&quot;});
+                            oneNotice.setUuid(createUUID(oneDayInter));
+                            listNotice.add(oneNotice);
+                        }
+                        getLogicNoticetaskService().batchSendNotice(listNotice);
+                        LOGGER.info(&quot;=call=&gt;sendNotice spen time :&quot;+(System.currentTimeMillis()-time));
+                    }
+
+                }catch(Exception e){
+                    LOGGER.error(&quot;=call=&gt;sendNotice error&quot;,e);
+                    String wstDayInterNoticeUuid = &quot;WST_DAY_INTER_NOTICE_&quot;+ UUID.randomUUID().toString();
+                    wstTaskService.objectsToWstTask(listOnePageDayInner,wstDayInterNoticeUuid, WstTaskTypeEnum.WST_INSERT_DAYINTER_NOTICE.getValue(),conn);
+                    //发任务引擎
+                    getPushTaskHandler().handlePushTask(JSON.toJSONString(wstDayInterNoticeUuid), WST_SENDNOTICE_INSERT_DAYINTER_TASK_TYPE,UUID.randomUUID().toString() , null, null);
+                }
+            }catch (Exception e){
+                conn.rollback();
+                result=UNSUCCESS;
+                e.printStackTrace();
+                LOGGER.error(&quot;=call=&gt;error--[&quot;+count+&quot;]-------------spen time:&quot; +  (System.currentTimeMillis()-timestart),e);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            LOGGER.error(&quot;=call=&gt;error--[&quot;+count+&quot;]-------------spen time:&quot; + (System.currentTimeMillis()-timestart),e);
+        }finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            }catch (Exception e){
+                LOGGER.error(&quot;=call=&gt;error close conn&quot;,e);
+            }
+        }
+        LOGGER.info(&quot;&lt;=call=&gt;--[&quot; + count + &quot;]-------------spen time:&quot; + (System.currentTimeMillis() - timestart));
+
+        return  result;
+    }
+
+    /**
+     * 批量插入procomm
+     * @param listOnePage
+     * @param conn
+     * @return
+     * @throws Exception
+     */
+    public int[] proCommFundsInfoInsertBatch(List&lt;ProCommFundsInfo&gt; listOnePage ,Connection conn) throws Exception{
+        &lt;span style=&quot;color:#cc0000;background-color: rgb(255, 255, 153);&quot;&gt;int[] results = new int[0];
+        PreparedStatement ps = conn.prepareStatement(&quot;INSERT ignore  INTO d_口口口口口口info&quot; +
+                &quot;(uid,income,rid) values&quot; +
+                &quot;(?,?,?)&quot;);
+        try {
+            for (int i =0 ;i&lt; listOnePage.size();i++) {
+                ProCommFundsInfo oneObj = listOnePage.get(i);
+                if (oneObj.getUid() == null) {
+                    ps.setNull(1, Types.INTEGER);
+                } else {
+                    ps.setInt(1, oneObj.getUid());
+                }
+
+                ps.setBigDecimal(2, oneObj.getIncome());
+
+                if (oneObj.getRid() == null) {
+                    ps.setNull(3, Types.INTEGER);
+                } else {
+                    ps.setInt(3, oneObj.getRid());
+                }
+                ps.addBatch();
+            }
+            int[] result = ps.executeBatch();
+            results = ArrayUtils.addAll(results,result);
+
+        }finally {
+            ps.close();
+        }
+        return results;&lt;/span&gt;
+    }
+
+  
+
+
+
+
+
+
+}
+</pre><br>
+前台控制类
+<p>
+<p>
+<pre code_snippet_id="1569959" snippet_file_name="blog_20160129_2_5332735" name="code" class="java">private Boolean insertDayInter(Integer vdate, Integer uid ) {
+
+		if(isPushTask){
+			LOGGER.info(&quot;=insertDayInter=&gt; is PushTaskEngine call This Method &quot;);
+		}
+		//记录日志
+		OperateLog operateLog = operateLogService.selectLogForCheckInter(vdate);
+		//判断是否插入过日志
+		if(operateLog !=null){
+
+			LOGGER.info(&quot;=insertDayInter=&gt; operateLog is not null &quot;);
+			//标记成功，直接返回
+			if(operateLog.getStatus()!=null &amp;&amp; operateLog.getStatus().equals(Constant.OPERATELOG_STATUS_SUCEESS)){
+				return true;
+			}else if (operateLog.getStatus()!=null &amp;&amp; operateLog.getStatus().equals(Constant.OPERATELOG_STATUS_PROCESSING)){
+				//时间间隔小于1小时则直接返回
+				Long time =  DateUtil.getNowDate().getTime() - operateLog.getModified().getTime();
+				if(time&lt;3600000){
+					return true;
+				}
+			}
+			operateLog.setStatus(Constant.OPERATELOG_STATUS_PROCESSING);
+			operateLog.setModified(new Date());
+			operateLogService.updateByPrimaryKeySelective(operateLog);
+		}else{
+			LOGGER.info(&quot;=insertDayInter=&gt; operateLog is  null &quot;);
+			operateLog = new OperateLog();
+			operateLog.setId((Long) SequenceHelp.get(SequenceHelp.OPERATE_LOG));
+
+			if(uid==null){
+				operateLog.setLogType(Constant.OPERATELOG_LOGTYPE_INTERWRAP);
+			}else{
+				operateLog.setLogType(Constant.OPERATELOG_LOGTYPE_TEST_INTERWRAP);
+				operateLog.setRemark(&quot;uid:&quot;+uid);
+			}
+
+			operateLog.setStatus(Constant.OPERATELOG_STATUS_UNTREATED);
+			operateLog.setPri(Constant.OPERATELOG_PRI_ONE);
+			operateLog.setAutoRedo(Constant.OPERATELOG_AUTOREDO_TRUE);
+			operateLog.setCreated(new Date(vdate*1000L));
+			operateLog.setModified(new Date());
+
+			operateLogService.insertForDayInter(operateLog);
+		}
+
+		if (vdate == null || vdate.intValue() &lt;= 0 ) {
+			LOGGER.error(&quot;=insertDayInter=&gt;error,vdate=&quot; + vdate + &quot;,uid=&quot; + uid);
+		} else {
+			int totalNum = 0;
+			if(uid ==null){
+				totalNum = proCommFundsInfoService.countForInsertBatchByUser(vdate);
+			}else{
+				totalNum=1;
+			}
+
+			if(totalNum==0){
+				LOGGER.error(&quot;=insertDayInter=&gt;error,vdate=&quot; + vdate + &quot;,uid=&quot; + uid+&quot; totalNum is 0 &quot;);
+				return true;
+			}
+
+			int startRow = 0;
+			List&lt;FutureTask&lt;Integer&gt;&gt; listFutures = new ArrayList&lt;FutureTask&lt;Integer&gt;&gt;();
+
+			//线程发息，每个线程处理n个用户
+			getTaskExecutor();
+			try {
+
+
+				LOGGER.info(&quot;=insertDayInter=&gt; insert proCommFundsInfo begin&quot;);
+				&lt;span style=&quot;color:#ff0000;background-color: rgb(255, 255, 153);&quot;&gt;for (int i = 0; i &lt;= Math.floor(totalNum / Constant.口口_口口_口口); i++) {
+					FutureTask&lt;Integer&gt; futureTask = new FutureTask&lt;Integer&gt;(new InsertBatchThread(vdate, uid, i));
+					taskExecutor.execute(futureTask);
+					listFutures.add(futureTask);
+				}&lt;/span&gt;
+
+				LOGGER.info(&quot;fixedThreadPool is ok&quot;);
+				if(listFutures !=null &amp;&amp; !listFutures.isEmpty()){
+					for(FutureTask&lt;Integer&gt; ontFuture : listFutures){
+						Integer threadReturn  = ontFuture.get();
+						if(threadReturn ==null ){
+							LOGGER.error(&quot;FutureTask is null &quot;+listFutures.indexOf(ontFuture));
+							listException.add(listFutures.indexOf(ontFuture));
+						}else {
+							if (!threadReturn.equals(-1)) {
+								listException.add(threadReturn);
+							}
+						}
+					}
+				}
+				result =true;
+
+				operateLog.setStatus(Constant.OPERATELOG_STATUS_SUCEESS);
+
+
+				operateLog.setLogData(&quot;SUCEESS&quot;);
+				operateLog.setModified(new Date());
+				operateLogService.updateByPrimaryKey(operateLog);
+				LOGGER.info(&quot;=insertDayInter=&gt; insert proCommFundsInfo end&quot;);
+			}catch (Exception e){
+				operateLog.setStatus(Constant.OPERATELOG_STATUS_FAILURE);
+
+				result = false;
+				if(listException != null &amp;&amp; !listException.isEmpty() ){
+					operateLog.setLogData(com.el.wst.soa.common.utils.StringUtils.ListToString(listException));
+				}else{
+					operateLog.setLogData(&quot;SUCEESS&quot;);
+				}
+				operateLog.setModified(new Date());
+				operateLogService.updateByPrimaryKey(operateLog);
+
+				LOGGER.error(&quot;&lt;=insertDayInter=&gt;error&quot;,e);
+				e.printStackTrace();
+			}
+
+		}
+		LOGGER.info(&quot;&lt;=insertDayInter=&gt;&quot;);
+		return result;
+	}</pre><br>
+spring线程池：
+<p>
+<p><br>
+</p>
+<p>
+<pre code_snippet_id="1569959" snippet_file_name="blog_20160129_3_8506081" name="code" class="html"> &lt;!-- 线程池 --&gt;
+    &lt;bean id=&quot;taskExecutor&quot;
+          class=&quot;org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor&quot;&gt;
+        &lt;property name=&quot;corePoolSize&quot; value=&quot;20&quot; /&gt;
+        &lt;property name=&quot;maxPoolSize&quot; value=&quot;50&quot; /&gt;
+        &lt;property name=&quot;queueCapacity&quot; value=&quot;500&quot; /&gt;
+        &lt;property name=&quot;keepAliveSeconds&quot; value=&quot;300&quot; /&gt;
+        &lt;property name=&quot;rejectedExecutionHandler&quot;&gt;
+            &lt;bean class=&quot;java.util.concurrent.ThreadPoolExecutor$DiscardOldestPolicy&quot; /&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;</pre><br>
+<br>
+<p>
+<h1>3，结果</h1>
+<p>综上所做，可以讲百亿交易量的处理，控制在20分钟内完成（测试10万用户，5个产品，5分钟完成），测试环境：双核四线程，普通pc</p>
+<h1>总结</h1>
+<p>&nbsp; &nbsp; &nbsp; 经过这一路的走来，验证了一个道理，万事有利必有弊，这样我们虽然可以提升效率，但是代码可读性，扩展性上，有了瓶颈，如果谁有更好的方案，欢迎交流，交流中，我们一起来探讨更大，更复杂数据的处理。</p>
+<p><br>
+</p>
+<p>声明：以下内容为技术分享，涉及公司真实业务部分已经掩盖，代码不可直接执行，请大家注意。<br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50608455'>原文链接</a>

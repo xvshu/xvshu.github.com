@@ -1,0 +1,194 @@
+﻿<div style="color:blue" align=center>Android开发学习（6）Maven管理项目</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><p>学习安卓开发有了一小段时间，一直想使用maven管理安卓的开发，这样就和以前的开发模式有了很大的重合，本着这个念头， 我们开始一步步使用maven创建一个安卓项目：</p>
+
+
+
+<h1 id="开发环境">开发环境:</h1>
+
+<p>JDK 1.8 <br>
+Maven 3.1.1 <br>
+IDEA 2016</p>
+
+
+
+<h1 id="主要步骤">主要步骤：</h1>
+
+
+
+<h2 id="配置-android-开发环境">配置 android 开发环境</h2>
+
+<p>根据 android 官网提示，配置 android 开发环境，直到能在 eclipse 上运行简单的 helloAndroid 项目。请参照官网(<a href="http://developer.android.com/" target="_blank">http://developer.android.com/</a>)，直到能运行模拟器，并看到 hello。 <br>
+目的是为了检验 android sdk 和 ADT(Android Developer Tools) 已配置正确，步骤2 中将不会被使用这个 helloAndroid 项目。</p>
+
+
+
+<h2 id="配置-maven-android-开发环境">配置 maven android 开发环境</h2>
+
+<p>根据 maven-android-plugin 官网提示，配置 maven android 开发环境，能在 IDEA 上运行 android 项目。 <br>
+maven 的安装和配置请参照maven官网。</p>
+
+
+
+<h3 id="环境变量">环境变量</h3>
+
+<p>设置 ANDROID_HOME，指向 android sdk 所在文件夹</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs mel">ANDROID_HOME=D:\Android\android-sdk
+Path=...;<span class="hljs-variable">%MAVEN_HOME</span><span class="hljs-variable">%\</span>bin;<span class="hljs-variable">%ANDROID_HOME</span><span class="hljs-variable">%\</span>tools;<span class="hljs-variable">%ANDROID_HOME</span><span class="hljs-variable">%\</span>platform-tools;<span class="hljs-variable">%ANDROID_HOME</span><span class="hljs-variable">%\</span>build-tools;<span class="hljs-variable">%ANDROID_HOME</span><span class="hljs-variable">%\</span>platforms;<span class="hljs-variable">%ANDROID_HOME</span><span class="hljs-variable">%\</span>build-tools\android-<span class="hljs-number">4.2</span><span class="hljs-number">.2</span></code></pre>
+
+
+
+<h3 id="maven-android-sdk-deployer">maven-android-sdk-deployer</h3>
+
+<p><a href="https://github.com/mosabua/maven-android-sdk-deployer" target="_blank">https://github.com/mosabua/maven-android-sdk-deployer</a>，点击下载 maven-android-sdk-deployer 源码，解压缩到本地任意路径。</p>
+
+<p>这是一个maven项目，执行 mvn clean install 直至 Success，会把 android 开发相关的所有 jar 包安装到本地的 mvn repository 中。 <br>
+cmd:安装安卓4.0插件</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs cmake">mvn clean <span class="hljs-keyword">install</span> -P4.<span class="hljs-number">0</span></code></pre>
+
+
+
+<h3 id="plugingroups">pluginGroups</h3>
+
+<p>打开 maven 配置文件 settings.xml  (默认路径:C:\Documents and Settings{user}.m2\settings.xml) ， <br>
+确认 pluginGroups 节点添加：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm">&lt;pluginGroups&gt;
+          &lt;pluginGroup&gt;<span class="hljs-keyword">com</span><span class="hljs-preprocessor">.jayway</span><span class="hljs-preprocessor">.maven</span><span class="hljs-preprocessor">.plugins</span><span class="hljs-preprocessor">.android</span><span class="hljs-preprocessor">.generation</span>2&lt;/pluginGroup&gt;  
+&lt;/pluginGroups&gt;  </code></pre>
+
+
+
+<h2 id="新建项目">新建项目</h2>
+
+<p>在本地建立 maven 项目路径，比如\AndroidSpace\maven-test</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs tex">cd <span class="hljs-command">\AndroidSpace</span><span class="hljs-command">\maven</span>-test</code></pre>
+
+<p>next:</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs lasso">mvn archetype:generate <span class="hljs-attribute">-DarchetypeArtifactId</span><span class="hljs-subst">=</span>android<span class="hljs-attribute">-quickstart</span> <span class="hljs-attribute">-DarchetypeGroupId</span><span class="hljs-subst">=</span>de<span class="hljs-built_in">.</span>akquinet<span class="hljs-built_in">.</span>android<span class="hljs-built_in">.</span>archetypes <span class="hljs-attribute">-DarchetypeVersion</span><span class="hljs-subst">=</span><span class="hljs-number">1.0</span><span class="hljs-number">.6</span> <span class="hljs-attribute">-DgroupId</span><span class="hljs-subst">=</span>com<span class="hljs-built_in">.</span>xvshu<span class="hljs-built_in">.</span>android <span class="hljs-attribute">-DartifactId</span><span class="hljs-subst">=</span>android<span class="hljs-attribute">-xvshu</span></code></pre>
+
+<p>next:</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs cmake">mvn clean <span class="hljs-keyword">install</span> </code></pre>
+
+
+
+<h2 id="关联模拟器">关联模拟器</h2>
+
+<p>avd是安卓开发时，虚拟一个安卓系统，和本地代码联调的程序，在idea中，可以直接创建： <br>
+在工具栏中找到AVD manager的图标，点击打开AVD管理器，选择Create Device”创建模拟机型，选好后，点击“finish”，记住自己创建的avd的name。 <br>
+<img src="34547226766120" alt="这里写图片描述" title=""> <br>
+打开 pom.xml，在 maven-android-plugin 的 configuration 中添加avd 名称。</p>
+
+<pre class="prettyprint"><code class=" hljs r">
+    &lt;configuration&gt;  
+        <span class="hljs-keyword">...</span>  
+        &lt;emulator&gt;
+             &lt;avd&gt;Nexus <span class="hljs-number">5</span> API <span class="hljs-number">16</span>&lt;/avd&gt;
+         &lt;/emulator&gt; 
+        <span class="hljs-keyword">...</span>  
+    &lt;/configuration&gt;  
+</code></pre>
+
+<p>执行 mvn android:deploy，将项目deploy到模拟器中，直至sucess.</p>
+
+<p><img src="4372019660050" alt="avd" title=""> </p>
+
+<h1 id="常见错误">常见错误：</h1>
+
+<blockquote>
+  <p>java.lang.ClassNotFoundException: org.sonatype.aether.RepositorySystem</p>
+</blockquote>
+
+<p>解决办法; <br>
+android-maven-plugin插件升级为3.8.1：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">project</span> <span class="hljs-attribute">xmlns</span>=<span class="hljs-value">"http://maven.apache.org/POM/4.0.0"</span> <span class="hljs-attribute">xmlns:xsi</span>=<span class="hljs-value">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attribute">xsi:schemaLocation</span>=<span class="hljs-value">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-title">modelVersion</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">groupId</span>&gt;</span>com.xvshu.android<span class="hljs-tag">&lt;/<span class="hljs-title">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">artifactId</span>&gt;</span>android-xvshu<span class="hljs-tag">&lt;/<span class="hljs-title">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-title">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">packaging</span>&gt;</span>apk<span class="hljs-tag">&lt;/<span class="hljs-title">packaging</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">name</span>&gt;</span>android-xvshu<span class="hljs-tag">&lt;/<span class="hljs-title">name</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">properties</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">android.sdk.path</span>&gt;</span>D:\Android\android-sdk<span class="hljs-tag">&lt;/<span class="hljs-title">android.sdk.path</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">android.sdk.version</span>&gt;</span>15<span class="hljs-tag">&lt;/<span class="hljs-title">android.sdk.version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">properties</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">dependencies</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">dependency</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">groupId</span>&gt;</span>com.google.android<span class="hljs-tag">&lt;/<span class="hljs-title">groupId</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">artifactId</span>&gt;</span>android<span class="hljs-tag">&lt;/<span class="hljs-title">artifactId</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">version</span>&gt;</span>2.1.2<span class="hljs-tag">&lt;/<span class="hljs-title">version</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">scope</span>&gt;</span>provided<span class="hljs-tag">&lt;/<span class="hljs-title">scope</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">dependencies</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">build</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">plugins</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">plugin</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">groupId</span>&gt;</span>com.jayway.maven.plugins.android.generation2<span class="hljs-tag">&lt;/<span class="hljs-title">groupId</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">artifactId</span>&gt;</span>android-maven-plugin<span class="hljs-tag">&lt;/<span class="hljs-title">artifactId</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">version</span>&gt;</span>3.8.1<span class="hljs-tag">&lt;/<span class="hljs-title">version</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">configuration</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">androidManifestFile</span>&gt;</span>${project.basedir}/AndroidManifest.xml<span class="hljs-tag">&lt;/<span class="hljs-title">androidManifestFile</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">assetsDirectory</span>&gt;</span>${project.basedir}/assets<span class="hljs-tag">&lt;/<span class="hljs-title">assetsDirectory</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">resourceDirectory</span>&gt;</span>${project.basedir}/res<span class="hljs-tag">&lt;/<span class="hljs-title">resourceDirectory</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">nativeLibrariesDirectory</span>&gt;</span>${project.basedir}/src/main/native<span class="hljs-tag">&lt;/<span class="hljs-title">nativeLibrariesDirectory</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">sdk</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">path</span>&gt;</span>${android.sdk.path}<span class="hljs-tag">&lt;/<span class="hljs-title">path</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">platform</span>&gt;</span>${android.sdk.version}<span class="hljs-tag">&lt;/<span class="hljs-title">platform</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-title">sdk</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">deleteConflictingFiles</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-title">deleteConflictingFiles</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">undeployBeforeDeploy</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-title">undeployBeforeDeploy</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">configuration</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">extensions</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-title">extensions</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">plugin</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-title">plugin</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">artifactId</span>&gt;</span>maven-compiler-plugin<span class="hljs-tag">&lt;/<span class="hljs-title">artifactId</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">version</span>&gt;</span>2.3.2<span class="hljs-tag">&lt;/<span class="hljs-title">version</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">configuration</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">source</span>&gt;</span>1.6<span class="hljs-tag">&lt;/<span class="hljs-title">source</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">target</span>&gt;</span>1.6<span class="hljs-tag">&lt;/<span class="hljs-title">target</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">configuration</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">plugin</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">plugins</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">build</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">project</span>&gt;</span>
+</code></pre></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/76916563'>原文链接</a>

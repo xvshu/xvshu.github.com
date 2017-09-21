@@ -1,0 +1,90 @@
+﻿<div style="color:blue" align=center>C#后台与前台界面交互——传数组</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p>&nbsp; &nbsp; &nbsp; &nbsp;当用到.net 时，很多新手都为如何解决.cs文件里数组赋&#20540;给.aspx中js数组的问题。这次主要和大家分享怎么解决这个问题！<br>
+&nbsp;<br>
+第一步：定义cs数组<br>
+</p>
+<p><pre class="csharp" name="code">cs代码：
+using System.Data;
+using System.Configuration;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Data.SqlClient;
+public partial class _Default : System.Web.UI.Page 
+{
+    public double[] la = new double[25]; //定义为公共数组
+    public double[] ln = new double[25];
+    public int[] id = new int[25];
+    public int k1 = 0;  //定义为公共,用于赋值循环
+    protected void Page_Load(object sender, EventArgs e)
+    {
+            }
+}
+</pre><br>
+<br>
+</p>
+<p><br>
+第二步：将cs数组赋&#20540;</p>
+<p><pre code_snippet_id="85658" snippet_file_name="blog_20131127_2_9611347" class="csharp" name="code">        string mycnnConnectionString1 = System.Configuration.ConfigurationManager.AppSettings[&quot;strcon&quot;].ToString();    //创建连接字符串
+        SqlConnection mycnn1 = new SqlConnection(mycnnConnectionString1);
+        mycnn1.Open();
+        SqlCommand cmd1 = new SqlCommand(&quot;select id,lat,lng from station  &quot;, mycnn1);
+        SqlDataReader dr1 = cmd1.ExecuteReader();
+        int k2 = 0; 
+        int k3 = 0; 
+        int k4 = 0;
+        string buf1 = &quot;&quot;; 
+        double buf2 = 0;
+        double buf3 = 0; 
+        int buf4 = 0;
+        while (dr1.Read())
+        {
+            //lat
+            buf2 = (double)dr1[&quot;lat&quot;];
+            la[k2] = buf2;
+            k2++;
+            //lng
+            buf3 = (double)dr1[&quot;lng&quot;];///数据库读取float型的数据要用double
+            ln[k3] = buf3;
+            k3++;
+            //id
+            buf4 = (int)dr1[&quot;id&quot;];
+            id[k4] = buf4;
+            k4++;
+        }
+        
+</pre><br>
+<br>
+</p>
+<p><br>
+第三步：将cs数组赋&#20540;个js数组<br>
+</p>
+<p><br>
+&nbsp;<pre code_snippet_id="85658" snippet_file_name="blog_20131127_3_4103687" class="javascript" name="code">aspx代码:
+.........
+ &lt;script type=&quot;text/javascript&quot;&gt;
+//赋值的代码要写在这里&lt;script type=&quot;text/javascript&quot;&gt;代码...&lt;/script&gt;
+         var jingdu= new Array();
+         var weidu=new Array();
+         var id=new Array();
+&lt;%
+   for(int i=0;i&lt;25;i++){
+  %&gt;
+   
+         jingdu.push(&lt;%=ln[i]%&gt;);
+         weidu.push(&lt;%=la[i]%&gt;);
+         id.push(&lt;%=id[i] %&gt;);
+  &lt;% 
+   }
+  %&gt;
+&lt;/script&gt;</pre><br>
+<br>
+<br>
+通过这次的解决，我们发现js和前台后台的交互都是较为简单的传送，其实他还有很多封装好的方法，咱们下次研究，敬请期待<br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/16994183'>原文链接</a>

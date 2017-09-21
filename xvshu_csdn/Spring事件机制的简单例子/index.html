@@ -1,0 +1,105 @@
+﻿<div style="color:blue" align=center>Spring事件机制的简单例子</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px; line-height: 35px;">本例子模拟一个给多个人发送内容（类似于报纸新闻）的例子。<br>1、定义事件<br><br><pre code_snippet_id="2125892" snippet_file_name="blog_20170113_1_5088739" name="code" class="java">package com.xvshu.hello;  
+import org.springframework.context.ApplicationEvent;  
+public class ContentEvent extends ApplicationEvent {  
+    public ContentEvent(final String content) {  
+        super(content);  
+    }  
+}  </pre><br><br><p><br></p>非常简单，如果用户发送内容，只需要通过构造器传入内容，然后通过getSource即可获取。<br>&nbsp;<br>2、定义无序监听器<br>之所以说无序，类似于AOP机制，顺序是无法确定的。<br><br><p><pre code_snippet_id="2125892" snippet_file_name="blog_20170113_2_8164592" name="code" class="java">package com.xvshu.hello;  
+import org.springframework.context.ApplicationEvent;  
+import org.springframework.context.ApplicationListener;  
+import org.springframework.stereotype.Component;  
+@Component  
+public class UserOneListener implements ApplicationListener&lt;ApplicationEvent&gt; {  
+    @Override  
+    public void onApplicationEvent(final ApplicationEvent event) {  
+        if(event instanceof ContentEvent) {  
+            System.out.println(&quot;[UserOneListener]msg：&quot; + event.getSource());  
+        }  
+    }  
+}</pre><br><br></p><p>&nbsp;&nbsp;</p>1、使用@Compoent注册Bean即可；<br>2、在实现中需要判断event类型是ContentEvent才可以处理；<br>&nbsp;<br>更简单的办法是通过泛型指定类型，如下所示<br><pre code_snippet_id="2125892" snippet_file_name="blog_20170113_3_6812579" name="code" class="java">package com.xvshu.hello;  
+import org.springframework.context.ApplicationListener;  
+import org.springframework.stereotype.Component;  
+@Component  
+public class UserTwoListener implements ApplicationListener&lt;ContentEvent&gt; {  
+    @Override  
+    public void onApplicationEvent(final ContentEvent event) {  
+        System.out.println(&quot;[UserTwoListener]msg：&quot; + event.getSource());  
+    }  
+} </pre><br><br>&nbsp;<br>3、定义有序监听器&nbsp;<br>实现SmartApplicationListener接口即可。<br><p><pre code_snippet_id="2125892" snippet_file_name="blog_20170113_4_4206831" name="code" class="java">package com.xvshu.hello;  
+import org.springframework.context.ApplicationEvent;  
+import org.springframework.context.event.SmartApplicationListener;  
+import org.springframework.stereotype.Component;  
+  
+@Component  
+public class UserThreeListener implements SmartApplicationListener {  
+  
+    @Override  
+    public boolean supportsEventType(final Class&lt;? extends ApplicationEvent&gt; eventType) {  
+        return eventType == ContentEvent.class;  
+    }  
+    @Override  
+    public boolean supportsSourceType(final Class&lt;?&gt; sourceType) {  
+        return sourceType == String.class;  
+    }  
+    @Override  
+    public void onApplicationEvent(final ApplicationEvent event) {  
+        System.out.println(&quot;UserThreeListener：&quot; + event.getSource());  
+    }  
+    @Override  
+    public int getOrder() {  
+        return 1;  
+    }  
+}  
+</pre><br><br></p><p><pre code_snippet_id="2125892" snippet_file_name="blog_20170113_5_9997899" name="code" class="java">package com.xvshu.hello;  
+import org.springframework.context.ApplicationEvent;  
+import org.springframework.context.event.SmartApplicationListener;  
+import org.springframework.stereotype.Component;  
+  
+@Component  
+public class UserFourListener implements SmartApplicationListener {  
+  
+    @Override  
+    public boolean supportsEventType(final Class&lt;? extends ApplicationEvent&gt; eventType) {  
+        return eventType == ContentEvent.class;  
+    }  
+  
+    @Override  
+    public boolean supportsSourceType(final Class&lt;?&gt; sourceType) {  
+        return sourceType == String.class;  
+    }  
+  
+    @Override  
+    public void onApplicationEvent(final ApplicationEvent event) {  
+        System.out.println(&quot;[UserFourListener]msg：&quot; + event.getSource());  
+    }  
+  
+    @Override  
+    public int getOrder() {  
+        return 2;  
+    }  
+}  </pre><br><br></p><p><br></p><p><br></p>supportsEventType：用于指定支持的事件类型，只有支持的才调用onApplicationEvent；<br>supportsSourceType：支持的目标类型，只有支持的才调用onApplicationEvent；<br><p>getOrder：即顺序，越小优先级越高</p><p><br></p>4、测试&nbsp;<br>4.1、配置文件<br>Java代码<br><br><pre code_snippet_id="2125892" snippet_file_name="blog_20170113_6_7217427" name="code" class="html">&lt;context:component-scan base-package=&quot;com.xvshu&quot;/&gt;  </pre><br><br><p>&nbsp;</p><p>就一句话，自动扫描注解Bean。</p>&nbsp;<br>4.2、测试类<br><p><pre code_snippet_id="2125892" snippet_file_name="blog_20170113_7_8756136" name="code" class="html">package com.xvshu;  
+import com.xvshu.hello.ContentEvent;  
+import org.junit.Test;  
+import org.junit.runner.RunWith;  
+import org.springframework.beans.factory.annotation.Autowired;  
+import org.springframework.context.ApplicationContext;  
+import org.springframework.test.context.ContextConfiguration;  
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;  
+  
+@RunWith(SpringJUnit4ClassRunner.class)  
+@ContextConfiguration(locations={&quot;classpath:spring-config-hello.xml&quot;})  
+public class HelloIT {  
+  
+    @Autowired  
+    private ApplicationContext applicationContext;  
+    @Test  
+    public void testPublishEvent() {  
+        applicationContext.publishEvent(new ContentEvent(&quot;news is  update&quot;));  
+    }  
+  
+}  </pre><br><br></p><p><br></p>接着会输出：<br><pre code_snippet_id="2125892" snippet_file_name="blog_20170113_8_3434390" name="code" class="plain">[UserFourListener]msg：news is updat
+[UserThreeListener]msg：news is update 
+[UserTwoListener]msg：news is updat 
+[UserOneListener]msg：news is updat </pre><br><br><p><br></p>一个简单的测试例子就演示完毕，而且我们使用spring的事件机制去写相关代码会非常简单。<p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px; line-height: 35px;">   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/54411416'>原文链接</a>

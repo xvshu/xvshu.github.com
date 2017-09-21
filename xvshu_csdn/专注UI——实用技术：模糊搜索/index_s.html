@@ -1,0 +1,240 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 专注UI——实用技术：模糊搜索</div><div style="color:blue" align=center>专注UI——实用技术：模糊搜索</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 在现在的项目中，需要做模糊搜索，在以前技术的基础上很快得完成了第一版，大家先看看第一版的效果，我们一会做评论：</span></p>
+<h1><span style="font-size:18px">初级：</span></h1>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img alt="" src="487539910237845"></span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 我们可能部分源码（附件中会有全部源码）</span></p>
+<pre code_snippet_id="496162" snippet_file_name="blog_20141025_1_9013500" class="html" name="code">&lt;span style=&quot;font-size:18px;&quot;&gt; &lt;div style=&quot;position:absolute;background-color:white;border-style:solid;border-width:1px;padding-top:2px;&quot;&gt;
+				&lt;table&gt;
+					&lt;thead&gt;
+						&lt;tr&gt;&lt;th&gt;姓名&lt;/th&gt;&lt;th&gt;性别&lt;/th&gt;&lt;/tr&gt;
+					&lt;/thead&gt;
+					&lt;tbody&gt;
+						&lt;tr&gt;&lt;td&gt;张山&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;李四&lt;/td&gt;&lt;td&gt;女&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;王五&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;找六&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;Rain&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;MAXMAN&lt;/td&gt;&lt;td&gt;女&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;王六&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;李字&lt;/td&gt;&lt;td&gt;女&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;李四&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+					&lt;/tbody&gt;
+				&lt;/table&gt;
+				&lt;br/&gt;
+			&lt;/div&gt;
+&lt;/span&gt;</pre>
+<p><span style="font-size:18px"><br>
+</span>&nbsp;</p>
+<h1><span style="font-size:18px">简单升级：</span></h1>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 大家很明显就能看出来，我们泄露了数据，在界面上将数据泄露给了用户，这是非常危险的，经过熟悉的<span style="font-family:Times New Roman">ajax</span>技术改造，我们马上出了第二版：</span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img alt="" src="441761610171005"></span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+<p><span style="font-size:18px"><span style="color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 但是这样，测试给提了两个</span><span style="color:black">bug</span><span style="color:black">：</span><span style="color:black">1</span><span style="color:black">，选中项没有标记；</span><span style="color:black">2</span><span style="color:black">，输入汉字没有反应</span></span></p>
+<h1><span style="font-size:18px">&nbsp;细节调整：</span></h1>
+<p><span style="font-size:18px; color:black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 针对这些我们又增加了代码：</span></p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img alt="" src="25316618060165"></span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 为了解决汉字的问题，我们将触发事件由<span style="font-family:Times New Roman">onkeypress</span>（）更改为<span style="font-family:Times New Roman">onpropertychange</span>（）</span></p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 区别：onpropertychange是检测属性的变化，这时汉字的变化是属性value的变化，就解决了onkeypress只识别英文与数字的缺陷。</span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 通过我们自检与负责的测试，我们将<span style="font-family:Times New Roman">UI</span>上的一个小功能，模糊搜索更改了<span style="font-family:Times New Roman">N</span>次，这恰恰符合了用户至上的理念，我们应该加深一个理念，对于用户来说，界面就是全部，在对<span style="font-family:Times New Roman">UI</span>的优化上，应该在允许的范围内不遗余力地替用户想，替用户做！就像我刚进这家公司时一位同事说的一样，让用户多想一点，多做一步，用户都会生气！</span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<h1>附件（源码）：</h1>
+<h2>初级：</h2>
+<span style="font-size:18px"></span><pre code_snippet_id="496162" snippet_file_name="blog_20141025_2_8380645" class="html" name="code">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;title&gt;&lt;/title&gt;
+
+&lt;!--   引入jQuery --&gt;
+&lt;script src=&quot;jquery-1.8.3.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt;
+  $(function(){
+       $(&quot;#filterName&quot;).keyup(function(){
+          $(&quot;table tbody tr&quot;)
+                    .hide()
+                    .filter(&quot;:contains(&#39;&quot;+( $(this).val() )+&quot;&#39;)&quot;)
+                    .show();
+       }).keyup();
+  })
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;
+	&lt;br/&gt;
+	筛选：
+	&lt;div &gt;
+		&lt;input id=&quot;filterName&quot;  /&gt;
+
+			 &lt;div style=&quot;position:absolute;background-color:white;border-style:solid;border-width:1px;padding-top:2px;&quot;&gt;
+				&lt;table&gt;
+					&lt;thead&gt;
+						&lt;tr&gt;&lt;th&gt;姓名&lt;/th&gt;&lt;th&gt;性别&lt;/th&gt;&lt;/tr&gt;
+					&lt;/thead&gt;
+					&lt;tbody&gt;
+						&lt;tr&gt;&lt;td&gt;张山&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;李四&lt;/td&gt;&lt;td&gt;女&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;王五&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;找六&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;Rain&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;MAXMAN&lt;/td&gt;&lt;td&gt;女&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;王六&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;李字&lt;/td&gt;&lt;td&gt;女&lt;/td&gt;&lt;/tr&gt;
+						&lt;tr&gt;&lt;td&gt;李四&lt;/td&gt;&lt;td&gt;男&lt;/td&gt;&lt;/tr&gt;
+					&lt;/tbody&gt;
+				&lt;/table&gt;
+				&lt;br/&gt;
+			&lt;/div&gt;
+			&lt;br/&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>&nbsp;</p>
+<h2>简单升级：</h2>
+<span style="font-size:18px"></span><pre code_snippet_id="496162" snippet_file_name="blog_20141025_3_8587606" class="html" name="code">&lt;td align=center class=&quot;module_title_text&quot; style=&quot;text-align: right;padding-right: 8px&quot;&gt;职工姓名&lt;/td&gt;
+			&lt;td&gt;
+				&lt;input type=&quot;text&quot; id =&quot;employeeFullnames&quot;  name=&quot;baseEmployeeForQuery.employeeFullname&quot; size=&quot;42&quot; class=&quot;module_input_01 &quot; id=&quot;&quot; maxlength=&quot;20&quot; value=&quot;&quot; onkeypress=&quot;inputWorkercode(this)&quot;  /&gt;
+				
+				
+				
+				&lt;script charset=&quot;utf-8&quot; type=&quot;text/javascript&quot;&gt;
+
+					//模糊查询用户
+					function inputWorkercode(userInput){
+						//获取用户输入
+						var name = userInput.value;
+						if(1==1){
+						
+							$.ajax(
+									{
+										url: &quot;Otherpeople_queryUserByInput_include_json.action&quot;,
+										type: &quot;POST&quot;,
+										data: jQuery(document.forms[0]).serializeArray(),
+										success: function(resObj) {
+											if(resObj.trim() == &quot;&quot;){
+												$(&quot;#inputQueryUser&quot;).hide();
+											}else{
+												//将后台返回的html代码加入到结果显示div中
+												$(&quot;#inputQueryUser&quot;).html(resObj);
+												$(&quot;#inputQueryUser&quot;).show();
+											}
+									}
+							});
+						}
+						
+	
+	
+					}
+
+					//用户选中某模糊结果
+					function onClickUserName(userInputForName){
+
+						//结果同步给用户全部名称（显示用）
+						$(&quot;#employeeFullnames&quot;).val(userInputForName.value);
+
+						//结果同步给用户id
+						$(&quot;#SWorkercode&quot;).val(userInputForName.id);
+
+						//结果同步给用户全部名称
+						$(&quot;#SWorkername&quot;).val(userInputForName.value);
+
+						//结果页隐藏
+						$(&quot;#inputQueryUser&quot;).hide();
+						
+					}
+
+					//鼠标经过结果背景为灰色——模糊搜索用
+					function Over(o){o.style.backgroundColor=&#39;#BBB&#39;; }
+
+					//鼠标划出结果背景为白色——模糊搜索用
+					function Out(o){o.style.backgroundColor=&#39;#FFF&#39;; }
+				&lt;/script&gt;
+				
+				
+				&lt;!-- 
+				&lt;select name=&quot;addBOtherpeopleDict.SWorkercode&quot;&gt;
+								&lt;c:forEach items=&quot;${list4yg}&quot; var=&quot;yh&quot;&gt;
+									&lt;option value=&quot;${yh.employeeGuid}&quot;&gt;${yh.employeeFullname}&lt;/option&gt;
+								&lt;/c:forEach&gt;
+				&lt;/select&gt;
+				 --&gt;
+				 
+			&lt;/td&gt;
+</pre>
+<p><br>
+&nbsp;</p>
+<p>&nbsp;</p>
+<pre code_snippet_id="496162" snippet_file_name="blog_20141025_4_3603333" class="java" name="code">//后台代码：
+/**
+	 * 根据用户输入模糊查询用户
+	 * @return
+	 */
+	public String queryUserByInput(){
+		
+		//结果集合
+		List&lt;BaseEmployee&gt; listForQuerty= new ArrayList&lt;BaseEmployee&gt;();;
+		baseEmployeeForQuery.setSWorkercode(null);
+		try{
+			
+			//模糊查询
+			listForQuerty = iEmployeeService.getAllEmployee(baseEmployeeForQuery, null, null, 5, 1, 50).getResultList();
+		}catch(Exception e){
+			logger.error(&quot;queryUserByInput()出错:&quot;, e);
+			e.printStackTrace();
+		}
+		
+		//开发将结果拼装成html代码返回给前台页面
+		String result = new String() ;
+		
+		//循环拼装html
+		for(int i = 0 ; i&lt; listForQuerty.size() ; i++ ){
+			
+			if(listForQuerty.get(i).getEmployeeDeptname()==null || listForQuerty.get(i).getEmployeeDeptname().trim()==&quot;&quot;){
+				listForQuerty.get(i).setEmployeeDeptname(&quot;未知&quot;);
+			}
+			
+			//一个用户拼装为一个按钮，按钮按下给页面输入框同步输入（仿百度）
+			result = result + &quot;&lt;input type=&#39;button&#39; Style=&#39;background-color:white;border:0;width:100%&#39;  id=&#39;&quot; + listForQuerty.get(i).getEmployeeGuid() +&quot;&#39; value=&#39;&quot;+listForQuerty.get(i).getEmployeeFullname()+&quot;--(&quot;+listForQuerty.get(i).getEmployeeDeptname() +&quot;)&#39; onclick=&#39;onClickUserName(this)&#39; /&gt;&lt;br/&gt;&quot; ;
+			
+		}
+		
+		//将html代码返回
+		ActionContext.getContext().put(JSON_RESULT,result);
+		
+		return SUCCESS;
+		
+	}
+</pre>
+<p><br>
+&nbsp;</p>
+<h2>&nbsp;细节调整：</h2>
+<span style="font-size:18px"></span><pre code_snippet_id="496162" snippet_file_name="blog_20141025_5_463007" class="html" name="code">//鼠标经过结果背景为灰色——模糊搜索用
+					function Over(o){o.style.backgroundColor=&#39;#BBB&#39;; }
+
+					//鼠标划出结果背景为白色——模糊搜索用
+					function Out(o){o.style.backgroundColor=&#39;#FFF&#39;; }
+</pre>
+<p><br>
+&nbsp;</p>
+<pre code_snippet_id="496162" snippet_file_name="blog_20141025_6_6035141" class="java" name="code">//后台代码：
+//一个用户拼装为一个按钮，按钮按下给页面输入框同步输入（仿百度）
+			result = result + &quot;&lt;input type=&#39;button&#39; Style=&#39;background-color:white;border:0;width:100%&#39;  id=&#39;&quot; + listForQuerty.get(i).getEmployeeGuid() +&quot;&#39; value=&#39;&quot;+listForQuerty.get(i).getEmployeeFullname()+&quot;--(&quot;+listForQuerty.get(i).getEmployeeDeptname() +&quot;)&#39; onclick=&#39;onClickUserName(this)&#39; onmouseover=Over(this); onmouseout=Out(this); /&gt;&lt;br/&gt;&quot; ;
+</pre>
+<p><br>
+&nbsp;</p>
+<p><br>
+&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/40449605'>原文链接</a>

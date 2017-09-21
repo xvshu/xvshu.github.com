@@ -1,0 +1,129 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; ajax（AsynchronousJavaScriptAndXML）</div><div style="color:blue" align=center>ajax（AsynchronousJavaScriptAndXML）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+我们先来看看国内外对ajax的解释：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+百度百科：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+AJAX 指异步JavaScript及XML（Asynchronous JavaScript And XML）。<br>
+&nbsp; &nbsp; &nbsp; &nbsp;国内翻译常为“阿贾克斯”和阿贾克斯足球队同音。Web应用的交互如Flickr,Backpack和Google在这方面已经有质的飞跃。这个术语源自描述从基于Web的应用到基于数据的应用的转换。在基于数据的应用中，用户需求的数据如联系人列表，可以从独立于实际网页的服务端取得并且可以被动态地写入网页中，给缓慢的Web应用体验着色使之像桌面应用一样。<br>
+&nbsp; &nbsp; &nbsp; Ajax的核心是JavaScript对象XmlHttpRequest。该对象在Internet Explorer 5中首次引入，它是一种支持异步请求的技术。简而言之，XmlHttpRequest使您可以使用JavaScript向服务器提出请求并处理响应，而不阻塞用户。<br>
+</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+维基百科：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+AJAX即“Asynchronous JavaScript and XML”（异步的JavaScript与XML技术），指的是一套综合了多项技术的浏览器端网页开发技术。Ajax的概念由Jesse James Garrett所提出[1]。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 传统的Web应用允许用户端填写表单（form），当提交表单时就向Web服务器发送一个请求。服务器接收并处理传来的表单，然后送回一个新的网页，但这个做法浪费了许多带宽，因为在前后两个页面中的大部分HTML码往往是相同的。由于每次应用的沟通都需要向服务器发送请求，应用的回应时间依赖于服务器的回应时间。这导致了用户界面的回应比本机应用慢得多。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 与此不同，AJAX应用可以仅向服务器发送并取回必须的数据，它使用SOAP或其它一些基于XML的页面服务接口（接口），并在客户端采用JavaScript处理来自服务器的回应。因为在服务器和浏览器之间交换的数据大量减少（大约只有原来的5%）。结果，我们感觉服务器回应更快了。同时，很多的处理工作可以在发出请求的客户端机器上完成，因此Web服务器的负荷也减少了。<br>
+</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+ajax的技术用我自己的话就是几种技术的整合，最后实现了网页交互的异步！这是个质的飞跃，量达到了一定的程度，简单的组合整理就会有全然不同的结果，现在咱们在项目中看看ajax的实战教程：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+实现效果：答卷的时候异步写答题记录</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+实现技术：ajax</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+技术前提：ajax，jquery，.net，sql</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+难点：动态控件，控件组合，ajax交互</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+实现概念图：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+<img src="" alt=""><br>
+</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+代码实现：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+动态控件关键代码：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+<pre code_snippet_id="128728" snippet_file_name="blog_20131226_1_3456823" name="code" class="csharp"> radioButton.Attributes.Add(&quot;onclick&quot;, &quot;javascript:AnswerSingleSelectQuestion('&quot; + strSingleSelectionRecordTableName + &quot;','&quot; + StudentId + &quot;','&quot; + ExamId + &quot;','&quot; + Convert.ToInt32(dr[&quot;questionId&quot;]) + &quot;','&quot; + dr[&quot;correctAnswer&quot;].ToString() + &quot;','&quot; + option + &quot;','&quot; + Convert.ToDouble(dr[&quot;fraction&quot;].ToString()) + &quot;')&quot;);</pre>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+<br>
+</div>
+<span style="white-space:pre"></span>js关键代码：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+<pre code_snippet_id="128728" snippet_file_name="blog_20131226_2_2344791" name="code" class="javascript">//更新判断题、单选题答题记录
+function AnswerSingleSelectQuestion(tableName, studentId, examId, questionId, ReferAnswer, examAnswer, fraction) {
+
+    //把参考答案和答写的答案转换成汉字
+    ReferAnswer = decodeURIComponent(ReferAnswer);
+    examAnswer = decodeURIComponent(examAnswer);
+
+    //获取时间戳
+    var timestamp = (new Date()).valueOf();
+
+    $.ajax({
+        url: &quot;ExamAnswerDeal.ashx&quot;,
+        data: { &quot;tableName&quot;: tableName, &quot;studentId&quot;: studentId, &quot;examId&quot;: examId, &quot;questionId&quot;: questionId, &quot;ReferAnswer&quot;: ReferAnswer, &quot;examAnswer&quot;: examAnswer, &quot;fraction&quot;: fraction, &quot;Event&quot;: &quot;Update&quot;, &quot;timestamp&quot;: timestamp },
+        dataType: &quot;text&quot;,
+        type: &quot;POST&quot;,
+        success: function (data, textStatus) { },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+            //alert(&quot;答题失败，请联系管理员！&quot;);
+            //存cookie
+            SaveAnswerToCookie(studentId, examId, tableName, questionId, examAnswer, &quot;Update&quot;, fraction, ReferAnswer, &quot;&quot;, &quot;&quot;);
+        }
+    });
+
+  
+
+
+}</pre><br>
+<span style="white-space:pre"></span>一般处理程序关键代码：</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+<pre code_snippet_id="128728" snippet_file_name="blog_20131226_3_9106187" name="code" class="csharp"> public void ProcessRequest(HttpContext context)
+        {
+            context.Response.ContentType = &quot;text/plain&quot;;
+
+            //获取事件标志位
+            string strEvent = context.Request.Form[&quot;Event&quot;].ToString();
+           
+            //答题记录实体
+            QuestionsRecordsEntity EntityQuestionRecords = new QuestionsRecordsEntity();
+            EntityQuestionRecords.TableName = context.Request.Form[&quot;tableName&quot;].ToString();//表名
+            EntityQuestionRecords.StudentId = context.Request.Form[&quot;studentId&quot;].ToString();//学生ID
+            EntityQuestionRecords.ExamId = Convert.ToInt64(context.Request.Form[&quot;examId&quot;].ToString());//考试Id
+            EntityQuestionRecords.QuestionId = Convert.ToInt32(context.Request.Form[&quot;questionId&quot;].ToString());//题号
+            EntityQuestionRecords.ReferAnswer = context.Request.Form[&quot;referAnswer&quot;].ToString(); //正确答案
+            string strExamAnswer = context.Request.Form[&quot;examAnswer&quot;].ToString();//考生答案
+            double dblFraction = Convert.ToDouble(context.Request.Form[&quot;fraction&quot;]);
+
+            //选择题
+            if (strEvent == &quot;Update&quot;)
+            {
+
+                //答题记录实体赋值
+                EntityQuestionRecords.EXAMANSWER = strExamAnswer;
+
+
+                //如果该考生答对了试题，就得到满分，否则得到零分
+                if (EntityQuestionRecords.ReferAnswer == strExamAnswer)
+                {
+                    EntityQuestionRecords.Fraction = dblFraction;
+                }
+                else
+                {
+                    EntityQuestionRecords.Fraction = 0;
+                }
+                //EntityQuestionRecords.isCheck = &quot;是&quot;;
+                //更新答题记录
+                BllExamManage.ModifyOneQuestionRecord(EntityQuestionRecords);
+
+                context.Response.Write(&quot;true&quot;);
+
+            }
+
+            
+
+
+        }</pre><br>
+<span style="white-space:pre"></span>$.ajax() 是在jquery中封装好的ajax代码，他用一定的&#26684;式约束我们使用ajax，同时也极大的方便了用户的代码写作！不得不说，面向对象的设计理念现在是深入到了开发的每个角落！</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+总结：由此我们可见，一种好的思想，在代码的世界中会找到合适的实现，只有想不到，没有做不到，今天这个互联网时代也是就已经实现，在做项目中重要的不是关心技术环节，而要关心这一层层关系背后的关系！</div>
+<div class="para" style="text-indent:28px; color:rgb(51,51,51); margin-bottom:5px; line-height:24px; font-family:arial,宋体,sans-serif; font-size:14px">
+<br>
+<br>
+</div>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/17580439'>原文链接</a>

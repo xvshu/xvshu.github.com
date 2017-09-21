@@ -1,0 +1,107 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 面向对象设计——协变与逆变</div><div style="color:blue" align=center>面向对象设计——协变与逆变</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在面向对象的设计中，我们一直追求一种结果，就是良好的复用性，基于这个理念，面向对象的设计中加入了协变与逆变（Covariance and Contravariance）两个概念，我们先来简单了解一下这两个概念。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">简介：</span></h1>
+<div><span style="font-size:18px"><br>
+</span></div>
+<p><span style="font-size:18px">协变：由子类向父类方向转变， 用out关键字标识<br>
+逆变：由父类向子类方向转变， 用in关键字<br>
+</span></p>
+<p><span style="font-size:18px">举例：Animal是父类，Dog是从Animal继承的子类；如果一个对象的类型是Dog，那么他必然是Animal。有一个获取宠物的方法要接受Dog参数，那么另一个接受Animal参数的方法肯定也可以接受这个方法的参数，这是Animal向Dog方向的转变是逆变。如果一个方法要求的返回&#20540;是Animal，那么返回Dog的方法肯定是可以满足其返回&#20540;要求的，这是Dog向Animal方向的转变是协变。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">代码示例：</span></h1>
+<div><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 以下三个实例，是对协变和逆变在抽象级别的不同的程度上做的不同应用，也是想通过这三个实例，让大家理解，一种技术在不同抽象的层面带来的不同变化，我们到底是牛刀杀鸡，还是多此一举，请大家细细体会！</span></div>
+<div><span style="font-size:18px"><br>
+</span></div>
+<h2><span style="font-size:18px">一． 数组的协变：</span></h2>
+<div><span style="font-size:18px"><br>
+</span></div>
+<p><pre code_snippet_id="415215" snippet_file_name="blog_20140703_1_607573" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;Animal[] animalArray = new Dog[]{};&lt;/span&gt;</pre><span style="font-size:18px"><br>
+&nbsp; &nbsp; &nbsp; &nbsp; 我们声明的数组数据类型是Animal，而实际上赋&#20540;时给的是Dog数据类型的数组，而每一个Dog对象都可以安全的转变为Animal。Dog向Animal方法转变是沿着父子继承方向上的转变就叫做协变，协变的应用在程序代码的设计中是经常使用的！<br>
+<br>
+<br>
+</span></p>
+<h2><span style="font-size:18px">二． 委托中的协变和逆变</span></h2>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h3><span style="font-size:18px">1.委托中的协变</span></h3>
+<span style="font-size:18px"><br>
+</span><pre code_snippet_id="415215" snippet_file_name="blog_20140703_2_542317" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;//委托定义的返回值是Animal类型~父类
+//获取宠物
+public delegate Animal GetPet();
+
+//委托方法实现中的返回值是Dog，是子类
+//获取宠物狗
+static Dog GetDog(){return new Dog();}
+
+//GetDog的返回值是Dog, Dog是Animal的子类；返回一个Dog肯定就相当于返回了一个Animal；所以下面对委托的赋值是有效的
+//获取宠物的委托加入获取狗，这是协变，是合法的
+&lt;/span&gt;&lt;pre name=&quot;code&quot; class=&quot;csharp&quot;&gt;&lt;span style=&quot;font-size:18px;&quot;&gt;GetPet &lt;span style=&quot;font-family: Arial, Helvetica, sans-serif;&quot;&gt;getMethod = GetDog; &lt;/span&gt;&lt;/span&gt;</pre>
+<pre></pre>
+<span style="font-size:18px"><br>
+<br>
+</span>
+<h3><span style="font-size:18px">2.委托中的逆变</span></h3>
+<span style="font-size:18px"><br>
+</span><pre code_snippet_id="415215" snippet_file_name="blog_20140703_3_891764" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;//委托中的定义参数类型是Dog
+//喂养宠物（狗）
+public delegate void FeedPet(Dog target);
+
+
+//实际方法中的参数类型是Animal
+//喂养动物
+static void FeedAnimal(Animal target){}
+
+
+// FeedAnimal是FeedDog委托的有效方法，因为委托接受的参数类型是Dog，Dog是可以隐式转变成Animal的，所以委托可以安全的的做类型转换，正确的执行委托方法；
+//喂养宠物变为喂养动物，这是逆变，也是合法的
+&lt;/span&gt;&lt;pre name=&quot;code&quot; class=&quot;csharp&quot;&gt;&lt;span style=&quot;font-size:18px;&quot;&gt;FeedPet &lt;span style=&quot;font-family: Arial, Helvetica, sans-serif;&quot;&gt;feedDogMethod = FeedAnimal; &lt;/span&gt;&lt;/span&gt;</pre>
+<pre></pre>
+<span style="font-size:18px"><br>
+</span>
+<h2><span style="font-size:18px">三. 泛型委托的协变和逆变：</span></h2>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p>
+<h3><span style="font-size:18px">1. 泛型委托中的协变</span></h3>
+<span style="font-size:18px"><br>
+如下委托声明：<br>
+</span><pre code_snippet_id="415215" snippet_file_name="blog_20140703_4_161416" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;//寻找的泛型委托：out代表可能协变，T为标记符
+public delegate T Find&lt;out T&gt;(); &lt;/span&gt;</pre><span style="font-size:18px"><br>
+&nbsp; &nbsp; &nbsp; &nbsp; Find委托要返回一个泛型类型T的实例，在泛型的尖括号中有一个out关键字，该关键字表明T类型是可能要做协变的</span>
+<p>
+<p><span style="font-size:18px"><br>
+</span><pre code_snippet_id="415215" snippet_file_name="blog_20140703_5_5809997" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;//声明Find&lt;Dog&gt;委托
+Find&lt;Dog&gt; findDog = ()=&gt;new Dog();
+//声明Find&lt;Animal&gt;委托，并将findDog赋值给findAnimal是合法的，类型T从Dog向Animal转变是协变
+Find&lt;Animal&gt; findAnimal = findDog; &lt;/span&gt;</pre></p>
+<div><span style="font-size:18px"><br>
+</span></div>
+<p>
+<h3><span style="font-size:18px">2． 泛型委托中的逆变</span></h3>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 委托声明：<br>
+</span><pre code_snippet_id="415215" snippet_file_name="blog_20140703_6_6159444" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;//喂养的泛型委托：in代表可能逆变，T为标记符
+public delegate void Feed&lt;in T&gt;(T target); &lt;/span&gt;</pre></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Feed委托接受一个泛型类型T，注意在泛型的尖括号中有一个in关键字，这个关键字的作用是告诉编译器在对委托赋&#20540;时类型T可能要做逆变</span>
+<p><span style="font-size:18px"><br>
+</span><pre code_snippet_id="415215" snippet_file_name="blog_20140703_7_1284638" name="code" class="csharp">&lt;span style=&quot;font-size:18px;&quot;&gt;//先声明一个T为Animal的委托
+Feed&lt;Animal&gt; feedAnimalMethod = a=&gt;Console.WriteLine(“Feed animal lambda”);
+
+//将T为Animal的委托赋值给T为Dog的委托变量，这是合法的，因为在定义泛型委托时有in关键字，如果把in关键字去掉，编译器会认为不合法
+Feed&lt;Dog&gt; feedDogMethod = feedAnimalMethod; &lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 其实协变和逆变不是个新鲜的概念，而以前我们更多使用的是协变，逆变的使用较少，尤其是在泛型和委托中使用，经过这么一番研究，我们发现，这种技术在一定的基础上提高了我们代码的复用性，我们没有必要为每个类都建立一个方法，利用协变和逆变，我们可以做很多复用性的设计！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 这在生活中，其实也好理解，父亲能做的事情，都会教给儿子，所以父亲出现的地方，儿子可以出现，传说中的虎父无犬子，而儿子出现的地方，父亲要选择性出现，因为，父亲将自己会的倾囊相授，儿子却可能还会其他的不一样的东西！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 难怪老师常说，有人的代码就像是堆柴禾，而有人的代码就像是艺术品，这不仅仅是代码工整的问题，而是抽象程度，设计理念的问题了啊！</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/36641877'>原文链接</a>

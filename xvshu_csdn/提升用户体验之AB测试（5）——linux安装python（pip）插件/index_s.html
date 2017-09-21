@@ -1,0 +1,85 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 提升用户体验之AB测试（5）——linux安装python（pip）插件</div><div style="color:blue" align=center>提升用户体验之AB测试（5）——linux安装python（pip）插件</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<span style="font-size:18px">此片博客作为工具片存在，帮助大家在安装sixpack时，升级python到2.7后安装pip工具，方便安装sixpack<br>
+<br>
+</span>
+<h1><span style="font-size:18px">1、pip简介</span></h1>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;在pip的python官网上我们可以看到，pip 是“A tool for installing and managing Python packages.”，也就是说pip是python的软件安装工具，下面是pip的使用方法：<br>
+</span>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 安装软件： &nbsp;&nbsp;</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;pip install SomePackage</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;卸载软件：<br>
+</span></p>
+<p><span style="font-size:18px">&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;pip uninstall SomePackage</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;更新一个软件：<br>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;pip install --upgrade SomePackage<br>
+</span>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;查看安装时安装了哪些文件：<br>
+</span>
+<p><span style="font-size:18px">&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;pip show --files SomePackage</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;查看哪些包可以更新：<br>
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;pip show --files SomePackage<br>
+<br>
+<br>
+</span>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px"></span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;有了pip我们就可以自动的安装 sixpack。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">因为安装pip依赖setuptools所以要先安装setuptools<br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p>
+<h1><span style="font-size:18px">2. 安装setuptools</span></h1>
+<span style="font-size:18px"><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(1)，下载<br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;wget http://pypi.python.org/packages/source/s/setuptools/setuptools-2.0.tar.gz</span>
+<p>
+<p><span style="font-size:18px"><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(2)，解压setuptools包<br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;tar zxvf setuptools-2.0.tar.gz<br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;cd setuptools-2.0</span></p>
+<p><span style="font-size:18px"><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(3)，编译setuptools<br>
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;python2.7 setup.py build</span></p>
+<p><span style="font-size:18px"><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(4)，开始执行setuptools安装<br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;python2.7 setup.py install<br>
+</span></p>
+<span style="font-size:18px"><br>
+</span>
+<h1><span style="font-size:18px">3. 安装 pip</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;（1），下载</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;在上面的pip python首页下载pip 包(pip-1.4.1.tar.gz)</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;（2），解压</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;tar -xvf pip-1.4.1.tar.gz</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;（3），安装软件</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;python2.7 setup.py install 。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;备注：不使用pip安装软件包，也可以用此方法下载、解压后使用 “python setup.py install”安装！</span></p>
+<span style="font-size:18px"><br>
+&nbsp; &nbsp; &nbsp; &nbsp; 安装好pip之后，我们就可以直接使用pip安装其他软件包了：<br>
+</span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;sudo pip install sixpack;</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 安装python实际和c是一样的，都是固定的那几个命令，大家掌握了之后，就可以自行下载安装，类&#20284;的问题，就可迎刃而解，但是pip命令的好处是，帮助我们下载依赖包，省去了我们手动下载，安装的麻烦，大家可自由选择。</span></p>
+<span style="font-size:18px"><br>
+<br>
+<br>
+</span><br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50779201'>原文链接</a>

@@ -1,0 +1,376 @@
+﻿<div style="color:blue" align=center>Android开发学习（8）SQLite</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><p>每到一个阶段，我们就用一个项目总结我们学习到的内容，今天我们就一起来完成一个拥有记忆功能的简单计算器，首先我们先在这篇博客介绍将使用一种新的存储方式，SQLite。</p>
+
+<blockquote>
+  <p>百度百科： <br>
+  SQLite，是一款轻型的数据库，是遵守ACID的关系型数据库管理系统，它包含在一个相对小的C库中。它是D.RichardHipp建立的公有领域项目。它的设计目标是嵌入式的，而且目前已经在很多嵌入式产品中使用了它，它占用资源非常的低，在嵌入式设备中，可能只需要几百K的内存就够了。它能够支持Windows/Linux/Unix等等主流的操作系统，同时能够跟很多程序语言相结合，比如 Tcl、C#、PHP、Java等，还有ODBC接口，同样比起Mysql、PostgreSQL这两款开源的世界著名数据库管理系统来讲，它的处理速度比他们都快。SQLite第一个Alpha版本诞生于2000年5月。 至2015年已经有15个年头，SQLite也迎来了一个版本 SQLite 3已经发布。</p>
+</blockquote>
+
+
+
+<h1 id="sql">SQL</h1>
+
+<p>SQLite是安卓内置的一个数据库，基本的数据操作与mysql类似，安卓内置了数据库帮助类，封装了可用性不错的接口，帮助我们快速使用这款轻型数据库。SQLite最大的特点是你可以把各种类型的数据保存到任何字段中，而不用关心字段声明的数据类型是什么。例如：可以在Integer类型的字段中存放字符串，或者在布尔型字段中存放浮点数，或者在字符型字段中存放日期型值。 <br>
+但有一种情况例外：定义为INTEGER PRIMARY KEY的字段只能存储64位整数， 当向这种字段保存除整数以外的数据时，将会产生错误。  <br>
+另外， SQLite 在解析CREATE TABLE 语句时，会忽略 CREATE TABLE 语句中跟在字段名后面的数据类型信息，如下面语句会忽略 name字段的类型信息：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs sql"><span class="hljs-operator"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> person (personid <span class="hljs-keyword">integer</span> <span class="hljs-keyword">primary</span> <span class="hljs-keyword">key</span> autoincrement, name <span class="hljs-keyword">varchar</span>(<span class="hljs-number">20</span>))  </span></code></pre>
+
+<p>SQLite可以解析大部分标准SQL语句，如：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs sql"><span class="hljs-operator"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> calc_history;</span>
+<span class="hljs-operator"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> calc_history <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> _id <span class="hljs-keyword">desc</span>  ;</span>
+<span class="hljs-operator"><span class="hljs-keyword">select</span> name <span class="hljs-keyword">from</span> calc_history <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> calc_value  <span class="hljs-keyword">having</span> <span class="hljs-aggregate">count</span>(*)&gt;<span class="hljs-number">1</span>  ;</span>
+<span class="hljs-operator"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> calc_history  limit <span class="hljs-number">5</span> offset <span class="hljs-number">3</span>  ;</span> 
+<span class="hljs-operator"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> calc_history limit <span class="hljs-number">3</span>,<span class="hljs-number">5</span> ;</span> 
+<span class="hljs-operator"><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> calc_history (calc_value) <span class="hljs-keyword">values</span>(<span class="hljs-string">'1+1=2'</span>) ;</span> 
+<span class="hljs-operator"><span class="hljs-keyword">update</span> calc_history <span class="hljs-keyword">set</span> calc_value=‘<span class="hljs-number">2</span>+<span class="hljs-number">2</span>=<span class="hljs-number">4</span>‘ <span class="hljs-keyword">where</span> _id=<span class="hljs-number">1</span> ;</span> 
+<span class="hljs-operator"><span class="hljs-keyword">delete</span> <span class="hljs-keyword">from</span> calc_history <span class="hljs-keyword">where</span> id=<span class="hljs-number">1</span>;</span></code></pre>
+
+
+
+<h1 id="sqliteopenhelper">SQLiteOpenHelper</h1>
+
+<p>使用SQLiteOpenHelper对数据库进行版本管理 <br>
+我们在编写数据库应用软件时，需要考虑这样的问题：因为我们开发的软件可能会安装在很多用户的手机上，如果应用使用到了SQLite数据库，我们必须在用户初次使用软件时创建出应用使用到的数据库表结构及添加一些初始化记录，另外在软件升级的时候，也需要对数据表结构进行更新。那么，我们如何才能实现在用户初次使用或升级软件时自动在用户的手机上创建出应用需要的数据库表呢？总不能让我们在每个需要安装此软件的手机上通过手工方式创建数据库表吧？因为这种需求是每个数据库应用都要面临的，所以在Android系统，为我们提供了一个名为SQLiteOpenHelper的抽象类，必须继承它才能使用，它是通过对数据库版本进行管理来实现前面提出的需求。  <br>
+为了实现对数据库版本进行管理，SQLiteOpenHelper类提供了两个重要的方法，分别是onCreate(SQLiteDatabase db)和onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)，前者用于初次使用软件时生成数据库表，后者用于升级软件时更新数据库表结构。当调用SQLiteOpenHelper的getWritableDatabase()或者getReadableDatabase()方法获取用于操作数据库的SQLiteDatabase实例的时候，如果数据库不存在，android系统会自动生成一个数据库，接着调用onCreate()方法，onCreate()方法在初次生成数据库时才会被调用，在onCreate()方法里可以生成数据库表结构及添加一些应用使用到的初始化数据。onUpgrade()方法在数据库的版本发生变化时会被调用，一般在软件升级时才需改变版本号，而数据库的版本是由程序员控制的，假设数据库现在的版本是1，由于业务的变更，修改了数据库表结构，这时候就需要升级软件，升级软件时希望更新用户手机里的数据库表结构，为了实现这一目的，可以把原来的数据库版本设置为2(有同学问设置为3行不行？当然可以，如果你愿意，设置为100也行)，并且在onUpgrade()方法里面实现表结构的更新。当软件的版本升级次数比较多，这时在onUpgrade()方法里面可以根据原版号和目标版本号进行判断，然后作出相应的表结构及数据更新。 <br>
+getWritableDatabase()和getReadableDatabase()方法都可以获取一个用于操作数据库的SQLiteDatabase实例。但getWritableDatabase() 方法以读写方式打开数据库，一旦数据库的磁盘空间满了，数据库就只能读而不能写，倘若使用getWritableDatabase()打开数据库就会出错。getReadableDatabase()方法先以读写方式打开数据库，如果数据库的磁盘空间满了，就会打开失败，当打开失败后会继续尝试以只读方式打开数据库。</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DatabaseHelper</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SQLiteOpenHelper</span> {</span>  
+
+            <span class="hljs-comment">//类没有实例化,是不能用作父类构造器的参数,必须声明为静态  </span>
+
+             <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String name = <span class="hljs-string">"xs_testapp_db"</span>; <span class="hljs-comment">//数据库名称  </span>
+
+             <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> version = <span class="hljs-number">1</span>; <span class="hljs-comment">//数据库版本  </span>
+
+             <span class="hljs-keyword">public</span> <span class="hljs-title">DatabaseHelper</span>(Context context) {  
+
+                  <span class="hljs-comment">//第三个参数CursorFactory指定在执行查询时获得一个游标实例的工厂类,设置为null,代表使用系统默认的工厂类  </span>
+
+                    <span class="hljs-keyword">super</span>(context, name, <span class="hljs-keyword">null</span>, version);  
+
+             }  
+
+            <span class="hljs-annotation">@Override</span>  
+            <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span>(SQLiteDatabase db) {  
+
+                  db.execSQL(<span class="hljs-string">"create table if not exists "</span>+CalcHisrory.TableName+<span class="hljs-string">"(_id INTEGER PRIMARY KEY AUTOINCREMENT,"</span>+CalcHisrory.calcValueName+<span class="hljs-string">" varchar(500))"</span>);
+
+             }  
+
+            <span class="hljs-annotation">@Override</span>   
+            <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onUpgrade</span>(SQLiteDatabase db, <span class="hljs-keyword">int</span> oldVersion, <span class="hljs-keyword">int</span> newVersion) {  
+
+                   db.execSQL(<span class="hljs-string">"ALTER TABLE "</span>+CalcHisrory.TableName+<span class="hljs-string">" ADD createtime date"</span>); <span class="hljs-comment">//往表中增加一列  </span>
+
+             }  
+    }  </code></pre>
+
+<p>在实际项目开发中，当数据库表结构发生更新时，应该避免用户存放于数据库中的数据丢失。</p>
+
+
+
+<h1 id="sqlitedatabase">SQLiteDatabase</h1>
+
+<p>Android提供了一个名为SQLiteDatabase的类，该类封装了一些操作数据库的API，使用该类可以完成对数据进行添加(Create)、查询(Retrieve)、更新(Update)和删除(Delete)操作（这些操作简称为CRUD）。对SQLiteDatabase的学习，我们应该重点掌握execSQL()和rawQuery()方法。 execSQL()方法可以执行insert、delete、update和CREATE TABLE之类有更改行为的SQL语句； rawQuery()方法用于执行select语句。</p>
+
+<p>execSQL()方法的使用例子：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm">SQLiteDatabase db = ....<span class="hljs-comment">;    </span>
+db<span class="hljs-preprocessor">.execSQL</span>(<span class="hljs-string">"insert into "</span>+CalcHisrory<span class="hljs-preprocessor">.TableName</span>+<span class="hljs-string">"("</span>+CalcHisrory<span class="hljs-preprocessor">.calcValueName</span>+<span class="hljs-string">") values('1+1=2')"</span>)<span class="hljs-comment">;  </span>
+db<span class="hljs-preprocessor">.close</span>()<span class="hljs-comment">;</span></code></pre>
+
+<p>执行上面SQL语句会往CalcHisrory表中添加进一条记录，在实际应用中， 语句中的’1+1=2’这些参数值会由用户输入界面提供，如果把用户输入的内容原样组拼到上面的insert语句， 当用户输入的内容含有单引号时，组拼出来的SQL语句就会存在语法错误。要解决这个问题需要对单引号进行转义，也就是把单引号转换成两个单引号。有些时候用户往往还会输入像“ &amp; ”这些特殊SQL符号，为保证组拼好的SQL语句语法正确，必须对SQL语句中的这些特殊SQL符号都进行转义，显然，对每条SQL语句都做这样的处理工作是比较烦琐的。 SQLiteDatabase类提供了一个重载后的execSQL(String sql, Object[] bindArgs)方法，使用这个方法可以解决前面提到的问题，因为这个方法支持使用占位符参数(?)。</p>
+
+<p>例子如下：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs sql">SQLiteDatabase db = ....;  
+db.execSQL("<span class="hljs-operator"><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-string">"+CalcHisrory.TableName+"</span>(<span class="hljs-string">"+CalcHisrory.calcValueName+"</span>) <span class="hljs-keyword">values</span>(?)<span class="hljs-string">""</span>, new Object[]{<span class="hljs-string">"1+1=2"</span>});</span>     
+db.close();  </code></pre>
+
+<p>execSQL(String sql, Object[] bindArgs)方法的第一个参数为SQL语句，第二个参数为SQL语句中占位符参数的值，参数值在数组中的顺序要和占位符的位置对应。 <br>
+SQLiteDatabase的rawQuery() 用于执行select语句，使用例子如下：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs livecodeserver">SQLiteDatabase db = ....;  
+Cursor cursor = db.rawQuery(<span class="hljs-string">"select * from "</span>+CalcHisrory.TableName, <span class="hljs-constant">null</span>);  
+ <span class="hljs-keyword">while</span> (cursor.moveToNext()) {    
+      int id = cursor.getInt(<span class="hljs-number">0</span>);<span class="hljs-comment"> //获取第一列的值,第一列的索引从0开始  </span>
+      String <span class="hljs-built_in">value</span> = cursor.getString(<span class="hljs-number">1</span>)<span class="hljs-comment">;//获取第二列的值 </span>
+    }   
+    cursor.<span class="hljs-built_in">close</span>();  
+    db.<span class="hljs-built_in">close</span>();  </code></pre>
+
+<p>rawQuery()方法的第一个参数为select语句；第二个参数为select语句中占位符参数的值，如果select语句没有使用占位符，该参数可以设置为null。带占位符参数的select语句使用例子如下：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs sql">Cursor cursor = db.rawQuery("<span class="hljs-operator"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">"+CalcHisrory.TableName+"</span><span class="hljs-keyword">where</span> <span class="hljs-string">"+CalcHisrory.calcValueName+"</span><span class="hljs-keyword">like</span> ? <span class="hljs-string">", new String[]{"</span><span class="hljs-number">1</span>+<span class="hljs-number">1</span>=<span class="hljs-number">2</span><span class="hljs-string">"});  </span></span></code></pre>
+
+<p>Cursor是结果集游标，用于对结果集进行随机访问，如果大家熟悉jdbc， 其实Cursor与JDBC中的ResultSet作用很相似。使用moveToNext()方法可以将游标从当前行移动到下一行，如果已经移过了结果集的最后一行，返回结果为false，否则为true。另外Cursor 还有常用的moveToPrevious()方法（用于将游标从当前行移动到上一行，如果已经移过了结果集的第一行，返回值为false，否则为true ）、moveToFirst()方法（用于将游标移动到结果集的第一行，如果结果集为空，返回值为false，否则为true ）和moveToLast()方法（用于将游标移动到结果集的最后一行，如果结果集为空，返回值为false，否则为true ） 。 <br>
+除了前面给大家介绍的execSQL()和rawQuery()方法， SQLiteDatabase还专门提供了对应于添加、删除、更新、查询的操作方法： insert()、delete()、update()和query() 。这些方法实际上是给那些不太了解SQL语法的菜鸟使用的，对于熟悉SQL语法的程序员而言，直接使用execSQL()和rawQuery()方法执行SQL语句就能完成数据的添加、删除、更新、查询操作。</p>
+
+<p>Insert()方法用于添加数据，各个字段的数据使用ContentValues进行存放。 ContentValues类似于MAP，相对于MAP，它提供了存取数据对应的put(String key, Xxx value)和getAsXxx(String key)方法，  key为字段名称，value为字段值，Xxx指的是各种常用的数据类型，如：String、Integer等。</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs livecodeserver">    SQLiteDatabase db = databaseHelper.getWritableDatabase();  
+
+    ContentValues values = <span class="hljs-built_in">new</span> ContentValues();  
+
+    values.<span class="hljs-built_in">put</span>(CalcHisrory.calcValueName, <span class="hljs-string">"1+1=2"</span>);  
+
+    <span class="hljs-keyword">long</span> rowid = db.insert(CalcHisrory.TableName, <span class="hljs-constant">null</span>, values)<span class="hljs-comment">;//返回新添记录的行号，与主键id无关  </span></code></pre>
+
+<p>不管第三个参数是否包含数据，执行Insert()方法必然会添加一条记录，如果第三个参数为空，会添加一条除主键之外其他字段值为Null的记录。Insert()方法内部实际上通过构造insert SQL语句完成数据的添加，Insert()方法的第二个参数用于指定空值字段的名称，相信大家对该参数会感到疑惑，该参数的作用是什么？</p>
+
+<p>是这样的：如果第三个参数values 为Null或者元素个数为0， 由于Insert()方法要求必须添加一条除了主键之外其它字段为Null值的记录，为了满足SQL语法的需要， insert语句必须给定一个字段名，如：insert into person(name) values(NULL)，倘若不给定字段名 ， insert语句就成了这样： insert into person() values()，显然这不满足标准SQL的语法。对于字段名，建议使用主键之外的字段，如果使用了INTEGER类型的主键字段，执行类似insert into person(personid) values(NULL)的insert语句后，该主键字段值也不会为NULL。如果第三个参数values 不为Null并且元素的个数大于0 ，可以把第二个参数设置为null。</p>
+
+<p>delete()方法的使用：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm">    SQLiteDatabase db = databaseHelper<span class="hljs-preprocessor">.getWritableDatabase</span>()<span class="hljs-comment">;   </span>
+    db<span class="hljs-preprocessor">.delete</span>(CalcHisrory<span class="hljs-preprocessor">.TableName</span>, <span class="hljs-string">"_id&lt;?"</span>, new String[]{<span class="hljs-string">"2"</span>})<span class="hljs-comment">;    </span>
+    db<span class="hljs-preprocessor">.close</span>()<span class="hljs-comment">; </span></code></pre>
+
+<p>update()方法的使用：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm">
+    SQLiteDatabase db = databaseHelper<span class="hljs-preprocessor">.getWritableDatabase</span>()<span class="hljs-comment">;   </span>
+    ContentValues values = new ContentValues()<span class="hljs-comment">;  </span>
+    values<span class="hljs-preprocessor">.put</span>(CalcHisrory<span class="hljs-preprocessor">.calcValueName</span>, <span class="hljs-string">"1=1"</span>)<span class="hljs-comment">;//key为字段名，value为值  </span>
+    db<span class="hljs-preprocessor">.update</span>(CalcHisrory<span class="hljs-preprocessor">.TableName</span>, values, <span class="hljs-string">"_id=?"</span>, new String[]{<span class="hljs-string">"1"</span>})<span class="hljs-comment">;   </span>
+    db<span class="hljs-preprocessor">.close</span>()<span class="hljs-comment">; </span></code></pre>
+
+<p>上面代码用于把person表中personid等于1的记录的name字段的值改为“炸死特”。</p>
+
+<p>query()方法</p>
+
+<p>实际上是把select语句拆分成了若干个组成部分，然后作为方法的输入参数：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs javascript">
+    SQLiteDatabase db = databaseHelper.getWritableDatabase();  
+
+    Cursor cursor = db.query(CalcHisrory.TableName, <span class="hljs-keyword">new</span> <span class="hljs-built_in">String</span>[]{<span class="hljs-string">"_id"</span>}, CalcHisrory.calcValueName+<span class="hljs-string">" like ?"</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">String</span>[]{<span class="hljs-string">"%22%"</span>}, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">"_id desc"</span>, <span class="hljs-string">"1,2"</span>);  
+
+    <span class="hljs-keyword">while</span> (cursor.moveToNext()) {  
+
+             int personid = cursor.getInt(<span class="hljs-number">0</span>); <span class="hljs-comment">//获取第一列的值,第一列的索引从0开始  </span>
+
+              <span class="hljs-built_in">String</span> name = cursor.getString(<span class="hljs-number">1</span>);<span class="hljs-comment">//获取第二列的值  </span>
+
+              int age = cursor.getInt(<span class="hljs-number">2</span>);<span class="hljs-comment">//获取第三列的值  </span>
+
+    }  
+
+    cursor.close();  
+
+    db.close();  </code></pre>
+
+<p>上面代码用于从person表中查找name字段含有“炸死特”的记录，匹配的记录按personid降序排序，对排序后的结果略过第一条记录，只获取2条记录。</p>
+
+<p>query(table, columns, selection, selectionArgs, groupBy, having, orderBy, limit)方法各参数的含义：</p>
+
+<p>table：表名。相当于select语句from关键字后面的部分。如果是多表联合查询，可以用逗号将两个表名分开。</p>
+
+<p>columns：要查询出来的列名。相当于select语句select关键字后面的部分。</p>
+
+<p>selection：查询条件子句，相当于select语句where关键字后面的部分，在条件子句允许使用占位符“?”</p>
+
+<p>selectionArgs：对应于selection语句中占位符的值，值在数组中的位置与占位符在语句中的位置必须一致，否则就会有异常。</p>
+
+<p>groupBy：相当于select语句group by关键字后面的部分</p>
+
+<p>having：相当于select语句having关键字后面的部分</p>
+
+<p>orderBy：相当于select语句order by关键字后面的部分，如：personid desc, age asc;</p>
+
+<p>limit：指定偏移量和获取的记录数，相当于select语句limit关键字后面的部分。</p>
+
+<p>数据库实例:</p>
+
+<p>这是我在其他博客中获取的数据库帮助类,直接复制过来,可以作为了解数据库的模板</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java">
+    <span class="hljs-keyword">package</span> jason.demo;  
+
+    <span class="hljs-keyword">import</span> android.content.Context;  
+    <span class="hljs-keyword">import</span> android.content.ContentValues;  
+    <span class="hljs-keyword">import</span> android.database.Cursor;  
+    <span class="hljs-keyword">import</span> android.database.SQLException;  
+    <span class="hljs-keyword">import</span> android.database.sqlite.SQLiteOpenHelper;  
+    <span class="hljs-keyword">import</span> android.database.sqlite.SQLiteDatabase;  
+    <span class="hljs-keyword">import</span> android.database.sqlite.SQLiteQueryBuilder;  
+
+    class RestaurantHelper extends SQLiteOpenHelper {  
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String DATABASE_NAME=<span class="hljs-string">"lunchlist.db"</span>;<span class="hljs-comment">//数据库名称  </span>
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> SCHEMA_VERSION=<span class="hljs-number">2</span>;<span class="hljs-comment">//版本号,则是升级之后的,升级方法请看onUpgrade方法里面的判断  </span>
+
+        <span class="hljs-keyword">public</span> <span class="hljs-title">RestaurantHelper</span>(Context context) {<span class="hljs-comment">//构造函数,接收上下文作为参数,直接调用的父类的构造函数  </span>
+            <span class="hljs-keyword">super</span>(context, DATABASE_NAME, <span class="hljs-keyword">null</span>, SCHEMA_VERSION);  
+        }  
+
+        <span class="hljs-annotation">@Override</span>  
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span>(SQLiteDatabase db) {<span class="hljs-comment">//创建的是一个午餐订餐的列表,id,菜名,地址等等  </span>
+            db.execSQL(<span class="hljs-string">"CREATE TABLE restaurants (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, address TEXT, type TEXT, notes TEXT, phone TEXT);"</span>);  
+        }  
+
+        <span class="hljs-annotation">@Override</span>  
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onUpgrade</span>(SQLiteDatabase db, <span class="hljs-keyword">int</span> oldVersion, <span class="hljs-keyword">int</span> newVersion) {  
+            <span class="hljs-keyword">if</span> (oldVersion==<span class="hljs-number">1</span> &amp;&amp; newVersion==<span class="hljs-number">2</span>) {<span class="hljs-comment">//升级判断,如果再升级就要再加两个判断,从1到3,从2到3  </span>
+                db.execSQL(<span class="hljs-string">"ALTER TABLE restaurants ADD phone TEXT;"</span>);  
+            }  
+        }  
+
+        <span class="hljs-keyword">public</span> Cursor <span class="hljs-title">getAll</span>(String where, String orderBy) {<span class="hljs-comment">//返回表中的数据,where是调用时候传进来的搜索内容,orderby是设置中传进来的列表排序类型  </span>
+            StringBuilder buf=<span class="hljs-keyword">new</span> StringBuilder(<span class="hljs-string">"SELECT _id, name, address, type, notes, phone FROM restaurants"</span>);  
+
+            <span class="hljs-keyword">if</span> (where!=<span class="hljs-keyword">null</span>) {  
+                buf.append(<span class="hljs-string">" WHERE "</span>);  
+                buf.append(where);  
+            }  
+
+            <span class="hljs-keyword">if</span> (orderBy!=<span class="hljs-keyword">null</span>) {  
+                buf.append(<span class="hljs-string">" ORDER BY "</span>);  
+                buf.append(orderBy);  
+            }  
+
+            <span class="hljs-keyword">return</span>(getReadableDatabase().rawQuery(buf.toString(), <span class="hljs-keyword">null</span>));  
+        }  
+
+        <span class="hljs-keyword">public</span> Cursor <span class="hljs-title">getById</span>(String id) {<span class="hljs-comment">//根据点击事件获取id,查询数据库  </span>
+            String[] args={id};  
+
+            <span class="hljs-keyword">return</span>(getReadableDatabase()  
+                            .rawQuery(<span class="hljs-string">"SELECT _id, name, address, type, notes, phone FROM restaurants WHERE _ID=?"</span>,  
+                                                args));  
+        }  
+
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">insert</span>(String name, String address, String type, String notes, String phone) {  
+            ContentValues cv=<span class="hljs-keyword">new</span> ContentValues();  
+
+            cv.put(<span class="hljs-string">"name"</span>, name);  
+            cv.put(<span class="hljs-string">"address"</span>, address);  
+            cv.put(<span class="hljs-string">"type"</span>, type);  
+            cv.put(<span class="hljs-string">"notes"</span>, notes);  
+            cv.put(<span class="hljs-string">"phone"</span>, phone);  
+
+            getWritableDatabase().insert(<span class="hljs-string">"restaurants"</span>, <span class="hljs-string">"name"</span>, cv);  
+        }  
+
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">update</span>(String id, String name, String address,  
+                                             String type, String notes, String phone) {  
+            ContentValues cv=<span class="hljs-keyword">new</span> ContentValues();  
+            String[] args={id};  
+
+            cv.put(<span class="hljs-string">"name"</span>, name);  
+            cv.put(<span class="hljs-string">"address"</span>, address);  
+            cv.put(<span class="hljs-string">"type"</span>, type);  
+            cv.put(<span class="hljs-string">"notes"</span>, notes);  
+            cv.put(<span class="hljs-string">"phone"</span>, phone);  
+
+            getWritableDatabase().update(<span class="hljs-string">"restaurants"</span>, cv, <span class="hljs-string">"_ID=?"</span>,  
+                                                                     args);  
+        }  
+
+        <span class="hljs-keyword">public</span> String <span class="hljs-title">getName</span>(Cursor c) {  
+            <span class="hljs-keyword">return</span>(c.getString(<span class="hljs-number">1</span>));  
+        }  
+
+        <span class="hljs-keyword">public</span> String <span class="hljs-title">getAddress</span>(Cursor c) {  
+            <span class="hljs-keyword">return</span>(c.getString(<span class="hljs-number">2</span>));  
+        }  
+
+        <span class="hljs-keyword">public</span> String <span class="hljs-title">getType</span>(Cursor c) {  
+            <span class="hljs-keyword">return</span>(c.getString(<span class="hljs-number">3</span>));  
+        }  
+
+        <span class="hljs-keyword">public</span> String <span class="hljs-title">getNotes</span>(Cursor c) {  
+            <span class="hljs-keyword">return</span>(c.getString(<span class="hljs-number">4</span>));  
+        }  
+
+        <span class="hljs-keyword">public</span> String <span class="hljs-title">getPhone</span>(Cursor c) {  
+            <span class="hljs-keyword">return</span>(c.getString(<span class="hljs-number">5</span>));  
+        }  
+    }  
+</code></pre>
+
+<p>那么这个帮助类该如何使用呢,下面举个列子,也是从代码里摘出来的一段</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java">
+    <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LunchList</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ListActivity</span> {</span>  
+     Cursor model=<span class="hljs-keyword">null</span>;<span class="hljs-comment">//用来存储查询的数据  </span>
+     RestaurantAdapter adapter=<span class="hljs-keyword">null</span>;<span class="hljs-comment">//上面自定义的数据库帮助类  </span>
+     <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span>(Bundle savedInstanceState) {  
+       <span class="hljs-keyword">super</span>.onCreate(savedInstanceState);  
+       setContentView(R.layout.main);  
+
+       helper=<span class="hljs-keyword">new</span> RestaurantHelper(<span class="hljs-keyword">this</span>);<span class="hljs-comment">//参数是上下文  </span>
+
+       initList();<span class="hljs-comment">//初始化listview列表,省略了很多,大体能明白使用数据库流程就行啦  </span>
+
+    }  
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initList</span>() {  
+      <span class="hljs-keyword">if</span> (model!=<span class="hljs-keyword">null</span>) {  
+       stopManagingCursor(model);  
+       model.close();  
+      }  
+
+      String where=<span class="hljs-keyword">null</span>;  
+
+      <span class="hljs-keyword">if</span> (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {<span class="hljs-comment">//如果有查询指令则根据查询内容从数据库获取表中所有满足条件数据  </span>
+       where=<span class="hljs-string">"name LIKE \"%"</span>+getIntent().getStringExtra(SearchManager.QUERY)+<span class="hljs-string">"%\""</span>;  
+      }  
+      model=helper.getAll(where, prefs.getString(<span class="hljs-string">"sort_order"</span>, <span class="hljs-string">"name"</span>));<span class="hljs-comment">//调用帮助类中的方法获取数据  </span>
+      startManagingCursor(model);  
+      adapter=<span class="hljs-keyword">new</span> RestaurantAdapter(model);<span class="hljs-comment">//设置adapter  </span>
+      setListAdapter(adapter);<span class="hljs-comment">//在列表中显示出来  </span>
+     }  </code></pre>
+
+<p>这里只举例了查询,增删改操作都类似,只是用helper调用一下需要的方法就行了,参数传对就没有问题.</p>
+
+<p>常见问题：</p>
+
+<ul>
+<li>Could not open the database in read/write mode. <br>
+此为没有权限，在AndroidManifest.xml加入：</li>
+</ul>
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-tag">&lt;<span class="hljs-title">uses-permission</span> <span class="hljs-attribute">android:name</span>=<span class="hljs-value">"android.permission.WRITE_EXTERNAL_STORAGE"</span> /&gt;</span></code></pre></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/77088609'>原文链接</a>

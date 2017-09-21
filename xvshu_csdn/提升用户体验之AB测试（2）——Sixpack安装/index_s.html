@@ -1,0 +1,85 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 提升用户体验之AB测试（2）——Sixpack安装</div><div style="color:blue" align=center>提升用户体验之AB测试（2）——Sixpack安装</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 上篇博客给大家介绍了A/B测试的相关流程，是不是已经摩拳擦掌了，别着急，跟着我，咱们马上进入，sixpck的世界，而且不要担心，更文太慢，这次一次发表5篇博客，力求最大可能帮助大家认识和熟悉sixpack，帮助大家提升自己的&#30524;界与掌握一个流行的中间件。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">1，python环境准备</span></h1>
+<div><span style="font-size:18px"><br>
+</span></div>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 升级python</span></h2>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="font-size:18px">大家要将python环境升级到2.7版本，过低版本，和sixpack不兼容，会有bug出现</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 具体操作，请参看博客：<a target="_blank" target="_blank" href="http://blog.csdn.net/xvshu/article/details/50779113">提升用户体验（4）——linux升级python到2.7</a></span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; pip 插件安装</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;安装pip插件后，我们可以自动安装sixpage，且自动下载相关依赖，省去了我们手动添加的麻烦</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 具体操作，请参看博客：<a target="_blank" target="_blank" href="http://blog.csdn.net/xvshu/article/details/50779201">提升用户体验（5）——linux安装python（pip）插件</a></span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">2，安装Sixpack</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 直接在linux命令行中输入</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;pip install sixpack</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 则会自动安装并注册sixpack服务</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">3，启动Sixpack服务</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;添加sixpack配置（redis请自行安装，不再赘述）保存为&nbsp;config.yml&nbsp;保存到你喜欢的位置，我保存到&nbsp;/usr/ABTest/sixpack/ 这个目录下</span></p>
+<p>
+<pre code_snippet_id="1594432" snippet_file_name="blog_20160302_1_4609015" name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;redis_port: 6379                        # Redis port
+redis_host: 192.168.2.16                # Redis host
+redis_prefix: sixpack                   # all Redis keys will be prefixed with this
+redis_db: 15                            # DB number in redis
+
+# The regex to match for robots
+robot_regex: $^|trivial|facebook|MetaURI|butterfly|google|amazon|goldfire|sleuth|xenu|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|pingdom|bot|yahoo|slurp|java|fetch|spider|url|crawl|oneriot|abby|commentreader|twiceler
+ignored_ip_addresses: []                # List of IP
+
+asset_path: gen                         # Path for compressed assets to live. This path is RELATIVE to sixpack/static
+secret_key: &#39;123&#39;    # Random key (any string is valid, required for sixpack-web to run)
+&lt;/span&gt;</pre>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">以此配置文件启动sixpack服务：</span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 命令&#26684;式：SIXPACK_CONFIG=&lt;path to config.yml&gt; sixpack，我的命令为：</span></p>
+<p><span style="font-size:18px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>SIXPACK_CONFIG=/usr/ABTest/sixpack/config.yml sixpack</span></p>
+<p><span style="font-size:18px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>会提示你在哪个端口，一般为5000</span></p>
+<p><span style="font-size:18px"><br>
+<br>
+</span></p>
+<p><span style="font-size:18px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>输入测试：</span></p>
+<p>
+<pre code_snippet_id="1594432" snippet_file_name="blog_20160302_2_2199037" name="code" class="html">curl http://localhost:5000/participate?experiment=button_color&amp;alternatives=red&amp;alternatives=blue&amp;client_id=12345678-1234-5678-1234-567812345678</pre><span style="font-size:18px"><br>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>有返回&#20540;，证明成功</span>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">4，启动Sixpack网页服务</span></h1>
+<p><span style="font-size:18px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>和启动sixpack服务相同：</span></p>
+<p><span style="font-size:18px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>SIXPACK_CONFIG=/usr/ABTest/sixpack/config.yml sixpack-web<br>
+</span></p>
+<p><span style="font-size:18px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>会提示你在哪个端口上，一般为5001</span></p>
+<p><span style="font-size:18px"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span>访问效果为：</span></p>
+<p><span style="font-size:18px"><img src="21811666290153" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; sixpack的想法挺好，安装也不困那，我从刚开始接触，到这一步，用了差不多2天的时候，中间掺杂着公司其他的事，这样的软件，易于学习，官网文档丰富，介绍详细，不愧是Facebook的团队做的产品，我们的产品也要向着这个方向，前进！</span></p>
+<p><span style="font-size:18px">参考资料：</span></p>
+<p><span style="font-size:18px">https://github.com/seatgeek/sixpack<br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50778952'>原文链接</a>

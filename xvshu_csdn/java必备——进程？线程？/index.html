@@ -1,0 +1,39 @@
+﻿<div style="color:blue" align=center>java必备——进程？线程？</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在计算机中，我们经常听到多任务之类的词语，对应到java，就是多线程的编程，在学习之余，我们有必要研究研究，进程和线程的概念<br>
+<br>
+</span>
+<h1><span style="font-size:18px">网络释义：</span></h1>
+<span style="font-size:18px">进程<br>
+&nbsp; &nbsp; &nbsp; &nbsp;维基百科：进程（英语：Process，台湾译作行程）是计算机中已运行程序的实体。进程为曾经是分时系统的基本运作单位。在面向进程设计的系统（如早期的UNIX，Linux 2.4及更早的版本）中，进程是程序的基本执行实体；在面向线程设计的系统（如当代多数操作系统、Linux 2.6及更新的版本）中，进程本身不是基本运行单位，而是线程的容器。程序本身只是指令、数据及其组织形式的描述，进程才是程序（那些指令和数据）的真正运行实例。若干进程有可能与同一个程序相关系，且每个进程皆可以同步（循序）或异步（平行）的方式独立运行。现代计算机系统可在同一段时间内以进程的形式将多个程序加载到存储器中，并借由时间共享（或称时分复用），以在一个处理器上表现出同时（平行性）运行的感觉。同样的，使用多线程技术（多线程即每一个线程都代表一个进程内的一个独立执行上下文）的操作系统或计算机架构，同样程序的平行线程，可在多CPU主机或网络上真正同时运行（在不同的CPU上）。<br>
+<br>
+线程<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 维基百科：线程（英语：thread）是操作系统能够进行运算调度的最小单位。它被包含在进程之中，是进程中的实际运作单位。一条线程指的是进程中一个单一顺序的控制流，一个进程中可以并发多个线程，每条线程并行执行不同的任务。在Unix System V及SunOS中也被称为轻量进程（lightweight processes），但轻量进程更多指内核线程(kernel thread)，而把用户线程(user thread)称为线程。<br>
+<br>
+</span>
+<h1><span style="font-size:18px">简单理解：</span></h1>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 计算机就像火车运输，我们每个程序就像一列火车，qq是负责运煤的火车，邮箱是负责运旅客的火车~<br>
+我们有很多火车道，可以跑很多列火车，但是对于控制中心来说，他要管理好所有的火车，就要有张运行图，什么时候，哪列火车怎么跑，保证同一方向，相近路段只有一列火车再跑，否则就会撞车！<br>
+</span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 进程就像我们的火车，它带有完成的实现“火车”这个功能的资源！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <img src="32026926319009" alt="">&nbsp; &nbsp; &nbsp;&nbsp;</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 线程呢？<br>
+</span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 线程就像火车上的车厢，最前一般是提供动力的火车头，然后有办公车厢，餐车，旅客车厢，行李车厢等等，他们都各自完成各自的功能！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="14065517753787" alt=""></span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 通过几张简单的图片和自己的简单的几句话，将进程和线程说清楚，明白他们两个的区别，我们才能在编程中，更加理解java机制的好处！<br>
+<br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 编程中一些晦涩难懂的概念，我们的生活中也许早就已经实践着，且比比皆是，几百万年的进化，使我们的生活中存在着极大的智慧，学习中，生活就是我们最好的老师，我们要懂得利用这个巨大的资源！</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/22174031'>原文链接</a>

@@ -1,0 +1,293 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; Android开发学习（4）简单登录界面</div><div style="color:blue" align=center>Android开发学习（4）简单登录界面</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><p>在简单的Hello Android 的基础上，我们进一步学习如果制作一个简单的登录界面（不涉及网络交互，用户名密码先固定为admin ），在这里我们学习获取用户名密码，多个Activity之间跳转。</p>
+
+
+
+<h1 id="layout-loginxml">layout login.xml</h1>
+
+<p>先看下成果： <br>
+<img src="26599809038022" alt="login-init" title=""> <br>
+源码：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">RelativeLayout</span>          <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>
+                         <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"match_parent"</span>
+                         <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"match_parent"</span>
+                         <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"#2197db"</span>
+&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">TextView
+</span>            <span class="hljs-attribute">android:text</span>=<span class="hljs-value">"XS-TestApp"</span>
+            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/loginbutton"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_centerHorizontal</span>=<span class="hljs-value">"true"</span>
+            <span class="hljs-attribute">android:layout_marginTop</span>=<span class="hljs-value">"90dp"</span>
+            <span class="hljs-attribute">android:layout_marginBottom</span>=<span class="hljs-value">"20dp"</span>
+            <span class="hljs-attribute">android:textColor</span>=<span class="hljs-value">"#fffefe"</span>
+            <span class="hljs-attribute">android:textSize</span>=<span class="hljs-value">"30sp"</span>/&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">LinearLayout
+</span>            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/input"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"match_parent"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_below</span>=<span class="hljs-value">"@+id/loginbutton"</span>
+            <span class="hljs-attribute">android:layout_marginLeft</span>=<span class="hljs-value">"28dp"</span>
+            <span class="hljs-attribute">android:layout_marginRight</span>=<span class="hljs-value">"28dp"</span>
+            <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"#fff"</span>
+            <span class="hljs-attribute">android:orientation</span>=<span class="hljs-value">"vertical"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">LinearLayout
+</span>                <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+                <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"44dp"</span>
+                <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"#fff"</span>
+                <span class="hljs-attribute">android:gravity</span>=<span class="hljs-value">"center_vertical"</span>
+                <span class="hljs-attribute">android:orientation</span>=<span class="hljs-value">"horizontal"</span> &gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-title">EditText
+</span>                    <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/userId"</span>
+                    <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"wrap_content"</span>
+                    <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"fill_parent"</span>
+                    <span class="hljs-attribute">android:layout_weight</span>=<span class="hljs-value">"1"</span>
+                    <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"@null"</span>
+                    <span class="hljs-attribute">android:imeOptions</span>=<span class="hljs-value">"actionDone"</span>
+                    <span class="hljs-attribute">android:textSize</span>=<span class="hljs-value">"16sp"</span>
+                    <span class="hljs-attribute">android:ems</span>=<span class="hljs-value">"10"</span>
+                    <span class="hljs-attribute">android:hint</span>=<span class="hljs-value">"请输入用户名"</span>
+            &gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">EditText</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">Button
+</span>                    <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/button_bar"</span>
+                    <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"20dp"</span>
+                    <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"20dp"</span>
+                    <span class="hljs-attribute">android:layout_marginRight</span>=<span class="hljs-value">"8dp"</span>
+                    <span class="hljs-attribute">android:layout_marginLeft</span>=<span class="hljs-value">"1dp"</span>
+                    <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"@drawable/login_input_arrow"</span>
+            /&gt;</span>
+
+        <span class="hljs-tag">&lt;/<span class="hljs-title">LinearLayout</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">View
+</span>                <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+                <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"1.0px"</span>
+                <span class="hljs-attribute">android:layout_marginLeft</span>=<span class="hljs-value">"1.0px"</span>
+                <span class="hljs-attribute">android:layout_marginRight</span>=<span class="hljs-value">"1.0px"</span>
+                <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"#ffc0c3c4"</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">EditText
+</span>                <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/pass"</span>
+                <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+                <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"44.0dip"</span>
+                <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"#00ffffff"</span>
+                <span class="hljs-attribute">android:gravity</span>=<span class="hljs-value">"center_vertical"</span>
+                <span class="hljs-attribute">android:inputType</span>=<span class="hljs-value">"textPassword"</span>
+                <span class="hljs-attribute">android:maxLength</span>=<span class="hljs-value">"16"</span>
+                <span class="hljs-attribute">android:maxLines</span>=<span class="hljs-value">"1"</span>
+                <span class="hljs-attribute">android:textColor</span>=<span class="hljs-value">"#ff1d1d1d"</span>
+                <span class="hljs-attribute">android:textColorHint</span>=<span class="hljs-value">"#ff666666"</span>
+                <span class="hljs-attribute">android:textSize</span>=<span class="hljs-value">"16.0sp"</span>
+                <span class="hljs-attribute">android:hint</span>=<span class="hljs-value">"请输入密码"</span>
+        /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">LinearLayout</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">Button
+</span>            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/loginBtn"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_below</span>=<span class="hljs-value">"@+id/input"</span>
+            <span class="hljs-attribute">android:layout_marginTop</span>=<span class="hljs-value">"10dp"</span>
+            <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"#3aadfd"</span>
+            <span class="hljs-attribute">android:text</span>=<span class="hljs-value">"登  录"</span>
+            <span class="hljs-attribute">android:textColor</span>=<span class="hljs-value">"#ffffff"</span>
+            <span class="hljs-attribute">android:textSize</span>=<span class="hljs-value">"18dp"</span>
+            <span class="hljs-attribute">android:layout_centerHorizontal</span>=<span class="hljs-value">"true"</span>
+            <span class="hljs-attribute">android:layout_marginLeft</span>=<span class="hljs-value">"28dp"</span>
+            <span class="hljs-attribute">android:layout_marginRight</span>=<span class="hljs-value">"28dp"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">TextView
+</span>            <span class="hljs-attribute">android:text</span>=<span class="hljs-value">""</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_below</span>=<span class="hljs-value">"@+id/loginBtn"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_centerHorizontal</span>=<span class="hljs-value">"true"</span>
+            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/promptText"</span>
+            <span class="hljs-attribute">android:textColor</span>=<span class="hljs-value">"#ff0000"</span>
+            <span class="hljs-attribute">android:layout_marginTop</span>=<span class="hljs-value">"10dp"</span>
+            <span class="hljs-attribute">android:textSize</span>=<span class="hljs-value">"18sp"</span>/&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-title">RelativeLayout</span>&gt;</span></code></pre>
+
+<h1 id="loginactivity">LoginActivity</h1>
+
+<p>这个类的设计，在初始化的时候获取各个部件，绑定登录按钮操作，在登录按钮触发时校验登录名密码，跳转测试页 <br>
+源码：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm">package <span class="hljs-keyword">com</span><span class="hljs-preprocessor">.markmoney</span><span class="hljs-preprocessor">.xvshu</span><span class="hljs-preprocessor">.markmoney</span><span class="hljs-preprocessor">.Activitys</span><span class="hljs-comment">;</span>
+
+import android<span class="hljs-preprocessor">.app</span><span class="hljs-preprocessor">.Activity</span><span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.content</span><span class="hljs-preprocessor">.Intent</span><span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.os</span><span class="hljs-preprocessor">.Bundle</span><span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.util</span><span class="hljs-preprocessor">.Base</span>64<span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.util</span><span class="hljs-preprocessor">.Log</span><span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.view</span><span class="hljs-preprocessor">.View</span><span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.widget</span><span class="hljs-preprocessor">.Button</span><span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.widget</span><span class="hljs-preprocessor">.EditText</span><span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.widget</span><span class="hljs-preprocessor">.TextView</span><span class="hljs-comment">;</span>
+import android<span class="hljs-preprocessor">.widget</span><span class="hljs-preprocessor">.Toast</span><span class="hljs-comment">;</span>
+import <span class="hljs-keyword">com</span><span class="hljs-preprocessor">.markmoney</span><span class="hljs-preprocessor">.xvshu</span><span class="hljs-preprocessor">.markmoney</span><span class="hljs-preprocessor">.HelloActivity</span><span class="hljs-comment">;</span>
+import <span class="hljs-keyword">com</span><span class="hljs-preprocessor">.markmoney</span><span class="hljs-preprocessor">.xvshu</span><span class="hljs-preprocessor">.markmoney</span><span class="hljs-preprocessor">.R</span><span class="hljs-comment">;</span>
+import <span class="hljs-keyword">com</span><span class="hljs-preprocessor">.squareup</span><span class="hljs-preprocessor">.okhttp</span><span class="hljs-preprocessor">.Call</span><span class="hljs-comment">;</span>
+import <span class="hljs-keyword">com</span><span class="hljs-preprocessor">.squareup</span><span class="hljs-preprocessor">.okhttp</span><span class="hljs-preprocessor">.Callback</span><span class="hljs-comment">;</span>
+
+import <span class="hljs-keyword">com</span><span class="hljs-preprocessor">.squareup</span><span class="hljs-preprocessor">.okhttp</span><span class="hljs-preprocessor">.OkHttpClient</span><span class="hljs-comment">;</span>
+import <span class="hljs-keyword">com</span><span class="hljs-preprocessor">.squareup</span><span class="hljs-preprocessor">.okhttp</span><span class="hljs-preprocessor">.Response</span><span class="hljs-comment">;</span>
+import <span class="hljs-keyword">com</span><span class="hljs-preprocessor">.zhy</span><span class="hljs-preprocessor">.http</span><span class="hljs-preprocessor">.okhttp</span><span class="hljs-preprocessor">.OkHttpUtils</span><span class="hljs-comment">;</span>
+import org<span class="hljs-preprocessor">.json</span><span class="hljs-preprocessor">.JSONObject</span><span class="hljs-comment">;</span>
+
+import java<span class="hljs-preprocessor">.util</span><span class="hljs-preprocessor">.concurrent</span><span class="hljs-preprocessor">.TimeUnit</span><span class="hljs-comment">;</span>
+
+<span class="hljs-comment">/**
+ * Created by xvshu on 2017/8/7.
+ */</span>
+public class LoginActivity extends Activity implements View<span class="hljs-preprocessor">.OnClickListener</span> {
+    private static final String TAG = <span class="hljs-string">"login"</span><span class="hljs-comment">;</span>
+    Button loginBtn = null<span class="hljs-comment">;</span>
+    EditText useridEt = null<span class="hljs-comment">;</span>
+    EditText passEt = null<span class="hljs-comment">;</span>
+    TextView promptText = null<span class="hljs-comment">;</span>
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super<span class="hljs-preprocessor">.onCreate</span>(savedInstanceState)<span class="hljs-comment">;</span>
+        setContentView(R<span class="hljs-preprocessor">.layout</span><span class="hljs-preprocessor">.login</span>)<span class="hljs-comment">;</span>
+        loginBtn = (Button) findViewById(R<span class="hljs-preprocessor">.id</span><span class="hljs-preprocessor">.loginBtn</span>)<span class="hljs-comment">;</span>
+        loginBtn<span class="hljs-preprocessor">.setOnClickListener</span>(this)<span class="hljs-comment">;</span>
+        useridEt = (EditText) findViewById(R<span class="hljs-preprocessor">.id</span><span class="hljs-preprocessor">.userId</span>)<span class="hljs-comment">;</span>
+        passEt = (EditText) findViewById(R<span class="hljs-preprocessor">.id</span><span class="hljs-preprocessor">.pass</span>)<span class="hljs-comment">;</span>
+        promptText = (TextView) findViewById(R<span class="hljs-preprocessor">.id</span><span class="hljs-preprocessor">.promptText</span>)<span class="hljs-comment">;</span>
+
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        String userid = useridEt<span class="hljs-preprocessor">.getText</span>()<span class="hljs-preprocessor">.toString</span>()<span class="hljs-preprocessor">.trim</span>()<span class="hljs-comment">;</span>
+        String pass = passEt<span class="hljs-preprocessor">.getText</span>()<span class="hljs-preprocessor">.toString</span>()<span class="hljs-preprocessor">.trim</span>()<span class="hljs-comment">;</span>
+        if(userid<span class="hljs-preprocessor">.equals</span>(<span class="hljs-string">""</span>)){
+            promptText<span class="hljs-preprocessor">.setText</span>(R<span class="hljs-preprocessor">.string</span><span class="hljs-preprocessor">.userIdError</span>)<span class="hljs-comment">;</span>
+            return <span class="hljs-comment">;</span>
+        }
+        if(pass<span class="hljs-preprocessor">.equals</span>(<span class="hljs-string">""</span>)){
+            promptText<span class="hljs-preprocessor">.setText</span>(R<span class="hljs-preprocessor">.string</span><span class="hljs-preprocessor">.passError</span>)<span class="hljs-comment">;</span>
+            return <span class="hljs-comment">;</span>
+        }
+
+
+        if (userid<span class="hljs-preprocessor">.equals</span>(<span class="hljs-string">"admin"</span>) &amp;&amp; pass<span class="hljs-preprocessor">.equals</span>(<span class="hljs-string">"admin"</span>)) {
+            Toast<span class="hljs-preprocessor">.makeText</span>(this, R<span class="hljs-preprocessor">.string</span><span class="hljs-preprocessor">.loginSuccess</span>, Toast<span class="hljs-preprocessor">.LENGTH</span>_LONG)<span class="hljs-preprocessor">.show</span>()<span class="hljs-comment">;</span>
+            Intent intent_hello = new Intent(this, HelloActivity<span class="hljs-preprocessor">.class</span>)<span class="hljs-comment">;</span>
+            startActivity(intent_hello)<span class="hljs-comment">;</span>
+            LoginActivity<span class="hljs-preprocessor">.this</span><span class="hljs-preprocessor">.finish</span>()<span class="hljs-comment">;</span>
+        } else {
+            Toast<span class="hljs-preprocessor">.makeText</span>(this, R<span class="hljs-preprocessor">.string</span><span class="hljs-preprocessor">.loginError</span>, Toast<span class="hljs-preprocessor">.LENGTH</span>_LONG)<span class="hljs-preprocessor">.show</span>()<span class="hljs-comment">;</span>
+        }
+
+    }
+}
+</code></pre>
+
+<h1 id="androidmanifestxml">AndroidManifest.xml</h1>
+
+<p>主文件中，我们改变默认Activity为LoginActivity ，添加测试页Activity</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">manifest</span> <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>
+          <span class="hljs-attribute">package</span>=<span class="hljs-value">"com.markmoney.xvshu.markmoney"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">application
+</span>            <span class="hljs-attribute">android:allowBackup</span>=<span class="hljs-value">"true"</span>
+            <span class="hljs-attribute">android:icon</span>=<span class="hljs-value">"@mipmap/ic_launcher"</span>
+            <span class="hljs-attribute">android:label</span>=<span class="hljs-value">"@string/app_name"</span>
+            <span class="hljs-attribute">android:theme</span>=<span class="hljs-value">"@style/AppTheme"</span> &gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">activity
+</span>                <span class="hljs-attribute">android:name</span>=<span class="hljs-value">".Activitys.LoginActivity"</span>
+                <span class="hljs-attribute">android:label</span>=<span class="hljs-value">"@string/app_name"</span> &gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">intent-filter</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">action</span> <span class="hljs-attribute">android:name</span>=<span class="hljs-value">"android.intent.action.MAIN"</span> /&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">category</span> <span class="hljs-attribute">android:name</span>=<span class="hljs-value">"android.intent.category.LAUNCHER"</span> /&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">intent-filter</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">activity</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-title">activity
+</span>                <span class="hljs-attribute">android:name</span>=<span class="hljs-value">".HelloActivity"</span>
+                <span class="hljs-attribute">android:label</span>=<span class="hljs-value">"@string/app_name"</span> &gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">activity</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-title">service</span> <span class="hljs-attribute">android:name</span>=<span class="hljs-value">".service.HelloService"</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-title">application</span>&gt;</span>
+
+
+<span class="hljs-tag">&lt;/<span class="hljs-title">manifest</span>&gt;</span></code></pre>
+
+<h1 id="stringsxml">strings.xml</h1>
+
+<p>添加登录相关提示</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs applescript">&lt;resources&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"app_name"</span>&gt;XV-TestApp&lt;/<span class="hljs-type">string</span>&gt;
+
+    &lt;!<span class="hljs-comment">-- Strings related to login --&gt;</span>
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"prompt_email"</span>&gt;Email&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"prompt_password"</span>&gt;Password (optional)&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"action_sign_in"</span>&gt;Sign <span class="hljs-keyword">in</span> <span class="hljs-keyword">or</span> register&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"action_sign_in_short"</span>&gt;Sign <span class="hljs-keyword">in</span>&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"error_invalid_email"</span>&gt;This email address <span class="hljs-keyword">is</span> invalid&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"error_invalid_password"</span>&gt;This password <span class="hljs-keyword">is</span> too short&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"error_incorrect_password"</span>&gt;This password <span class="hljs-keyword">is</span> incorrect&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"error_field_required"</span>&gt;This field <span class="hljs-keyword">is</span> required&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"permission_rationale"</span>&gt;<span class="hljs-string">"Contacts permissions are needed for providing email completions."</span>&lt;/<span class="hljs-type">string</span>&gt;
+
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"default_message"</span>&gt;<span class="hljs-string">"hello xvshu!"</span>&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"button_send"</span>&gt;<span class="hljs-string">"say hello"</span>&lt;/<span class="hljs-type">string</span>&gt;
+
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"interact_message"</span>&gt;You just clicked <span class="hljs-function_start"><span class="hljs-keyword">on</span></span> <span class="hljs-keyword">the</span> Button!&lt;/<span class="hljs-type">string</span>&gt;
+
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"userIdError"</span>&gt;You userid <span class="hljs-keyword">is</span> <span class="hljs-keyword">error</span>!&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"passError"</span>&gt;You  pass <span class="hljs-keyword">is</span> <span class="hljs-keyword">error</span>!&lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"loginSuccess"</span>&gt;Login success &lt;/<span class="hljs-type">string</span>&gt;
+    &lt;<span class="hljs-type">string</span> <span class="hljs-property">name</span>=<span class="hljs-string">"loginError"</span>&gt;Login <span class="hljs-keyword">error</span> &lt;/<span class="hljs-type">string</span>&gt;
+
+
+
+
+&lt;/resources&gt;
+</code></pre>
+
+<p>成果： <br>
+1. 登录成功 <br>
+<img src="534455296341" alt="login-success" title=""> <br>
+2. 登录失败 <br>
+<img src="34390805781775" alt="login-error" title=""></p>
+
+<h1 id="总结">总结</h1>
+
+<p>我们发现，安卓的编码实际并不困难，和我们的普通java程序是一样的，入门成本非常低，这也方便了我们这些迫切需要了解的同学，希望在不断学习这个路上，我们能一直同行。</p></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/76849574'>原文链接</a>

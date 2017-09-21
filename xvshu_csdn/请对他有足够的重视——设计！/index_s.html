@@ -1,0 +1,67 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 请对他有足够的重视——设计！</div><div style="color:blue" align=center>请对他有足够的重视——设计！</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在一个软件实现的过程中，我们经常有这样的感受，写代码愁，但是调试代码很愁，调试一段找不到错误原因的代码，特别愁！最近我就遇到了一个错误，我们队伍编写了个程序，功能测试的时候，较为顺畅，让不熟悉的人测试，也很顺利，但是到了压力测试的时候，出现了很多乱像，比如数据库重复更新等等错误！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 其他的辛酸史就不说了，究其根本原因，刚开始事务没有加全，第二次是将初始化代码放到了事务提交之后，第三次是对事务嵌套管理不足，经过三次血泪的教训，通过和老师交流，我终于对事务提起了足够的重视，终于意识到，这不是代码的问题，而是前期规划的问题，是设计理念的问题！</span></p>
+<p><span style="font-size:18px">在一个程序动工之初，两件事较为重要：</span></p>
+<p><span style="font-size:18px">统一</span></p>
+<p><span style="font-size:18px">设计</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">统一的问题主要在svn那块，上篇博客已有说明！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;设计这块，其实也很简单，用以计划概括就是，方便用户！话是这么说，但是我们要意识到，用户的需求变化是多种多样的，我们要怎么样满足用户这些东西呢？这是个没有答案的问答题，仁者见仁智者见智，但是就我第一次的项目开发经验，和大家一起探讨一下作为项目管理者该有的设计&#30524;光！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 首先，我们先说一个前提，就是我们的设计是有基线的，咱们的交流要遵循基线，第一个基线就是这事我经验不足！第二个基线是我思考了很长时间，遇到了很多问题，但是也肯定有不足的地方，希望大家指正！第三个基线就是，咱们同在电脑前，这次讨论的身份是管理者！请大家多向上靠拢啊！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">正戏开场：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">有图有真相：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="29646427085823" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">第一：表象</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们要了解一个事物的核心成分，必然要先从表象开始研究，而且我们不难发现，在互联网时代的今天，了解一个事物时，我们有很多的资料可以借鉴，在网上输入一个关键词，起码会有成千上万与之相关的页面出现在你的&#30524;前！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;那么，一个好的设计，表象是什么呢？</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 站在用户的角度：简单，易上手，功能全，稳定</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 站在开发人员的角度：平均错误时间长，出错频率低，错误易修改</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 站在公司的角度：成本低，销量高，客户反映好，开发门槛低，开发周期短</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 综上观点，我们发现一个好的程序每一个人站的角度不同，对他的要求也不同，但是作为项目的管理者，好的设计特别简单，就是客户，公司双赢！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">第二：本质</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;一个好的设计，表象&#20284;乎很明显了，但是如何在设计之初将这些要求实施在项目中呢？</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;分析以上好设计的表象以及我自己对项目看法，好的设计总结为以下几个字：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 正确；</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 稳定；</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 安全；</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 灵活；</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;正确：这是是毋庸置疑的，我们要正确实现客户所要求的内容！</span></p>
+<p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 稳定：这个确实不太容易实现的，因为稳定前期是正确，和适合的反应时间，快速和稳定是我们要同时考虑的问题，关于其，我有一篇博客谢了灵活的数据库设计，大家有兴趣可以看看，共同交流！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 安全：这个没得商量，给用户在关键页面把好安全的每一关，涉及到数据，隐私等！个人经验就是在每个页面加载前先要有一个安全验证，这时候权限管理就提上日程了，关于权限管理，网上现在有较为全面的解决方案，有些还是开源的，大家可以去逛逛！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 灵活：这个是一个老话题，系统的适应性就要落实在灵活性上，但是肯定没有绝对的灵活，这就需要我们做下一个工作！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">第三：提升</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;到了这一关，和程序已经没有太大的关系，最大的关系就是人！人的&#30524;光和素质！这时候，比的不是谁的技术高低，而是对事情的态度，我们是为了完成任务而工作，还是为了提升自己，或者是学习！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;普通人是要有人画一条线，然后他在线下努力奋斗，等有一天他碰到了这条线，就会茫然而又退回去！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;一般的管理者是有人画了一条线，他也奋斗，但是等他碰到了线，他就会永远在线上左顾右盼！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;好的管理者是有人画了一条线，他越过线后看到了另外一条线！这样他一直在奋斗中……</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;出色的管理者就需要看到各种线，各色的线，最后发现，世界本没有线！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><img src="34372739670887" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 通过三部曲，我们从技术上和思想上都说了改怎么样做一个好的设计，其实到最后我们不难发现，我们想问题的方式决定了我们在哪个层面活动，要想改变自己的现状，就要改变自己的思维方式，到程序中就是对设计的重视程度！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 你对设计有足够的重视吗？</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/17127265'>原文链接</a>

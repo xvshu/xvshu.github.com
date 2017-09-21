@@ -1,0 +1,293 @@
+﻿<div style="color:blue" align=center>Android开发学习（14）Popupwindow右上角弹出菜单</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><p>很多安卓app的右上角都有弹出菜单，今天我们继续丰富我们的计算机app，前几篇博客我们为他增加了历史记录的功能，今天我们使用Popupwindow做一个右上角弹出的按钮。 <br>
+效果： <br>
+<img src="25824378886317" alt="pop" title=""></p>
+
+
+
+<h1 id="布局">布局</h1>
+
+
+
+<h2 id="按钮主界面">按钮主界面</h2>
+
+<p>menu_popwindow.xml</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">LinearLayout</span> <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>
+              <span class="hljs-attribute">android:orientation</span>=<span class="hljs-value">"vertical"</span>
+              <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"match_parent"</span>
+              <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"match_parent"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">ImageView
+</span>            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"18sp"</span>
+            <span class="hljs-attribute">android:src</span>=<span class="hljs-value">"@drawable/ic_up"</span>
+            <span class="hljs-attribute">android:layout_gravity</span>=<span class="hljs-value">"right"</span>
+            <span class="hljs-attribute">android:layout_marginBottom</span>=<span class="hljs-value">"-3sp"</span>
+            <span class="hljs-attribute">android:layout_marginRight</span>=<span class="hljs-value">"10sp"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"18sp"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">ListView
+</span>            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/lv_toptitle_menu"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"match_parent"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:background</span>=<span class="hljs-value">"@color/background_ground"</span> /&gt;</span>
+
+
+<span class="hljs-tag">&lt;/<span class="hljs-title">LinearLayout</span>&gt;</span></code></pre>
+
+<p>menu_popwindow_item.xml</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">LinearLayout</span> <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>
+              <span class="hljs-attribute">android:orientation</span>=<span class="hljs-value">"horizontal"</span>
+              <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"match_parent"</span>
+              <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"match_parent"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">ImageView
+</span>            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/iv_menu_item"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"18dp"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"18dp"</span>
+            <span class="hljs-attribute">android:layout_gravity</span>=<span class="hljs-value">"center_vertical"</span>
+            <span class="hljs-attribute">android:layout_marginRight</span>=<span class="hljs-value">"10dp"</span>
+            <span class="hljs-attribute">android:layout_marginLeft</span>=<span class="hljs-value">"10dp"</span>
+            <span class="hljs-attribute">android:src</span>=<span class="hljs-value">"@drawable/ic_setting"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">TextView
+</span>            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/tv_menu_item"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:gravity</span>=<span class="hljs-value">"center"</span>
+            <span class="hljs-attribute">android:layout_gravity</span>=<span class="hljs-value">"center_vertical"</span>
+            <span class="hljs-attribute">android:text</span>=<span class="hljs-value">"测试"</span>
+            <span class="hljs-attribute">android:textColor</span>=<span class="hljs-value">"@color/background_ground"</span>
+            <span class="hljs-attribute">android:textSize</span>=<span class="hljs-value">"18sp"</span> /&gt;</span>
+
+
+<span class="hljs-tag">&lt;/<span class="hljs-title">LinearLayout</span>&gt;</span></code></pre>
+
+
+
+<h2 id="按钮动画">按钮动画</h2>
+
+<p>style.xml</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs applescript">&lt;style <span class="hljs-property">name</span>=<span class="hljs-string">"PopupAnimation"</span> parent=<span class="hljs-string">"android:Animation"</span> mce_bogus=<span class="hljs-string">"1"</span>&gt;
+        &lt;<span class="hljs-property">item</span> <span class="hljs-property">name</span>=<span class="hljs-string">"android:windowEnterAnimation"</span>&gt;@anim/popup_enter&lt;/<span class="hljs-property">item</span>&gt;
+        &lt;<span class="hljs-property">item</span> <span class="hljs-property">name</span>=<span class="hljs-string">"android:windowExitAnimation"</span>&gt;@anim/popup_exit&lt;/<span class="hljs-property">item</span>&gt;
+    &lt;/style&gt;</code></pre>
+
+<p>弹出： <br>
+popup_enter.xml</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">set</span> <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">scale</span> <span class="hljs-attribute">android:fromXScale</span>=<span class="hljs-value">"0.6"</span> <span class="hljs-attribute">android:toXScale</span>=<span class="hljs-value">"1.0"</span>
+           <span class="hljs-attribute">android:fromYScale</span>=<span class="hljs-value">"0.6"</span> <span class="hljs-attribute">android:toYScale</span>=<span class="hljs-value">"1.0"</span> <span class="hljs-attribute">android:pivotX</span>=<span class="hljs-value">"50%"</span>
+           <span class="hljs-attribute">android:pivotY</span>=<span class="hljs-value">"50%"</span> <span class="hljs-attribute">android:duration</span>=<span class="hljs-value">"150"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">alpha</span> <span class="hljs-attribute">android:interpolator</span>=<span class="hljs-value">"@android:anim/decelerate_interpolator"</span>
+           <span class="hljs-attribute">android:fromAlpha</span>=<span class="hljs-value">"0.0"</span> <span class="hljs-attribute">android:toAlpha</span>=<span class="hljs-value">"1.0"</span> <span class="hljs-attribute">android:duration</span>=<span class="hljs-value">"50"</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">set</span>&gt;</span></code></pre>
+
+<p>退出： <br>
+popup_exit.xml</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">set</span> <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">scale
+</span>            <span class="hljs-attribute">android:fromXScale</span>=<span class="hljs-value">"1.0"</span>
+            <span class="hljs-attribute">android:toXScale</span>=<span class="hljs-value">"0.5"</span>
+            <span class="hljs-attribute">android:fromYScale</span>=<span class="hljs-value">"1.0"</span>
+            <span class="hljs-attribute">android:toYScale</span>=<span class="hljs-value">"0.5"</span>
+            <span class="hljs-attribute">android:pivotX</span>=<span class="hljs-value">"50%"</span>
+            <span class="hljs-attribute">android:pivotY</span>=<span class="hljs-value">"50%"</span>
+            <span class="hljs-attribute">android:duration</span>=<span class="hljs-value">"150"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">alpha
+</span>            <span class="hljs-attribute">android:interpolator</span>=<span class="hljs-value">"@android:anim/accelerate_interpolator"</span>
+            <span class="hljs-attribute">android:fromAlpha</span>=<span class="hljs-value">"1.0"</span>
+            <span class="hljs-attribute">android:toAlpha</span>=<span class="hljs-value">"0.0"</span>
+            <span class="hljs-attribute">android:duration</span>=<span class="hljs-value">"150"</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">set</span>&gt;</span></code></pre>
+
+
+
+<h1 id="自定义popupwindow">自定义Popupwindow</h1>
+
+<p>MenuPopwindow：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">package</span> com.xvshu.android.window;
+
+<span class="hljs-keyword">import</span> android.app.Activity;
+<span class="hljs-keyword">import</span> android.content.Context;
+<span class="hljs-keyword">import</span> android.graphics.drawable.ColorDrawable;
+<span class="hljs-keyword">import</span> android.view.LayoutInflater;
+<span class="hljs-keyword">import</span> android.view.View;
+<span class="hljs-keyword">import</span> android.view.ViewGroup;
+<span class="hljs-keyword">import</span> android.widget.*;
+<span class="hljs-keyword">import</span> com.xvshu.android.R;
+<span class="hljs-keyword">import</span> com.xvshu.android.model.MenuPopwindowBean;
+
+<span class="hljs-keyword">import</span> java.util.List;
+
+<span class="hljs-javadoc">/**
+ * Created by xvshu on 2017/8/21.
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MenuPopwindow</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PopupWindow</span> {</span>
+    <span class="hljs-keyword">private</span> View conentView;
+    <span class="hljs-keyword">private</span> ListView lvContent;
+    <span class="hljs-keyword">public</span> <span class="hljs-title">MenuPopwindow</span>(Activity context, List&lt;MenuPopwindowBean&gt; list) {
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        conentView = inflater.inflate(R.layout.menu_popwindow, <span class="hljs-keyword">null</span>);
+        lvContent = (ListView) conentView.findViewById(R.id.lv_toptitle_menu);
+        lvContent.setAdapter(<span class="hljs-keyword">new</span> MyAdapter(context, list));
+        <span class="hljs-keyword">int</span> h = context.getWindowManager().getDefaultDisplay().getHeight();
+        <span class="hljs-keyword">int</span> w = context.getWindowManager().getDefaultDisplay().getWidth();
+        <span class="hljs-comment">// 设置SelectPicPopupWindow的View</span>
+        <span class="hljs-keyword">this</span>.setContentView(conentView);
+        <span class="hljs-comment">// 设置SelectPicPopupWindow弹出窗体的宽</span>
+        <span class="hljs-keyword">this</span>.setWidth(w / <span class="hljs-number">3</span>-<span class="hljs-number">30</span>);
+        <span class="hljs-comment">// 设置SelectPicPopupWindow弹出窗体的高</span>
+        <span class="hljs-keyword">this</span>.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        <span class="hljs-comment">// 设置SelectPicPopupWindow弹出窗体可点击</span>
+        <span class="hljs-keyword">this</span>.setFocusable(<span class="hljs-keyword">true</span>);
+        <span class="hljs-keyword">this</span>.setOutsideTouchable(<span class="hljs-keyword">true</span>);
+        <span class="hljs-comment">// 刷新状态</span>
+        <span class="hljs-keyword">this</span>.update();
+        <span class="hljs-comment">// 实例化一个ColorDrawable颜色为半透明</span>
+        ColorDrawable dw = <span class="hljs-keyword">new</span> ColorDrawable(<span class="hljs-number">0000000000</span>);
+        <span class="hljs-comment">// 点back键和其他地方使其消失,设置了这个才能触发OnDismisslistener ，设置其他控件变化等操作</span>
+        <span class="hljs-keyword">this</span>.setBackgroundDrawable(dw);
+        <span class="hljs-comment">// 设置SelectPicPopupWindow弹出窗体动画效果</span>
+        <span class="hljs-keyword">this</span>.setAnimationStyle(R.style.PopupAnimation);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setOnItemClick</span>(AdapterView.OnItemClickListener myOnItemClickListener) {
+        lvContent.setOnItemClickListener(myOnItemClickListener);
+    }
+
+    class MyAdapter extends BaseAdapter {
+        <span class="hljs-keyword">private</span> List&lt;MenuPopwindowBean&gt; list;
+        <span class="hljs-keyword">private</span> LayoutInflater inflater;
+        <span class="hljs-keyword">public</span> <span class="hljs-title">MyAdapter</span>(Context context, List&lt;MenuPopwindowBean&gt; list) {
+            inflater = LayoutInflater.from(context);
+            <span class="hljs-keyword">this</span>.list = list;
+        }
+        <span class="hljs-annotation">@Override</span>
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getCount</span>() {
+            <span class="hljs-keyword">return</span> list == <span class="hljs-keyword">null</span> ? <span class="hljs-number">0</span> : list.size();
+        }
+        <span class="hljs-annotation">@Override</span>
+        <span class="hljs-keyword">public</span> Object <span class="hljs-title">getItem</span>(<span class="hljs-keyword">int</span> position) {
+            <span class="hljs-keyword">return</span> list.get(position);
+        }
+        <span class="hljs-annotation">@Override</span>
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">long</span> <span class="hljs-title">getItemId</span>(<span class="hljs-keyword">int</span> position) {
+            <span class="hljs-keyword">return</span> position;
+        }
+        <span class="hljs-annotation">@Override</span>
+        <span class="hljs-keyword">public</span> View <span class="hljs-title">getView</span>(<span class="hljs-keyword">int</span> position, View convertView, ViewGroup parent) {
+            Holder holder = <span class="hljs-keyword">null</span>;
+            <span class="hljs-keyword">if</span> (convertView == <span class="hljs-keyword">null</span>) {
+                convertView = inflater.inflate(R.layout.menu_popwindow_item, <span class="hljs-keyword">null</span>);
+                holder = <span class="hljs-keyword">new</span> Holder();
+                holder.ivItem = (ImageView) convertView.findViewById(R.id.iv_menu_item);
+                holder.tvItem = (TextView) convertView.findViewById(R.id.tv_menu_item);
+                convertView.setTag(holder);
+            } <span class="hljs-keyword">else</span> {
+                holder = (Holder) convertView.getTag();
+            }
+            holder.ivItem.setImageResource(list.get(position).getIcon());
+            holder.tvItem.setText(list.get(position).getText());
+            <span class="hljs-keyword">return</span> convertView;
+        }
+        class Holder {
+            ImageView ivItem;
+            TextView tvItem;
+        }
+    }
+    <span class="hljs-javadoc">/**
+     * 显示popupWindow
+     *
+     *<span class="hljs-javadoctag"> @param</span> parent
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">showPopupWindow</span>(View parent) {
+        <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.isShowing()) {
+            <span class="hljs-comment">// 以下拉方式显示popupwindow</span>
+            <span class="hljs-keyword">this</span>.showAsDropDown(parent);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">this</span>.dismiss();
+        }
+    }
+}
+</code></pre>
+
+
+
+<h1 id="绑定">绑定</h1>
+
+<p>CalcActivity.java</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span>  <span class="hljs-title">more</span>(View view){
+        <span class="hljs-keyword">int</span>[] icons = {R.drawable.ic_setting, R.drawable.ic_delete};
+        String[] texts = {<span class="hljs-string">"编辑"</span>, <span class="hljs-string">"删除"</span>};
+        List&lt;MenuPopwindowBean&gt; list = <span class="hljs-keyword">new</span> ArrayList&lt;MenuPopwindowBean&gt;();
+        MenuPopwindowBean bean = <span class="hljs-keyword">null</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; icons.length; i++) {
+            bean = <span class="hljs-keyword">new</span> MenuPopwindowBean();
+            bean.setIcon(icons[i]);
+            bean.setText(texts[i]);
+            list.add(bean);
+        }
+        MenuPopwindow pw = <span class="hljs-keyword">new</span> MenuPopwindow(<span class="hljs-keyword">this</span>, list);
+        pw.setOnItemClick(<span class="hljs-keyword">new</span> AdapterView.OnItemClickListener(){
+            <span class="hljs-annotation">@Override</span>
+            <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onItemClick</span>(AdapterView&lt;?&gt; parent, View view,
+                                    <span class="hljs-keyword">int</span> position, <span class="hljs-keyword">long</span> id) {
+                Adapter adapter=parent.getAdapter();
+                MenuPopwindowBean thisBean = (MenuPopwindowBean)adapter.getItem(position);
+                Log.i(<span class="hljs-string">"more"</span>, <span class="hljs-string">"onItemClick: "</span>+thisBean.getText());
+            }
+
+        });
+        pw.showPopupWindow(findViewById(R.id.button_forward));
+    }</code></pre>
+
+<p>点击图片后日志： <br>
+<img src="18326425581464" alt="log" title=""></p>
+
+<blockquote>
+  <p><strong>源码地址：</strong> <br>
+  <a href="https://github.com/xvshu/xvshu_android_test" target="_blank">git_xvshu_android_test</a></p>
+</blockquote>
+
+<h1 id="总结">总结</h1>
+
+<p>非常感慨，安卓的资源真丰富，也非常感触自己生活的时代，为我们自学提供了当下最好的土壤，最近从朋友圈听到了一句，自己感觉说到了当下这个时代人面临的问题“这个时代正在惩罚不学习的人”，仔细想想，个人感觉这句话，放到哪个时代都是合适的，不断学习，不断更新自己我们才能飞翔的更自由。</p></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/77450007'>原文链接</a>

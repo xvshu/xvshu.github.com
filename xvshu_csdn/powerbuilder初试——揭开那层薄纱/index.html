@@ -1,0 +1,193 @@
+﻿<div style="color:blue" align=center>powerbuilder初试——揭开那层薄纱</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">今天我们认识一个新朋友：powerbuilder，首相我们通过网络上的解释先解开第一层面纱：</span></p>
+<h1><span style="font-size:18px">百科：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; PowerBuilder美国Sybase公司研制的一种新型、快速开发工具，是客户机/服务器结构下，基于Windows3.x、Windows95和WindowsNT的一个集成化开发工具。它包含一个直观的图形界面和可扩展的面向对象的编程语言PowerScript，提供与当前流行的大型数据库的接口，并通过ODBC与单机数据库相连。<br>
+</span></p>
+<h1><span style="font-size:18px">优缺点：</span></h1>
+<p><span style="font-size:18px">优点：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 1，小型开发效率高</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 2，简单，封装较好</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 3，提供b/s开发</span></p>
+<p><span style="font-size:18px">缺点：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 1，执行效率低</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 2，b/s开发效果非常不理想</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 3，PB与其他技术的集成不好</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 无论如何他是我们自考中要学习的一门技术，经过2-3天的研究，今天将增删改查的几个例子展现给大家：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">例子：</span></h1>
+<h2><span style="font-size:18px">基本步骤：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 第一步：建立数据库<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 第二步：建立ODBC数据源<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 第三步：连接PB<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 第四步：编写代码</span></p>
+<p><span style="font-size:18px">详细描述：</span></p>
+<h2><span style="font-size:18px">第一步：建立数据库</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 这里不再赘述，按照传统的方法，建立一个sql数据库。<br>
+</span></p>
+<h2><span style="font-size:18px">第二步：建立ODBC数据源</span></h2>
+<p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 建立一个公共的ODBC数据源传统方法不再展示，在pb中的方法是：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="12797356153476" alt=""><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 进入我们熟悉的设置界面</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="22103777684188" alt=""><br>
+</span></p>
+<h2><span style="font-size:18px">第三步：连接PB</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;在PB中建立新的数据连接：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="46361955708713" alt=""><br>
+</span></p>
+<h2><span style="font-size:18px">第四步：编写代码</span></h2>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 以用户管理为例</span></p>
+<h3><span style="font-size:18px">1，连接数据库</span></h3>
+<p><span style="font-size:18px">（1）代码：</span></p>
+<p>
+<pre code_snippet_id="187361" snippet_file_name="blog_20140213_1_3310139" code_snippet_id="187361" snippet_file_name="blog_20140213_1_3310139" name="code" class="plain"><span style="font-size:18px;">SQLCA.DBMS=&quot;ODBC&quot;
+SQLCA.AutoCommit=False
+SQLCA.DBParm=&quot;Connectstring='DSN=mysqlxvshu;uid=sa;pwd=123456'&quot;
+CONNECT USING SQLCA;
+open(w_login)</span></pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<h3><span style="font-size:18px">2，添加用户</span></h3>
+<p>
+<p><span style="font-size:18px">（1）界面：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="19297695979119" alt=""><br>
+</span></p>
+<p><span style="font-size:18px">（2）代码：</span></p>
+<pre code_snippet_id="187361" snippet_file_name="blog_20140213_2_2547553" code_snippet_id="187361" snippet_file_name="blog_20140213_2_2547553" name="code" class="plain"><span style="font-size:18px;">//通过用户名查看是否已经有此用户
+string strPwd
+string strRole
+string strrolename
+
+strrolename=&quot;管理员&quot;
+if trim(ddlb_role.text)=strrolename then
+	strRole=&quot;1&quot;
+else
+	strRole=&quot;2&quot;
+end if 
+
+SELECT pwd
+INTO :strPwd
+from &quot;T_User&quot;
+where &quot;T_User&quot;.&quot;UserName&quot;=:sle_username.text;
+
+//SQLCode=100证明没有找到记录，此用户合法
+if SQLCA.SQLCode=100 then
+
+	INSERT INTO T_User(UserName,pwd,role)
+	values (:sle_username.text,:sle_password.text,:strRole);
+	messagebox(&quot;提示&quot;,&quot;添加成功&quot;)
+else
+	//提示用户重名
+	messagebox(&quot;提示&quot;,&quot;此用户名已经存在，请您输入其他的用户名&quot;)
+	sle_username.text=&quot;&quot;
+	sle_username.SetFocus()
+end if 
+	</span></pre><span style="font-size:18px"><br>
+<br>
+</span>
+<h3><span style="font-size:18px">3，查询用户</span></h3>
+<p>
+<p><span style="font-size:18px">（1）界面：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="6574485600128" alt=""><br>
+</span></p>
+<p><span style="font-size:18px">（2）代码：</span></p>
+<p><span style="font-size:18px">界面开始初始化数据显示：</span></p>
+<p>
+<pre code_snippet_id="187361" snippet_file_name="blog_20140213_3_6244287" code_snippet_id="187361" snippet_file_name="blog_20140213_3_6244287" name="code" class="plain"><span style="font-size:18px;">dw_user.SetTransObject(SQLCA)
+dw_user.Retrieve()
+st_time.text=&quot;当前日期：&quot;+string(today(),&quot;yyyy-mm-dd&quot;)</span></pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<p><span style="font-size:18px">查询按钮：</span></p>
+<p>
+<pre code_snippet_id="187361" snippet_file_name="blog_20140213_4_6004307" code_snippet_id="187361" snippet_file_name="blog_20140213_4_6004307" name="code" class="plain"><span style="font-size:18px;">if trim(sle_username.text)=&quot;&quot; then
+	messagebox(&quot;提示&quot;,&quot;用户名不能为空&quot;)
+else
+	
+	dw_user.setfilter(&quot;Username like '%&quot;+sle_username.text+&quot;%'&quot;)
+	dw_user.filter()
+	dw_user.SetFocus()
+
+end if </span></pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<h3><span style="font-size:18px">4，修改密码</span></h3>
+<p>
+<p><span style="font-size:18px">（1）界面：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="34001466114238" alt=""><br>
+</span></p>
+<p><span style="font-size:18px">（2）代码：</span></p>
+<p><span style="font-size:18px">确认按钮：</span></p>
+<p>
+<pre code_snippet_id="187361" snippet_file_name="blog_20140213_5_4925295" code_snippet_id="187361" snippet_file_name="blog_20140213_5_4925295" name="code" class="plain"><span style="font-size:18px;">if trim(sle_new.text)=&quot;&quot; then
+	messagebox(&quot;提示&quot;,&quot;新密码不能为空，请您重新输入&quot;)
+	sle_new.setfocus()
+else
+	update T_User
+	set pwd=:sle_new.text
+	where UserName=:PUBstrusername ;
+	messagebox(&quot;提示&quot;,&quot;修改成功&quot;)
+end if </span></pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<h3><span style="font-size:18px">5，删除用户</span></h3>
+<p>
+<p><span style="font-size:18px">（1）界面：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="13929815465255" alt=""><br>
+</span></p>
+<p><span style="font-size:18px">（2）代码：</span></p>
+<p><span style="font-size:18px">删除按钮：</span></p>
+<p>
+<pre code_snippet_id="187361" snippet_file_name="blog_20140213_6_7716957" code_snippet_id="187361" snippet_file_name="blog_20140213_6_7716957" name="code" class="plain"><span style="font-size:18px;">//存储用户角色
+string strRole
+
+//判断输入的用户名是否为空
+if trim(sle_putname.text)=&quot;&quot; then
+	messagebox(&quot;提示&quot;,&quot;用户名不能为空&quot;)
+else
+	
+	//通过用户名找到权限
+	SELECT role
+	INTO :strRole
+	from &quot;T_User&quot;
+	where &quot;T_User&quot;.&quot;UserName&quot;=:sle_putname.text;
+	
+	
+	//判断用户是否存在
+	if SQLCA.SQLCode=100 then
+		messagebox(&quot;提示信息&quot;,&quot;您输入的用户不存在！&quot;)
+	else
+	
+		delete 
+		from T_User
+		where &quot;UserName&quot;=:sle_putname.text;
+		messagebox(&quot;提示&quot;,&quot;删除成功&quot;)
+		
+	//判断用户结束标志	
+	end if
+
+//是否为空结束标志
+end if</span></pre><span style="font-size:18px"><br>
+</span>
+<p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在没有实践之前，觉得这是个新东西，挺难的，但是当事情&#36924;到自己头上，硬着头皮跟着教科书的目录，发现90%都是相&#20284;的，都是自己以前学过的东西，唯一有点不同的就是语法结构，和事件表示！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; “不怕不知道，就怕不知道”</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们被知道和不知道折腾的很久了，但是有个问题是他们的前提，就是客服“怕”的心理，相信我们自己的能力，学到了这个年纪，我们应该知道，基础的学习我们掌握了，那么其他上层学习只是换了个表皮而已，俗话说的换汤不换药！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 相信自己，自己就能超越自己，这就是我们这个时代的奇迹！信息时代的奇迹！</span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/19173461'>原文链接</a>

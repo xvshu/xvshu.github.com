@@ -1,0 +1,270 @@
+﻿<div style="color:blue" align=center>Android开发学习（7）ListView</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><p>很多时候，我们需要以列表的方式展示我们的商品，类似通讯录中联系人的列表展示页，今天我们就开始使用ListView做一个类似的功能</p>
+
+<p>ListView是一个经常用到的控件，ListView里面的每个子项Item可以使一个字符串，也可以是一个组合控件。先说说ListView的实现：</p>
+
+<p>添加步骤:</p>
+
+<ul>
+<li>准备ListView要显示的数据 ；</li>
+<li>使用 一维或多维 动态数组 保存数据；</li>
+<li>构建适配器 ， 简单地来说， 适配器就是 Item数组 ， 动态数组 有多少元素就生成多少个Item；</li>
+<li>把 适配器 添加到ListView,并显示出来。</li>
+</ul>
+
+<h1 id="简单模式">简单模式</h1>
+
+<p>效果图 <br>
+<img src="34718089500579" alt="ListViews" title=""></p>
+
+<h2 id="主页面">主页面：</h2>
+
+<p>listview_diarys.xml</p>
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">LinearLayout</span> <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>
+              <span class="hljs-attribute">android:orientation</span>=<span class="hljs-value">"vertical"</span>
+              <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/LL_ListViewDiarys"</span>
+              <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+              <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"fill_parent"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!--list父窗口 --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">ListView</span> <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"wrap_content"</span>
+              <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+              <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/LV_Diarys"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">ListView</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-title">LinearLayout</span>&gt;</span></code></pre>
+
+
+
+<h2 id="列表元素">列表元素</h2>
+
+<p>listitem_diary.xml</p>
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-comment">&lt;!--list中每个单元定义窗口 --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">LinearLayout</span> <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+              <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>
+              <span class="hljs-attribute">android:orientation</span>=<span class="hljs-value">"vertical"</span>
+              <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+              <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/ListItem_Diary"</span>
+              <span class="hljs-attribute">android:paddingBottom</span>=<span class="hljs-value">"3dip"</span>
+              <span class="hljs-attribute">android:paddingLeft</span>=<span class="hljs-value">"10dip"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">TextView
+</span>            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/ItemTitle"</span>
+            <span class="hljs-attribute">android:textSize</span>=<span class="hljs-value">"15sp"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">TextView</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">TextView
+</span>            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/ItemText"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">TextView</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-title">LinearLayout</span>&gt;</span></code></pre>
+
+
+
+<h2 id="加载列表">加载列表</h2>
+
+<p>ListViewDiarysActivity.java</p>
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">package</span> com.xvshu.android;
+
+<span class="hljs-keyword">import</span> android.app.Activity;
+<span class="hljs-keyword">import</span> android.os.Bundle;
+<span class="hljs-keyword">import</span> android.widget.ListView;
+<span class="hljs-keyword">import</span> android.widget.SimpleAdapter;
+
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.HashMap;
+
+<span class="hljs-javadoc">/**
+ * Created by xvshu on 2017/8/9.
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ListViewDiarysActivity</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Activity</span> {</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span>(Bundle savedInstanceState) {
+        <span class="hljs-keyword">super</span>.onCreate(savedInstanceState);
+        setContentView(R.layout.listview_diarys);
+        <span class="hljs-comment">//绑定XML中的ListView，作为Item的容器</span>
+        ListView list = (ListView) findViewById(R.id.LV_Diarys);
+
+        <span class="hljs-comment">//生成动态数组，并且转载数据</span>
+        ArrayList&lt;HashMap&lt;String, String&gt;&gt; mylist = <span class="hljs-keyword">new</span> ArrayList&lt;HashMap&lt;String, String&gt;&gt;();
+        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">30</span>;i++)
+        {
+            HashMap&lt;String, String&gt; map = <span class="hljs-keyword">new</span> HashMap&lt;String, String&gt;();
+            map.put(<span class="hljs-string">"ItemTitle"</span>, <span class="hljs-string">"This is Title "</span>+i);
+            map.put(<span class="hljs-string">"ItemText"</span>, <span class="hljs-string">"This is text "</span>+i);
+            mylist.add(map);
+        }
+        <span class="hljs-comment">//生成适配器，数组===》ListItem</span>
+        SimpleAdapter mSchedule = <span class="hljs-keyword">new</span> SimpleAdapter(<span class="hljs-keyword">this</span>,
+                mylist,<span class="hljs-comment">//数据来源</span>
+                R.layout.listitem_diary,<span class="hljs-comment">//ListItem的XML实现</span>
+
+                <span class="hljs-comment">//动态数组与ListItem对应的子项</span>
+                <span class="hljs-keyword">new</span> String[] {<span class="hljs-string">"ItemTitle"</span>, <span class="hljs-string">"ItemText"</span>},
+
+                <span class="hljs-comment">//ListItem的XML文件里面的两个TextView ID</span>
+                <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[] {R.id.ItemTitle,R.id.ItemText});
+        <span class="hljs-comment">//添加并且显示</span>
+        list.setAdapter(mSchedule);
+    }
+
+}
+</code></pre>
+
+<h1 id="加入图片">加入图片</h1>
+
+<p>效果图 <br>
+<img src="379479210384893" alt="img" title=""></p>
+
+<h2 id="元素扩展">元素扩展</h2>
+
+<pre class="prettyprint"><code class=" hljs xml"><span class="hljs-pi">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="hljs-comment">&lt;!--list中每个单元定义窗口 --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">RelativeLayout
+</span>        <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+        <span class="hljs-attribute">xmlns:android</span>=<span class="hljs-value">"http://schemas.android.com/apk/res/android"</span>
+        <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+        <span class="hljs-attribute">android:paddingBottom</span>=<span class="hljs-value">"4dip"</span>
+        <span class="hljs-attribute">android:paddingLeft</span>=<span class="hljs-value">"12dip"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-title">ImageView
+</span>            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/itemImage"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"fill_parent"</span>
+            <span class="hljs-attribute">android:src</span>=<span class="hljs-value">"@drawable/ic_android"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">ImageView</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">TextView
+</span>            <span class="hljs-attribute">android:text</span>=<span class="hljs-value">"TextView01"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/itemTitle"</span>
+            <span class="hljs-attribute">android:layout_toRightOf</span>=<span class="hljs-value">"@+id/itemImage"</span>
+            <span class="hljs-attribute">android:textSize</span>=<span class="hljs-value">"20dip"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">TextView</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">TextView
+</span>            <span class="hljs-attribute">android:text</span>=<span class="hljs-value">"TextView02"</span>
+            <span class="hljs-attribute">android:layout_height</span>=<span class="hljs-value">"wrap_content"</span>
+            <span class="hljs-attribute">android:layout_width</span>=<span class="hljs-value">"fill_parent"</span>
+            <span class="hljs-attribute">android:id</span>=<span class="hljs-value">"@+id/itemText"</span>
+            <span class="hljs-attribute">android:layout_toRightOf</span>=<span class="hljs-value">"@+id/itemImage"</span>
+            <span class="hljs-attribute">android:layout_below</span>=<span class="hljs-value">"@+id/itemTitle"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">TextView</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-title">RelativeLayout</span>&gt;</span></code></pre>
+
+
+
+<h2 id="加载器扩展">加载器扩展</h2>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">package</span> com.xvshu.android;
+
+<span class="hljs-keyword">import</span> android.app.Activity;
+<span class="hljs-keyword">import</span> android.content.Context;
+<span class="hljs-keyword">import</span> android.os.Bundle;
+<span class="hljs-keyword">import</span> android.view.LayoutInflater;
+<span class="hljs-keyword">import</span> android.view.View;
+<span class="hljs-keyword">import</span> android.view.ViewGroup;
+<span class="hljs-keyword">import</span> android.widget.*;
+
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.HashMap;
+
+<span class="hljs-javadoc">/**
+ * Created by xvshu on 2017/8/9.
+ */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ListViewDiarysActivity</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Activity</span> {</span>
+
+    ListView listView;
+    String[] titles={<span class="hljs-string">"标题1"</span>,<span class="hljs-string">"标题2"</span>,<span class="hljs-string">"标题3"</span>,<span class="hljs-string">"标题4"</span>};
+    String[] texts={<span class="hljs-string">"文本内容A"</span>,<span class="hljs-string">"文本内容B"</span>,<span class="hljs-string">"文本内容C"</span>,<span class="hljs-string">"文本内容D"</span>};
+    <span class="hljs-keyword">int</span>[] resIds={R.drawable.ic_android,R.drawable.ic_android,R.drawable.ic_android,R.drawable.ic_android};
+
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span>(Bundle savedInstanceState) {
+        <span class="hljs-keyword">super</span>.onCreate(savedInstanceState);
+        setContentView(R.layout.listview_diarys);
+        <span class="hljs-comment">//绑定XML中的ListView，作为Item的容器</span>
+        listView = (ListView) findViewById(R.id.LV_Diarys);
+        listView.setAdapter(<span class="hljs-keyword">new</span> ListViewAdapter(titles,texts,resIds));
+    }
+    <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ListViewAdapter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseAdapter</span> {</span>
+        View[] itemViews;
+
+        <span class="hljs-keyword">public</span> <span class="hljs-title">ListViewAdapter</span>(String[] itemTitles, String[] itemTexts,
+                               <span class="hljs-keyword">int</span>[] itemImageRes) {
+            itemViews = <span class="hljs-keyword">new</span> View[itemTitles.length];
+
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; itemViews.length; i++) {
+                itemViews[i] = makeItemView(itemTitles[i], itemTexts[i],
+                        itemImageRes[i]);
+            }
+        }
+
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getCount</span>() {
+            <span class="hljs-keyword">return</span> itemViews.length;
+        }
+
+        <span class="hljs-keyword">public</span> View <span class="hljs-title">getItem</span>(<span class="hljs-keyword">int</span> position) {
+            <span class="hljs-keyword">return</span> itemViews[position];
+        }
+
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">long</span> <span class="hljs-title">getItemId</span>(<span class="hljs-keyword">int</span> position) {
+            <span class="hljs-keyword">return</span> position;
+        }
+
+        <span class="hljs-keyword">private</span> View <span class="hljs-title">makeItemView</span>(String strTitle, String strText, <span class="hljs-keyword">int</span> resId) {
+            LayoutInflater inflater = (LayoutInflater) ListViewDiarysActivity.<span class="hljs-keyword">this</span>
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            <span class="hljs-comment">// 使用View的对象itemView与R.layout.item关联</span>
+            View itemView = inflater.inflate(R.layout.listitem_diary, <span class="hljs-keyword">null</span>);
+
+            <span class="hljs-comment">// 通过findViewById()方法实例R.layout.item内各组件</span>
+            TextView title = (TextView) itemView.findViewById(R.id.itemTitle);
+            title.setText(strTitle);
+            TextView text = (TextView) itemView.findViewById(R.id.itemText);
+            text.setText(strText);
+            ImageView image = (ImageView) itemView.findViewById(R.id.itemImage);
+            image.setImageResource(resId);
+
+            <span class="hljs-keyword">return</span> itemView;
+        }
+
+        <span class="hljs-keyword">public</span> View <span class="hljs-title">getView</span>(<span class="hljs-keyword">int</span> position, View convertView, ViewGroup parent) {
+            <span class="hljs-keyword">if</span> (convertView == <span class="hljs-keyword">null</span>)
+                <span class="hljs-keyword">return</span> itemViews[position];
+            <span class="hljs-keyword">return</span> convertView;
+        }
+    }
+
+}
+</code></pre>
+
+<h1 id="总结">总结</h1>
+
+<p>越走进安卓越发现，和java重合度非常高，页面也是，类似web的布局，如果有前端的经验，可以说入手完全无压力，希望大家一起学习，越来越对移动开发熟悉，了解，形成自己的逻辑。</p></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/76998344'>原文链接</a>

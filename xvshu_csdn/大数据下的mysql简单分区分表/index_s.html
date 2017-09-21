@@ -1,0 +1,190 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 大数据下的mysql简单分区分表</div><div style="color:blue" align=center>大数据下的mysql简单分区分表</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+一，什么是mysql分表，分区<br>
+什么是分表，从表面意思上看呢，就是把一张表分成N多个小表，具体请看mysql分表的3种方法<br>
+什么是分区，分区呢就是把一张表的数据分成N多个区块，这些区块可以在同一个磁盘上，也可以在不同的磁盘上<br>
+一，先说一下为什么要分表<br>
+当一张的数据达到几百万时，你查询一次所花的时间会变多，如果有联合查询的话，我想有可能会死在那儿了。分表的目的就在于此，减小数据库的负担，缩短查询时间。<br>
+根据个人经验，mysql执行一个sql的过程如下：<br>
+1,接收到sql;2,把sql放到排队队列中 ;3,执行sql;4,返回执行结果。在这个执行过程中最花时间在什么地方呢？第一，是排队等待的时间，第二，sql的执行时间。其实这二个是一回事，等待的同时，肯定有sql在执行。所以我们要缩短sql的执行时间。<br>
+mysql中有一种机制是表锁定和行锁定，为什么要出现这种机制，是为了保证数据的完整性，我举个例子来说吧，如果有二个sql都要修改同一张表的同一条数据，这个时候怎么办呢，是不是二个sql都可以同时修改这条数据呢？很显然mysql对这种情况的处理是，一种是表锁定（myisam存储引擎），一个是行锁定（innodb存储引擎）。表锁定表示你们都不能对这张表进行操作，必须等我对表操作完才行。行锁定也一样，别的sql必须等我对这条数据操作完了，才能对这条数据进行操作。如果数据太多，一次执行的时间太长，等待的时间就越长，这也是我们为什么要分表的原因。<br>
+二，分表<br>
+1，做mysql集群，例如：利用mysql cluster ，mysql proxy，mysql replication，drdb等等<br>
+有人会问mysql集群，根分表有什么关系吗？虽然它不是实际意义上的分表，但是它启到了分表的作用，做集群的意义是什么呢？为一个数据库减轻负担，说白了就是减少sql排队队列中的sql的数量，举个例子：有10个sql请求，如果放在一个数据库服务器的排队队列中，他要等很长时间，如果把这10个sql请求，分配到5个数据库服务器的排队队列中，一个数据库服务器的队列中只有2个，这样等待时间是不是大大的缩短了呢？这已经很明显了。所以我把它列到了分表的范围以内，我做过一些mysql的集群：<br>
+linux mysql proxy 的安装，配置，以及读写分离<br>
+mysql replication 互为主从的安装及配置，以及数据同步<br>
+优点：扩展性好，没有多个分表后的复杂操作（php代码）<br>
+缺点：单个表的数据量还是没有变，一次操作所花的时间还是那么多，硬件开销大。<br>
+2，预先估计会出现大数据量并且访问频繁的表，将其分为若干个表<br>
+这种预估大差不差的，论坛里面发表帖子的表，时间长了这张表肯定很大，几十万，几百万都有可能。 聊天室里面信息表，几十个人在一起一聊一个晚上，时间长了，这张表的数据肯定很大。像这样的情况很多。所以这种能预估出来的大数据量表，我们就事先分出个N个表，这个N是多少，根据实际情况而定。以聊天信息表为例：<br>
+我事先建100个这样的表，message_00,message_01,message_02..........message_98,message_99.然后根据用户的ID来判断这个用户的聊天信息放到哪张表里面，你可以用hash的方式来获得，可以用求余的方式来获得，方法很多，各人想各人的吧。下面用hash的方法来获得表名：<br>
+查看复制打印?<br>
+&lt;?php &nbsp;<br>
+function get_hash_table($table,$userid) { &nbsp;<br>
+&nbsp;$str = crc32($userid); &nbsp;<br>
+&nbsp;if($str&lt;0){ &nbsp;<br>
+&nbsp;$hash = &quot;0&quot;.substr(abs($str), 0, 1); &nbsp;<br>
+&nbsp;}else{ &nbsp;<br>
+&nbsp;$hash = substr($str, 0, 2); &nbsp;<br>
+&nbsp;} &nbsp;<br>
+&nbsp;&nbsp;<br>
+&nbsp;return $table.&quot;_&quot;.$hash; &nbsp;<br>
+} &nbsp;<br>
+&nbsp;&nbsp;<br>
+echo get_hash_table('message','user18991'); &nbsp; &nbsp; //结果为message_10 &nbsp;<br>
+echo get_hash_table('message','user34523'); &nbsp; &nbsp;//结果为message_13 &nbsp;<br>
+?&gt; &nbsp;<br>
+说明一下，上面的这个方法，告诉我们user18991这个用户的消息都记录在message_10这张表里，user34523这个用户的消息都记录在message_13这张表里，读取的时候，只要从各自的表中读取就行了。<br>
+优点：避免一张表出现几百万条数据，缩短了一条sql的执行时间<br>
+缺点：当一种规则确定时，打破这条规则会很麻烦，上面的例子中我用的hash算法是crc32，如果我现在不想用这个算法了，改用md5后，会使同一个用户的消息被存储到不同的表中，这样数据乱套了。扩展性很差。<br>
+3，利用merge存储引擎来实现分表<br>
+我觉得这种方法比较适合，那些没有事先考虑，而已经出现了得，数据查询慢的情况。这个时候如果要把已有的大数据量表分开比较痛苦，最痛苦的事就是改代码，因为程序里面的sql语句已经写好了，现在一张表要分成几十张表，甚至上百张表，这样sql语句是不是要重写呢？举个例子，我很喜欢举子<br>
+mysql&gt;show engines;的时候你会发现mrg_myisam其实就是merge。<br>
+查看复制打印?<br>
+mysql&gt; CREATE TABLE IF NOT EXISTS `user1` ( &nbsp;<br>
+&nbsp;-&gt; &nbsp; `id` int(11) NOT NULL AUTO_INCREMENT, &nbsp;<br>
+&nbsp;-&gt; &nbsp; `name` varchar(50) DEFAULT NULL, &nbsp;<br>
+&nbsp;-&gt; &nbsp; `sex` int(1) NOT NULL DEFAULT '0', &nbsp;<br>
+&nbsp;-&gt; &nbsp; PRIMARY KEY (`id`) &nbsp;<br>
+&nbsp;-&gt; ) ENGINE=MyISAM &nbsp;DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; &nbsp;<br>
+Query OK, 0 rows affected (0.05 sec) &nbsp;<br>
+&nbsp;&nbsp;<br>
+mysql&gt; CREATE TABLE IF NOT EXISTS `user2` ( &nbsp;<br>
+&nbsp;-&gt; &nbsp; `id` int(11) NOT NULL AUTO_INCREMENT, &nbsp;<br>
+&nbsp;-&gt; &nbsp; `name` varchar(50) DEFAULT NULL, &nbsp;<br>
+&nbsp;-&gt; &nbsp; `sex` int(1) NOT NULL DEFAULT '0', &nbsp;<br>
+&nbsp;-&gt; &nbsp; PRIMARY KEY (`id`) &nbsp;<br>
+&nbsp;-&gt; ) ENGINE=MyISAM &nbsp;DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; &nbsp;<br>
+Query OK, 0 rows affected (0.01 sec) &nbsp;<br>
+&nbsp;&nbsp;<br>
+mysql&gt; INSERT INTO `user1` (`name`, `sex`) VALUES('张映', 0); &nbsp;<br>
+Query OK, 1 row affected (0.00 sec) &nbsp;<br>
+&nbsp;&nbsp;<br>
+mysql&gt; INSERT INTO `user2` (`name`, `sex`) VALUES('tank', 1); &nbsp;<br>
+Query OK, 1 row affected (0.00 sec) &nbsp;<br>
+&nbsp;&nbsp;<br>
+mysql&gt; CREATE TABLE IF NOT EXISTS `alluser` ( &nbsp;<br>
+&nbsp;-&gt; &nbsp; `id` int(11) NOT NULL AUTO_INCREMENT, &nbsp;<br>
+&nbsp;-&gt; &nbsp; `name` varchar(50) DEFAULT NULL, &nbsp;<br>
+&nbsp;-&gt; &nbsp; `sex` int(1) NOT NULL DEFAULT '0', &nbsp;<br>
+&nbsp;-&gt; &nbsp; INDEX(id) &nbsp;<br>
+&nbsp;-&gt; ) TYPE=MERGE UNION=(user1,user2) INSERT_METHOD=LAST AUTO_INCREMENT=1 ; &nbsp;<br>
+Query OK, 0 rows affected, 1 warning (0.00 sec) &nbsp;<br>
+&nbsp;&nbsp;<br>
+mysql&gt; select id,name,sex from alluser; &nbsp;<br>
+&#43;----&#43;--------&#43;-----&#43; &nbsp;<br>
+| id | name &nbsp; | sex | &nbsp;<br>
+&#43;----&#43;--------&#43;-----&#43; &nbsp;<br>
+| &nbsp;1 | 张映 | &nbsp; 0 | &nbsp;<br>
+| &nbsp;1 | tank &nbsp; | &nbsp; 1 | &nbsp;<br>
+&#43;----&#43;--------&#43;-----&#43; &nbsp;<br>
+2 rows in set (0.00 sec) &nbsp;<br>
+&nbsp;&nbsp;<br>
+mysql&gt; INSERT INTO `alluser` (`name`, `sex`) VALUES('tank2', 0); &nbsp;<br>
+Query OK, 1 row affected (0.00 sec) &nbsp;<br>
+&nbsp;&nbsp;<br>
+mysql&gt; select id,name,sex from user2 &nbsp;<br>
+&nbsp;-&gt; ; &nbsp;<br>
+&#43;----&#43;-------&#43;-----&#43; &nbsp;<br>
+| id | name &nbsp;| sex | &nbsp;<br>
+&#43;----&#43;-------&#43;-----&#43; &nbsp;<br>
+| &nbsp;1 | tank &nbsp;| &nbsp; 1 | &nbsp;<br>
+| &nbsp;2 | tank2 | &nbsp; 0 | &nbsp;<br>
+&#43;----&#43;-------&#43;-----&#43; &nbsp;<br>
+2 rows in set (0.00 sec) &nbsp;<br>
+从上面的操作中，我不知道你有没有发现点什么？假如我有一张用户表user，有50W条数据，现在要拆成二张表user1和user2，每张表25W条数据，<br>
+INSERT INTO user1(user1.id,user1.name,user1.sex)SELECT (user.id,user.name,user.sex)FROM user where user.id &lt;= 250000<br>
+INSERT INTO user2(user2.id,user2.name,user2.sex)SELECT (user.id,user.name,user.sex)FROM user where user.id &gt; 250000<br>
+这样我就成功的将一张user表，分成了二个表，这个时候有一个问题，代码中的sql语句怎么办，以前是一张表，现在变成二张表了，代码改动很大，这样给程序员带来了很大的工作量，有没有好的办法解决这一点呢？办法是把以前的user表备份一下，然后删除掉，上面的操作中我建立了一个alluser表，只把这个alluser表的表名改成user就行了。但是，不是所有的mysql操作都能用的<br>
+a，如果你使用 alter table 来把 merge 表变为其它表类型，到底层表的映射就被丢失了。取而代之的，来自底层 myisam 表的行被复制到已更换的表中，该表随后被指定新类型。<br>
+b，网上看到一些说replace不起作用，我试了一下可以起作用的。晕一个先<br>
+mysql&gt; UPDATE alluser SET sex=REPLACE(sex, 0, 1) where id=2; &nbsp;<br>
+Query OK, 1 row affected (0.00 sec) &nbsp;<br>
+Rows matched: 1 &nbsp;Changed: 1 &nbsp;Warnings: 0 &nbsp;<br>
+&nbsp;&nbsp;<br>
+mysql&gt; select * from alluser; &nbsp;<br>
+&#43;----&#43;--------&#43;-----&#43; &nbsp;<br>
+| id | name &nbsp; | sex | &nbsp;<br>
+&#43;----&#43;--------&#43;-----&#43; &nbsp;<br>
+| &nbsp;1 | 张映 | &nbsp; 0 | &nbsp;<br>
+| &nbsp;1 | tank &nbsp; | &nbsp; 1 | &nbsp;<br>
+| &nbsp;2 | tank2 &nbsp;| &nbsp; 1 | &nbsp;<br>
+&#43;----&#43;--------&#43;-----&#43; &nbsp;<br>
+3 rows in set (0.00 sec) &nbsp;<br>
+c，一个 merge 表不能在整个表上维持 unique 约束。当你执行一个 insert，数据进入第一个或者最后一个 myisam 表（取决于 insert_method 选项的&#20540;）。mysql 确保唯一键&#20540;在那个 myisam 表里保持唯一，但不是跨集合里所有的表。<br>
+d,当你创建一个 merge 表之时，没有检查去确保底层表的存在以及有相同的机构。当 merge 表被使用之时，mysql 检查每个被映射的表的记录长度是否相等，但这并不十分可靠。如果你从不相&#20284;的 myisam 表创建一个 merge 表，你非常有可能撞见奇怪的问题。<br>
+优点：扩展性好，并且程序代码改动的不是很大<br>
+缺点：这种方法的效果比第二种要差一点<br>
+三，总结一下<br>
+上面提到的三种方法，我实际做过二种，第一种和第二种。第三种没有做过，所以说的细一点。哈哈。做什么事都有一个度，超过个度就过变得很差，不能一味的做数据库服务器集群，硬件是要花钱买的，也不要一味的分表，分出来1000表，mysql的存储归根到底还以文件的形势存在硬盘上面，一张表对应三个文件，1000个分表就是对应3000个文件，这样检索起来也会变的很慢。我的建议是<br>
+方法1和方法2结合的方式来进行分表<br>
+方法1和方法3结合的方式来进行分表<br>
+我的二个建议适合不同的情况，根据个人情况而定，我觉得会有很多人选择方法1和方法3结合的方式<br>
+<br>
+<br>
+二，mysql分表和分区有什么区别呢<br>
+1，实现方式上<br>
+a），mysql的分表是真正的分表，一张表分成很多表后，每一个小表都是完正的一张表，都对应三个文件，一个.MYD数据文件，.MYI索引文件，.frm表结构文件。<br>
+[root@BlackGhost test]# ls |grep user &nbsp;&nbsp;<br>
+alluser.MRG &nbsp;&nbsp;<br>
+alluser.frm &nbsp;&nbsp;<br>
+user1.MYD &nbsp;&nbsp;<br>
+user1.MYI &nbsp;&nbsp;<br>
+user1.frm &nbsp;&nbsp;<br>
+user2.MYD &nbsp;&nbsp;<br>
+user2.MYI &nbsp;&nbsp;<br>
+user2.frm &nbsp;<br>
+Php代码 &nbsp;收藏代码<br>
+[root@BlackGhost test]# ls |grep user &nbsp;<br>
+alluser.MRG &nbsp;<br>
+alluser.frm &nbsp;<br>
+user1.MYD &nbsp;<br>
+user1.MYI &nbsp;<br>
+user1.frm &nbsp;<br>
+user2.MYD &nbsp;<br>
+user2.MYI &nbsp;<br>
+user2.frm &nbsp;<br>
+简单说明一下，上面的分表呢是利用了merge存储引擎（分表的一种），alluser是总表，下面有二个分表，user1，user2。他们二个都是独立的表，取数据的时候，我们可以通过总表来取。这里总表是没有.MYD,.MYI这二个文件的，也就是说，总表他不是一张表，没有数据，数据都放在分表里面。我们来看看.MRG到底是什么东西<br>
+[root@BlackGhost test]# cat alluser.MRG |more &nbsp;&nbsp;<br>
+user1 &nbsp;&nbsp;<br>
+user2 &nbsp;&nbsp;<br>
+#INSERT_METHOD=LAST &nbsp;<br>
+Php代码 &nbsp;收藏代码<br>
+[root@BlackGhost test]# cat alluser.MRG |more &nbsp;<br>
+user1 &nbsp;<br>
+user2 &nbsp;<br>
+#INSERT_METHOD=LAST &nbsp;<br>
+从上面我们可以看出，alluser.MRG里面就存了一些分表的关系，以及插入数据的方式。可以把总表理解成一个外壳，或者是联接池。<br>
+b），分区不一样，一张大表进行分区后，他还是一张表，不会变成二张表，但是他存放数据的区块变多了。<br>
+[root@BlackGhost test]# ls |grep aa &nbsp;&nbsp;<br>
+aa#P#p1.MYD &nbsp;&nbsp;<br>
+aa#P#p1.MYI &nbsp;&nbsp;<br>
+aa#P#p3.MYD &nbsp;&nbsp;<br>
+aa#P#p3.MYI &nbsp;&nbsp;<br>
+aa.frm &nbsp;&nbsp;<br>
+aa.par &nbsp;<br>
+Php代码 &nbsp;收藏代码<br>
+[root@BlackGhost test]# ls |grep aa &nbsp;<br>
+aa#P#p1.MYD &nbsp;<br>
+aa#P#p1.MYI &nbsp;<br>
+aa#P#p3.MYD &nbsp;<br>
+aa#P#p3.MYI &nbsp;<br>
+aa.frm &nbsp;<br>
+aa.par &nbsp;<br>
+从上面我们可以看出，aa这张表，分为二个区，p1和p3，本来是三个区，被我删了一个区。我们都知道一张表对应三个文件.MYD,.MYI,.frm。分区呢根据一定的规则把数据文件和索引文件进行了分割，还多出了一个.par文件，打开.par文件后你可以看出他记录了，这张表的分区信息，根分表中的.MRG有点像。分区后，还是一张，而不是多张表。<br>
+2，数据处理上<br>
+a），分表后，数据都是存放在分表里，总表只是一个外壳，存取数据发生在一个一个的分表里面。看下面的例子：<br>
+select * from alluser where id=’12′表面上看，是对表alluser进行操作的，其实不是的。是对alluser里面的分表进行了操作。<br>
+b），分区呢，不存在分表的概念，分区只不过把存放数据的文件分成了许多小块，分区后的表呢，还是一张表。数据处理还是由自己来完成。<br>
+3，提高性能上<br>
+a），分表后，单表的并发能力提高了，磁盘I/O性能也提高了。并发能力为什么提高了呢，因为查寻一次所花的时间变短了，如果出现高并发的话，总表可以根据不同的查询，将并发压力分到不同的小表里面。磁盘I/O性能怎么搞高了呢，本来一个非常大的.MYD文件现在也分摊到各个小表的.MYD中去了。<br>
+b），mysql提出了分区的概念，我觉得就想突破磁盘I/O瓶颈，想提高磁盘的读写能力，来增加mysql性能。<br>
+在这一点上，分区和分表的测重点不同，分表重点是存取数据时，如何提高mysql并发能力上；而分区呢，如何突破磁盘的读写能力，从而达到提高mysql性能的目的。<br>
+4），实现的难易度上<br>
+a），分表的方法有很多，用merge来分表，是最简单的一种方式。这种方式根分区难易度差不多，并且对程序代码来说可以做到透明的。如果是用其他分表方式就比分区麻烦了。<br>
+b），分区实现是比较简单的，建立分区表，根建平常的表没什么区别，并且对开代码端来说是透明的。<br>
+三，mysql分表和分区有什么联系呢<br>
+1，都能提高mysql的性高，在高并发状态下都有一个良好的表面。<br>
+2，分表和分区不矛盾，可以相互配合的，对于那些大访问量，并且表数据比较多的表，我们可以采取分表和分区结合的方式（如果merge这种分表方式，不能和分区配合的话，可以用其他的分表试），访问量不大，但是表数据很多的表，我们可以采取分区的方式等。
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/48321659'>原文链接</a>

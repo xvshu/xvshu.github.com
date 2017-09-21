@@ -1,0 +1,351 @@
+﻿<div style="color:blue" align=center>如何处理PB级别数据（2）——ApacheSolr之使用SolrJ操作索引库</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="padding-top:0px; padding-bottom:0px; margin-top:8px; margin-bottom:8px; line-height:22.5px; letter-spacing:0.5px; font-size:12.5px; word-wrap:break-word; word-break:break-all; color:rgb(51,51,51); font-family:'Microsoft YaHei',Verdana,sans-serif,宋体">
+&nbsp;Solrj是Solr搜索服务器的一个比较基础的客户端工具，可以非常方便地与Solr搜索服务器进行交互。最基本的功能就是管理Solr索引，包括添加、更新、删除和查询等。对于一些比较基础的应用，用Solj基本够用，而且你可以非常容易地通过使用Solrj的API实现与Solr搜索服务器进行交互，实现对Solr的基本管理功能。如果你的应用比较复杂，可以扩展Solrj来满足需要。</p>
+<p style="padding-top:0px; padding-bottom:0px; margin-top:8px; margin-bottom:8px; line-height:22.5px; letter-spacing:0.5px; font-size:12.5px; word-wrap:break-word; word-break:break-all; color:rgb(51,51,51); font-family:'Microsoft YaHei',Verdana,sans-serif,宋体">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;使用&nbsp;SolrJ操作索引库：</p>
+<p style="padding-top:0px; padding-bottom:0px; margin-top:8px; margin-bottom:8px; line-height:22.5px; letter-spacing:0.5px; font-size:12.5px; word-wrap:break-word; word-break:break-all; color:rgb(51,51,51); font-family:'Microsoft YaHei',Verdana,sans-serif,宋体">
+</p>
+<pre code_snippet_id="1589040" snippet_file_name="blog_20160226_1_2671208" name="code" class="java">import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+ 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.junit.Before;
+import org.junit.Test;
+ 
+import com.hcm.solr.entity.Message;
+ 
+public class SolrTest {
+ 
+    private static Log logger = LogFactory.getLog(SolrTest.class);
+ 
+    private static final String URL = &quot;http://127.0.0.1:8086/solr&quot;;
+ 
+    private HttpSolrServer server = null;
+ 
+    @Before
+    public void init() {
+        // 创建 server
+        server = new HttpSolrServer(URL);
+    }
+ 
+    /**
+     * 添加文档
+     */
+    @Test
+    public void addDoc() {
+ 
+        SolrInputDocument doc = new SolrInputDocument();
+ 
+        doc.addField(&quot;id&quot;, &quot;11&quot;);
+        doc.addField(&quot;title&quot;, &quot;this is my document !!&quot;);
+ 
+        try {
+ 
+            UpdateResponse response = server.add(doc);
+            // 提交
+            server.commit();
+ 
+            logger.info(&quot;########## Query Time :&quot; + response.getQTime());
+            logger.info(&quot;########## Elapsed Time :&quot; + response.getElapsedTime());
+            logger.info(&quot;########## Status :&quot; + response.getStatus());
+ 
+        } catch (SolrServerException | IOException e) {
+            logger.error(&quot;&quot;, e);
+        }
+    }
+ 
+    /**
+     * 添加多个文档
+     */
+    @Test
+    public void addDocs() {
+ 
+        String[] titles = new String[] { &quot;aaaaaaa&quot;, &quot;bbbbbbb&quot;, &quot;ccccccc&quot;, &quot;dddddd&quot;, &quot;eeeeee&quot; };
+ 
+        List&lt;SolrInputDocument&gt; docs = new ArrayList&lt;SolrInputDocument&gt;();
+ 
+        int i = 0;
+        for (String str : titles) {
+            SolrInputDocument doc = new SolrInputDocument();
+            doc.addField(&quot;id&quot;, i++);
+            doc.addField(&quot;title&quot;, str);
+            docs.add(doc);
+        }
+ 
+        try {
+ 
+            UpdateResponse response = server.add(docs);
+            server.commit();
+ 
+            logger.info(&quot;########## Query Time :&quot; + response.getQTime());
+            logger.info(&quot;########## Elapsed Time :&quot; + response.getElapsedTime());
+            logger.info(&quot;########## Status :&quot; + response.getStatus());
+ 
+        } catch (SolrServerException | IOException e) {
+            logger.error(&quot;&quot;, e);
+        }
+    }
+ 
+    /**
+     * 添加一个Entity到索引库
+     */
+    @Test
+    public void addBean() {
+ 
+        Message msg = new Message(&quot;1001&quot;, &quot;What is Fluentd?&quot;, new String[] { &quot;Fluentd is an open source data collector for unified logging layer&quot;,
+                &quot;Fluentd allows you to unify data collection and consumption for a better use and understanding of data.&quot;,
+                &quot;Fluentd decouples data sources from backend systems by providing a unified logging layer in between.&quot;,
+                &quot;Fluentd proves you can achieve programmer happiness and performance at the same time. A great example of Ruby beyond the Web.&quot;,
+                &quot;Fluentd to differentiate their products with better use of data.&quot; });
+ 
+        try {
+ 
+            UpdateResponse response = server.addBean(msg);
+            server.commit();
+ 
+            logger.info(&quot;########## Query Time :&quot; + response.getQTime());
+            logger.info(&quot;########## Elapsed Time :&quot; + response.getElapsedTime());
+            logger.info(&quot;########## Status :&quot; + response.getStatus());
+ 
+        } catch (SolrServerException | IOException e) {
+            logger.error(&quot;&quot;, e);
+        }
+    }
+ 
+    /**
+     * 添加多个Entity到索引库
+     */
+    @Test
+    public void addBeans() {
+ 
+        List&lt;Message&gt; msgs = new ArrayList&lt;Message&gt;();
+ 
+        Message msg = new Message(&quot;1001&quot;, &quot;What is Fluentd?&quot;, new String[] { &quot;Fluentd is an open source data collector for unified logging layer&quot;,
+                &quot;Fluentd allows you to unify data collection and consumption for a better use and understanding of data.&quot;,
+                &quot;Fluentd decouples data sources from backend systems by providing a unified logging layer in between.&quot;,
+                &quot;Fluentd proves you can achieve programmer happiness and performance at the same time. A great example of Ruby beyond the Web.&quot;,
+                &quot;Fluentd to differentiate their products with better use of data.&quot; });
+ 
+        Message msg2 = new Message(&quot;1002&quot;, &quot;What is Fluentd?&quot;, new String[] { &quot;Fluentd is an open source data collector for unified logging layer&quot;,
+                &quot;Fluentd allows you to unify data collection and consumption for a better use and understanding of data.&quot;,
+                &quot;Fluentd decouples data sources from backend systems by providing a unified logging layer in between.&quot;,
+                &quot;Fluentd proves you can achieve programmer happiness and performance at the same time. A great example of Ruby beyond the Web.&quot;,
+                &quot;Fluentd to differentiate their products with better use of data.&quot; });
+ 
+        msgs.add(msg);
+        msgs.add(msg2);
+ 
+        try {
+ 
+            UpdateResponse response = server.addBeans(msgs);
+            server.commit();
+ 
+            logger.info(&quot;########## Query Time :&quot; + response.getQTime());
+            logger.info(&quot;########## Elapsed Time :&quot; + response.getElapsedTime());
+            logger.info(&quot;########## Status :&quot; + response.getStatus());
+ 
+        } catch (SolrServerException | IOException e) {
+            logger.error(&quot;&quot;, e);
+        }
+    }
+ 
+    /**
+     * 删除索引
+     */
+    @Test
+    public void deleteDoc() {
+        try {
+            server.deleteById(&quot;0&quot;);
+            server.commit();
+        } catch (SolrServerException | IOException e) {
+            logger.error(&quot;&quot;, e);
+        }
+    }
+     
+    /**
+     * 更新索引&lt;br&gt;
+     * solr索引库不同于数据库，没有更新的功能。如果想更新，先通过id删除对应的文档，再添加新的文档。
+     */
+    @Test
+    public void updateDoc() {
+        // ... ...
+    }
+ 
+    /**
+     * 查询
+     */
+    @Test
+    public void testQuery() {
+        String queryStr = &quot;*:*&quot;;
+        SolrQuery params = new SolrQuery(queryStr);
+        params.set(&quot;rows&quot;, 10);
+        try {
+            QueryResponse response = server.query(params);
+            SolrDocumentList list = response.getResults();
+            logger.info(&quot;########### 总共 ： &quot; + list.getNumFound() + &quot;条记录&quot;);
+            for (SolrDocument doc : list) {
+                logger.info(&quot;######### id : &quot; + doc.get(&quot;id&quot;) + &quot;  title : &quot; + doc.get(&quot;title&quot;));
+            }
+        } catch (SolrServerException e) {
+            logger.error(&quot;&quot;, e);
+        }
+    }
+ 
+    /**
+     * 简单查询(分页)
+     */
+    @Test
+    public void querySimple() {
+        ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set(&quot;q&quot;, &quot;this my&quot;);
+        params.set(&quot;q.op&quot;, &quot;and&quot;);
+        params.set(&quot;start&quot;, 0);
+        params.set(&quot;rows&quot;, 5);
+        params.set(&quot;fl&quot;, &quot;*,score&quot;);
+        try {
+            QueryResponse response = server.query(params);
+            SolrDocumentList list = response.getResults();
+            logger.info(&quot;########### 总共 ： &quot; + list.getNumFound() + &quot;条记录&quot;);
+            for (SolrDocument doc : list) {
+                logger.info(&quot;######### id : &quot; + doc.get(&quot;id&quot;) + &quot;  title : &quot; + doc.get(&quot;title&quot;));
+            }
+        } catch (SolrServerException e) {
+            logger.error(&quot;&quot;, e);
+        }
+    }
+ 
+    /**
+     * 查询(分页,高亮)
+     */
+    @Test
+    public void queryCase() {
+        String queryStr = &quot;title:this&quot;;
+        SolrQuery params = new SolrQuery(queryStr);
+        params.set(&quot;start&quot;, 0);
+        params.set(&quot;rows&quot;, 5);
+ 
+        // 启用高亮组件, 设置高亮
+        params.setHighlight(true)                           
+            .addHighlightField(&quot;title&quot;)                     
+            .setHighlightSimplePre(&quot;&lt;span class=\&quot;red\&quot;&gt;&quot;)
+            .setHighlightSimplePost(&quot;&lt;/span&gt;&quot;)
+            .setHighlightSnippets(2)
+            .setHighlightFragsize(1000)
+            .setStart(0)
+            .setRows(10)
+            .set(&quot;hl.useFastVectorHighlighter&quot;, &quot;true&quot;)
+            .set(&quot;hl.fragsize&quot;, &quot;200&quot;);
+ 
+        try {
+            QueryResponse response = server.query(params);
+            SolrDocumentList list = response.getResults();
+            logger.info(&quot;########### 总共 ： &quot; + list.getNumFound() + &quot;条记录&quot;);
+            for (SolrDocument doc : list) {
+                logger.info(&quot;######### id : &quot; + doc.get(&quot;id&quot;) + &quot;  title : &quot; + doc.get(&quot;title&quot;));
+            }
+ 
+            Map&lt;String, Map&lt;String, List&lt;String&gt;&gt;&gt; map = response.getHighlighting();
+            Iterator&lt;String&gt; iterator = map.keySet().iterator();
+ 
+            while (iterator.hasNext()) {
+                String key = iterator.next();
+                Map&lt;String, List&lt;String&gt;&gt; values = map.get(key);
+                logger.info(&quot;############################################################&quot;);
+                logger.info(&quot;############ id : &quot; + key);
+ 
+                for (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : values.entrySet()) {
+                    String subKey = entry.getKey();
+                    List&lt;String&gt; subValues = entry.getValue();
+ 
+                    logger.info(&quot;############ subKey : &quot; + subKey);
+                    for (String str : subValues) {
+                        logger.info(&quot;############ subValues : &quot; + str);
+                    }
+                }
+                 
+            }
+             
+        } catch (SolrServerException e) {
+            logger.error(&quot;&quot;, e);
+        }
+    }
+ 
+}</pre><br>
+<span style="color:rgb(51,51,51); font-family:'Microsoft YaHei',Verdana,sans-serif,宋体; font-size:12.5px; letter-spacing:0.5px; line-height:22.5px">POJO：</span><br>
+<p>
+<p style="padding-top:0px; padding-bottom:0px; margin-top:8px; margin-bottom:8px; line-height:22.5px; letter-spacing:0.5px; font-size:12.5px; word-wrap:break-word; word-break:break-all; color:rgb(51,51,51); font-family:'Microsoft YaHei',Verdana,sans-serif,宋体">
+<span style="color:rgb(51,51,51); font-family:'Microsoft YaHei',Verdana,sans-serif,宋体; font-size:12.5px; letter-spacing:0.5px; line-height:22.5px"></span></p>
+<pre code_snippet_id="1589040" snippet_file_name="blog_20160226_2_3085129" name="code" class="java">package com.hcm.solr.entity;
+ 
+import java.io.Serializable;
+ 
+import org.apache.solr.client.solrj.beans.Field;
+ 
+public class Message implements Serializable {
+ 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+ 
+    private String id;
+    private String title;
+    private String[] content;
+ 
+    public Message() {
+        super();
+    }
+ 
+    public Message(String id, String title, String[] content) {
+        super();
+        this.id = id;
+        this.title = title;
+        this.content = content;
+    }
+ 
+    public String getId() {
+        return id;
+    }
+ 
+    @Field(&quot;id&quot;)
+    public void setId(String id) {
+        this.id = id;
+    }
+ 
+    public String getTitle() {
+        return title;
+    }
+ 
+    @Field(&quot;title&quot;)
+    public void setTitle(String title) {
+        this.title = title;
+    }
+ 
+    public String[] getContent() {
+        return content;
+    }
+ 
+    @Field(&quot;content&quot;)
+    public void setContent(String[] content) {
+        this.content = content;
+    }
+ 
+}</pre><br>
+<br>
+<p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50749826'>原文链接</a>

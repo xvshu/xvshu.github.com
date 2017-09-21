@@ -1,0 +1,74 @@
+﻿<div style="color:blue" align=center>操作系统——pv之道</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;我们的生活每天都有很多的事情发生，大部分事情我们可以自行处理，有些事情我们就要和其他人合作，比如去饭馆吃饭，饭馆是我们的一个经常光顾的地方，但是我们往往会碰到这样的情况，附近只有这一家饭馆，我很饿，不想去别的饭馆，刚刚我来的时候没有了位置，服务员让我等，看到别人在那吃得满嘴流油，恨啊……</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;刚刚的场景，很生活，我们不妨让时间暂停在上面那句话的时刻，我们来看这个可不可以解释pv操作，首先我们定义，饭馆有3张桌子，饭馆的经营情况是只有一个厨师，来的客人不定，在厨师的案面上放着要做几个菜，客人点菜由客人自己保管（小票），厨师念号，告诉他做什么！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;我们这么定义，厨师做几个菜是厨师的信号为Sc，客人看到饭馆剩几个座位是客人的信号Sp。</span></p>
+<p><span style="font-size:18px">上午9点，饭馆里没有一个客人，刚好有个客人来，还没有点菜</span></p>
+<p><span style="font-size:18px">Sc=0<br>
+</span></p>
+<p><span style="font-size:18px">Sp=3<br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">客人点了一个菜</span></p>
+<p>
+<p><span style="font-size:18px">Sc=1<br>
+</span></p>
+<p><span style="font-size:18px">Sp=2</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">上午11点，客人坐满，没有人等着，所有客人都点菜了</span></p>
+<p>
+<p><span style="font-size:18px">Sc=3<br>
+</span></p>
+<p><span style="font-size:18px">Sp=0</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">上午11:30，客人饱满，有三个客人等着，客人点菜还没上</span></p>
+<p>
+<p><span style="font-size:18px">Sc=3<br>
+</span></p>
+<p><span style="font-size:18px">Sp=-3</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;这时候我们再解释pv，p操作是看看有没有资源，对于厨师是看看有没有人要做饭，对于顾客是看看还有几个位置；v操作是，有一个顾客吃完饭了，释放了一个位置，对于厨师要判断要不要做饭，有人等着，就要做，没有人等着，就等待。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;程序的厨师设置为</span></p>
+<p>
+<p><span style="font-size:18px">Sc=0<br>
+</span></p>
+<p><span style="font-size:18px">Sp=3</span></p>
+<span style="font-size:18px"><br>
+</span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;厨师的代码是</span></p>
+<p><span style="font-size:18px">p（Sc）：看看要不要做饭</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;做饭&#43;送饭</span></p>
+<p><span style="font-size:18px">v（Sp）：通知顾客吃饭</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;顾客的代码：</span></p>
+<p><span style="font-size:18px">p（Sp）：看看我能吃饭吗？</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;点菜&#43;吃完</span></p>
+<p><span style="font-size:18px">v（Sc）：通知厨师有一个空位置</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;这里我们理解pv操作的意义，饭馆使我们的一个公共资源，我们要向好好的利用它，就要有排队，顾客排队点菜，厨师排队做饭，这样我们就和谐了，如果只有一个桌子厨师做了顾客才能吃，是合作的关系，也叫同步，如果饭馆就剩一个位置了，来了两个顾客，他两打起来了，这就叫互斥！所以pv操作是解决公共资源利用的问题，就是临界区的问题！希望大家能稍微理解！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px"><br>
+</span>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px"><br>
+</span><br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/8776034'>原文链接</a>

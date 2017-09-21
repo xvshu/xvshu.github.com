@@ -1,0 +1,66 @@
+﻿<div style="color:blue" align=center>WF40——简单认识及结合实际业务demo</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; WF的全称是Windows Workflow Foundation（Windows工作流基础），这个概念在最初在java中接触，看了jBPM的一些例子，最近要接手一个项目，客户的业务非常吻合工作流的特性，我们决定用.net版的工作流引擎WF4.0开发，在以后的博客中，我们一起学习工作流的使用与开发，现在我们先简单认识下这个朋友！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">1，简单理解</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 工作流(Workflow)，就是“业务过程的部分或整体在计算机应用环境下的自动化”，它主要解决的是“使在多个参与者之间按照某种预定义的规则传递文档、信息或任务的过程自动进行，从而实现某个预期的业务目标，或者促使此目标的实现”。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 就像我们做项目要有规划一样。从可行性分析到需求分析一直到项目维护，我们熟悉的瀑布模型就是一个典型的工作流：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="26241886139121" alt=""><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 说的简单点，就是事情执行的顺序！</span></p>
+<h1><span style="font-size:18px">2，实例</span></h1>
+<p><span style="white-space:pre"><span style="font-size:18px"></span></span></p>
+<p>&nbsp; 项目中工作流的建立步骤：</p>
+<h2>（1）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 业务分离</h2>
+<p>分析业务中可以单独存在的部分，或者较为合适的一个业务模块。</p>
+<p>举例：建设一个在线案件举报审批系统：</p>
+<p>&nbsp;</p>
+<p>A 用户添加举报案件</p>
+<p>B 办事员员审批用户案件</p>
+<p>C 更改案件状态</p>
+<p>&nbsp;</p>
+<h2>（2）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 流程建立</h2>
+<p>将业务以流程图的形式表达出来</p>
+<p>&nbsp;</p>
+<p>实例：案件举报</p>
+<p><img src="24162765441581" alt=""><br>
+</p>
+<p>
+<h2>（3）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 模块开发</h2>
+<p>
+<p>2.3.1添加工作流</p>
+<img src="19066697738645" alt=""><br>
+<p><img src="18362399357433" alt=""><br>
+</p>
+<p><img src="27953886581965" alt=""><br>
+</p>
+<p>
+<p>2.3.2添加代码模块</p>
+<img src="8825506783080" alt=""><br>
+<p><img src="13711359065904" alt=""><br>
+</p>
+<p>
+<h2>（4）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 设计宿主程序（管理工作流的外观&#43;工厂）</h2>
+<div><br>
+</div>
+<span style="white-space:pre"><img src="32903198198211" alt=""></span>
+<p>
+<p>
+<h2>（5）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 组装测试</h2>
+<p>
+<p>&nbsp;</p>
+<p>技术要点：</p>
+<p align="left">当用户添加案件，在提交申请之后和办事员审核之前，流程会暂停于WaitForInput&lt;String&gt;这个bookmark，并将流程持久化到微软定义的那些复杂的数据表中。</p>
+<p align="left">管理员登陆之后，提交审核，就会恢复这个BookMark。然后用一个IF活动判断管理员的审核结果，接着用自定义的UpdateApply活动更新数据表的状态。</p>
+<p align="left"><br>
+</p>
+<img src="15544056070329" alt=""><br>
+<p><br>
+</p>
+<h1><img src="50568667327971" alt=""><br>
+<span style="font-size:18px">3，总结</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们的学习，有时候会被我们的固化思维所束缚，好几天都找不到bug所在，其实，我们大可不必如此，团队的合作是开阔自己思路，加快项目成型的一个必要途径，在前期的技术攻坚阶段，突破往往是别人的一句话给了你莫大的启示！学会与别人合作提高开发效率，也是个必不可少的学习内容！</span></p>
+<p><span style="font-size:18px">本文代码下载地址：http://pan.baidu.com/s/1gdBt5dx</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/38730983'>原文链接</a>

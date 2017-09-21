@@ -1,0 +1,145 @@
+﻿<div style="color:blue" align=center>java必备——通过异常处理看面向对象</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<div style="direction:ltr; border-width:100%">
+<div style="direction:ltr; margin-top:0in; margin-left:0in; width:6.577in">
+<div style="direction:ltr; margin-top:0in; margin-left:0in; width:6.577in">
+<p style="margin:0in; font-family:Calibri">
+<div style="direction:ltr; border-width:100%">
+<div style="direction:ltr; margin-top:0in; margin-left:0in; width:9.9722in">
+<div style="direction:ltr; margin-top:0in; margin-left:0in; width:9.9722in">
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; 在看</span><span lang="en-US" style="font-family:Calibri">java</span><span lang="zh-CN" style="font-family:SimSun">视频的时候，看到异常处理的时候，我认识到自己编程上的一个缺憾，就是以前的错误处理他范范，我们应该针对不同的错误，做不同的处理，我拿出自己</span><span lang="en-US" style="font-family:Calibri">c#</span><span lang="zh-CN" style="font-family:SimSun">和</span><span lang="en-US" style="font-family:Calibri">vb</span><span lang="zh-CN" style="font-family:SimSun">的代码，看了看错误处理代码，发现，他们的&#26684;式很相&#20284;，想到面向对象和面向过程的对比，我想，咱们也许可以在这里，再挖掘一把！</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; 在编写</span><span lang="en-US" style="font-family:Calibri">VB</span><span lang="zh-CN" style="font-family:SimSun">的时候，我作为一个小白，基本没有用过错误处理，心中的他是个很高大上的技术，而随着学习了</span><span lang="en-US" style="font-family:Calibri">c#</span><span lang="zh-CN" style="font-family:SimSun">，</span><span lang="en-US" style="font-family:Calibri">java</span><span lang="zh-CN" style="font-family:SimSun">我发现，他原来是个如此</span><span lang="en-US" style="font-family:Calibri">so
+ easy</span><span lang="zh-CN" style="font-family:SimSun">的东西，是什么让他从“高大上”走向了普通百姓家呢，思来想去，还是“对象”这个词汇！让我们从他们的代码&#26684;式开始理解这个过程！</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">vb</span><span lang="zh-CN" style="font-family:SimSun">代码示例：</span></span></p>
+<p style="margin:0in; font-family:SimSun">
+<pre code_snippet_id="272666" snippet_file_name="blog_20140403_1_4764347" name="code" class="vb">private functionF_Search(byval iKB as integer) as boolean
+ 
+    on error goto Err
+    dim ado As New AdoObject
+    ado.openConn(&quot;XXXXXXXXXX&quot;)
+    ado.executeSQL(&quot;SQLYYYYY&quot;)
+   &#39;其他处理省略
+    exit function   
+err:
+    msgbox &quot;ERROR&quot;
+end function</pre><br>
+<br>
+<p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">c#</span><span lang="zh-CN" style="font-family:SimSun">代码示例：</span></span></p>
+<p lang="en-US" style="margin:0in; font-family:SimSun">
+<pre code_snippet_id="272666" snippet_file_name="blog_20140403_2_8428844" name="code" class="csharp">try {
+/*程序代码
+}catch(Exception e) {　        
+log.error(&quot;Error processing request: &quot; + req, e);　     
+}</pre><br>
+<br>
+<p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">java</span><span lang="zh-CN" style="font-family:SimSun">代码示例：</span></span></p>
+<p style="margin:0in; font-family:SimSun">
+<pre code_snippet_id="272666" snippet_file_name="blog_20140403_3_871843" name="code" class="java"> try{
+ /*程序代码*/
+ }catch(IOException ioe){
+ /*程序代码*/
+ }catch(SQLException sqle){
+ /*程序代码*/
+ }finally{
+ /*程序代码*/
+ }</pre><br>
+<br>
+<p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; 我们对比发现，</span><span lang="en-US" style="font-family:Calibri">vb</span><span lang="zh-CN" style="font-family:SimSun">的代码相对于</span><span lang="en-US" style="font-family:Calibri">c#</span><span lang="zh-CN" style="font-family:SimSun">和</span><span lang="en-US" style="font-family:Calibri">java</span><span lang="zh-CN" style="font-family:SimSun">来说显得有些随意，的确，在纯面向对象的编程中，任何事情都是有类的约束的，而在</span><span lang="en-US" style="font-family:Calibri">vb</span><span lang="zh-CN" style="font-family:SimSun">基于对象的语言中，我们发现点面向过程的影子，因为错误处理不是一个类，而是一句代码，好&#20284;是程序的一部分，不可拆，但是在</span><span lang="en-US" style="font-family:Calibri">c#</span><span lang="zh-CN" style="font-family:SimSun">和</span><span lang="en-US" style="font-family:Calibri">java</span><span lang="zh-CN" style="font-family:SimSun">中，错误处理被抽象出来，我们编程起来方便了不少！</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 我们举个例子，面向过程的错误编程，就像是一个“居委会万能大妈”，他什么都得管着，例如邻里纠纷，他得想着解决，小孩走失，她帮忙去找。</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; 而面向对象，更像是一个公司，分出了</span><span lang="en-US" style="font-family:Calibri">N</span><span lang="zh-CN" style="font-family:SimSun">个部门，有售后，人力资源，财务等等，各忙各的，大家协同工作！</span><span lang="en-US" style="font-family:Calibri">A</span><span lang="zh-CN" style="font-family:SimSun">公司有个电脑高手，可以借给</span><span lang="en-US" style="font-family:Calibri">B</span><span lang="zh-CN" style="font-family:SimSun">公司，别的他一概不会，但是“电脑”是他的专业，有关这方面的他都会！所以他“复用性”更好！</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; 而我们的万能大妈呢？</span><span lang="en-US" style="font-family:Calibri">A</span><span lang="zh-CN" style="font-family:SimSun">村出了事，他能管，</span><span lang="en-US" style="font-family:Calibri">B</span><span lang="zh-CN" style="font-family:SimSun">村出了事，他就不一定能管，他不了解啊，她得搞清楚前因后果之后，才能处理！</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">面向对象的错误处理和面向对象的异常处理简单对比</span></p>
+<div style="direction:ltr">
+<table border="1" cellpadding="0" cellspacing="0" valign="top" style="direction:ltr; border-collapse:collapse; border-style:solid; border-color:#A3A3A3; border-width:1pt">
+<tbody>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.0944in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">对比类别</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8222in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">面向过程</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8326in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">面向对象</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.0944in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">代码量</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8222in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">大</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8326in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">小</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.0944in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">处理复杂情况</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8222in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">统一处理</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8326in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">分批处理</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.0944in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">编程者要求</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8222in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">经验丰厚</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8326in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">会用就好</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.0944in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">可复用</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8222in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">低</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.8326in; padding:2.0pt 3.0pt 2.0pt 3.0pt">
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">高</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">通过这几个方面的简单对比，我们发现面向对象的编程中，但就错误处理而言，面向对象降低了初期编程的要求，我们只需要认识这几个类，将错误交给专业的类处理，我们干我们最需要我们做的事就好，就是理清业务逻辑！</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">再深刻理解一下面向对象和面向过程的对比，面向过程类&#20284;于工业革命前的小作坊，任何事情，他一个作坊，就能出一个完整的作品，二面向对象呢？是流水线，每个人做自己专业且擅长那部分，其他的活，自然有专业的人解决，而老板呢？他再也不用对每个细节都很了解，他只需要知道哪家工厂哪部分做得好就行，因为“只要实现了这个接口”，他用谁的都行！</span></span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp;</span><span lang="zh-CN" style="font-family:SimSun">细细想想，我们古人就很有面向对象的思想，在石器时代，我们是一个酋长说了算，他貌&#20284;知道一切，而到了农耕社会，我们的社会管理变了，我们分出了六部九卿，皇帝不再需要知道细节，坐在宝座上指挥就好！面向对象的思想，好像无处不在了！！！！！</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+</div>
+</div>
+</div>
+<p style="margin:0in; font-family:SimSun">
+</div>
+</div>
+</div>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/22876885'>原文链接</a>

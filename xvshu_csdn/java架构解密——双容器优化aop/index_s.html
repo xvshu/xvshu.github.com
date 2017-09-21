@@ -1,0 +1,173 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; java架构解密——双容器优化aop</div><div style="color:blue" align=center>java架构解密——双容器优化aop</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 上篇博客中，提出，优化是个无止境的过程，的确，随着需求的变化，软硬件基础的升级，我们越来越不考虑代码的容量，而是考虑代码的质量，但是随着研究的深入，到了某个阶段，我们也要考虑代码的容量问题，这时，容器的概念，脱颖而出，在上篇博客将服务类作为一个接口传入，实际在后台是一个map容器，我们不仅包含了map的全部实现，还实现了服务类的叠加，但是美中不足的是，我们的业务类，还是单个的对象，就如下图：</span></p>
+<p><span style="font-size:18px"><img src="176859810431442" alt=""><br>
+</span></p>
+<h1><span style="font-size:18px">类图改造</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;这时，我们如果想为更多的业务提供服务，就必须编写更多的aop，这不符合我们的原则，基于这一点，我做了以下的调整，大家先看类图：</span></p>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 1.1，回顾上个版本类图：</span></h2>
+<p><span style="font-size:18px"><img src="12399889344791" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1.2，改造后的类图：</span></h2>
+<p><span style="font-size:18px"><img src="17122346041957" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">代码实现：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们将业务类做成了容器，然后代理类持有这个容器，这个容器的所有子元素，通过遍历，就都拥有了服务类的所有方法：</span></p>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 2.1，业务容器：</span></h2>
+<p><pre name="code" class="java">&lt;pre name=&quot;code&quot; class=&quot;java&quot;&gt;&lt;span style=&quot;font-size:18px;&quot;&gt;/**
+ * 业务类容器：
+ * 	用map盛放要切入服务的业务类
+ *
+ * @author 许恕
+ * @version 3.0.0 , 2015年6月16日 下午4:41:28
+ */
+public class DoMehds  implements IDoMehds {
+	//盛放执行业务的map
+	private  HashMap&lt;String,Object&gt; DoBeans;
+
+	//获取业务map
+	public HashMap&lt;String, Object&gt; getDoBeans() {
+		return DoBeans;
+	}
+
+	//设置业务map
+	public void setDoBeans(HashMap&lt;String, Object&gt; doBeans) {
+		DoBeans = doBeans;
+	}
+        
+}
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span></p>
+<pre></pre>
+<span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 2.2，代理类变化：</span></h2>
+<p><pre name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;&lt;/span&gt;&lt;pre name=&quot;code&quot; class=&quot;java&quot;&gt;&lt;span style=&quot;font-size:18px;&quot;&gt;/**
+ * 打招呼动态代理类，给业务类添加功能
+ * 前一版本为JDK代理实现
+ * 	本次添加执行方法之前打印到控制台‘befor’
+ * 	本次添加执行方法之后打印到控制台‘after’
+ *本次版本为DGLIB代理
+ *	换代理类原因，JDK代理要求被代理类必须实现某接口，因为它底层实现是新建一个类，实现和被代理类相同的接口
+ *	用代理类新建的业务类代替原业务类
+ *	CGLIB代理是新建一个类，继承自被代理类，用新建的代理类替换掉原业务类，就不需要接口了
+ *
+ *5.0版本增加服务组装容器，将服务从代理类中抽离出去了，我们的代理类成为了一个bean
+ *6.0将服务容器定义为接口
+ *7.0增加业务容器
+ * @author 许恕
+ * @version 3.0.0 , 2015年6月16日 下午3:20:13
+ */
+public class CGLibDynamicProxy implements MethodInterceptor {  
+ 
+	//服务类容器
+	private IProxyMehds proxyMehds;
+	//业务类容器
+    private DoMehds doMehds;
+  //代理工厂类：单例模式，优化内存开销
+    private static CGLibDynamicProxy instance = new CGLibDynamicProxy();  
+ 
+    //构造函数
+    private CGLibDynamicProxy() {  
+    }  
+ 
+    //获取cglib代理工厂类
+    public static CGLibDynamicProxy getInstance() {  
+        return instance;  
+    }  
+ 
+    /**
+     * 使用代理工厂生成某个类的代理
+     *
+     * @param cls 要代理的类
+     * @return 返回已经代理好的类
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)  
+    public &lt;T&gt; T getProxy(Class&lt;T&gt; cls) {  
+        return (T) Enhancer.create(cls, this);  
+    }  
+ 
+    //获取业务容器
+    private void getProxyToDoMap(){
+    	
+    	//从业务容器中获取业务map
+    	HashMap&lt;String,Object&gt; mapDo = doMehds.getDoBeans();
+    	
+    	//循环给业务map中的业务类增加代理
+    	for (HashMap.Entry&lt;String, Object&gt; entry : mapDo.entrySet()) {
+    		
+    		//获取map中的对象
+    	    String objectKey = entry.getKey();
+    	    Object objectValure = entry.getValue();
+    	    
+    	    //重新更新map中的对象：代替原业务方法
+    	    mapDo.put(objectKey, getProxy(objectValure.getClass()));
+    	}
+    	
+    }
+    
+    //重写被代理对象的方法执行
+    //所有的方法执行，到反射的级别都是invoke，重写了这个方法，就重写了所有的方法执行，实现了代理
+    @Override 
+    public Object intercept(Object target, Method method, Object[] args, MethodProxy proxy) throws Throwable {  
+    	//重要改进：从服务容器中执行方法，不再是写死的！
+    	proxyMehds.beforeBean(); 
+    	
+    	//方法正常执行的语句
+        Object result = proxy.invokeSuper(target, args);
+        
+        //重要改进：从服务容器中执行方法，不再是写死的！
+        proxyMehds.afterBean(); 
+        
+        
+        return result;   
+    }
+
+    //服务容器的get方法
+	public IProxyMehds getProxyMehds() {
+		return proxyMehds;
+	}
+
+	//服务容器的set方法
+	public void setProxyMehds(IProxyMehds proxyMehds) {
+		this.proxyMehds = proxyMehds;
+	}
+
+	//业务容器get方法
+	public DoMehds getDoMehds() {
+		return doMehds;
+	}
+
+	//业务容器set方法
+	public void setDoMehds(DoMehds doMehds) {
+		this.doMehds = doMehds;
+		getProxyToDoMap();
+	}  
+ 
+    
+    
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span></p>
+<pre></pre>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 任何事物，都是有个诞生发展的过程，人类至今发明的东西，都是来自于人类自己的生活，在学习的过程中，想象生活，我们有时候，就会豁然开朗，举个例子：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 小明要有个快递要给小李邮过去，小明找到邮递员，签字完成，过了3天小李收到了，邮递的过程就好像咱们的aop一般，对用户来说是透明的，拆箱和装箱的过程，交给各自自己负责就好，这不就是面向对象吗！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 当然，优化如此就完美了吗？当然没有，下篇博客，咱们继续对aop做深入的了解和优化！<br>
+<br>
+</span></p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/46634737'>原文链接</a>

@@ -1,0 +1,96 @@
+﻿<div style="color:blue" align=center>权限管理框架实现（3）jquery自定义标签</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><span style="font-size:18px;">上篇文章，介绍了，使用ValueStack对权限进行控制，但是还是需要前台工作者去写，其实，我们利用jquery，就可以做到对html标签的控制，基本思路如下：</span></p><p><span style="font-size:18px;">1，获取所有特殊标签集合</span></p><p><span style="font-size:18px;">2，ajax后台申请权限</span></p><p><span style="font-size:18px;">3，判断返回值，没有权限则消除标签</span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;">具体js代码如下</span></p><h1><span style="font-size:18px;">1，获取集合</span></h1><p><pre code_snippet_id="1643613" snippet_file_name="blog_20160412_1_4792526" name="code" class="javascript"><span style="font-size:18px;"> var authObjs = $(&quot;auth[TestAuth='true']&quot;);</span></pre><span style="font-size:18px;"><br></span><h1><span style="font-size:18px;">2，ajax申请后台</span></h1></p><p><pre code_snippet_id="1643613" snippet_file_name="blog_20160412_2_6679116" name="code" class="javascript"><span style="font-size:18px;"> $.ajax({
+            type: &quot;POST&quot;,
+            url: authurl,
+            async: false,
+            dataType: &quot;html&quot;,
+            success: function(result) {
+                if(hascode==&quot;true&quot;){
+                    if(result.indexOf(&quot;noauth&quot;)&lt;7 &amp;&amp; result.indexOf(&quot;noauth&quot;)&gt;=0){
+                        oneAuthObj.remove();
+                    }
+                }else if (result.indexOf(&quot;&lt;html auth='NOAUTH'&gt;&lt;/html&gt;&quot;)&lt;28 &amp;&amp; result.indexOf(&quot;NOAUTH&quot;)&gt;=0) {
+                    oneAuthObj.remove();
+                }
+            },
+            error:function(date){
+                oneAuthObj.remove();
+            }
+        });</span></pre><span style="font-size:18px;"><br></span><h1><span style="font-size:18px;">3，整体</span></h1></p><p><pre code_snippet_id="1643613" snippet_file_name="blog_20160412_3_4868973" name="code" class="javascript"><span style="font-size:18px;">$(function(){
+    checkauth()
+});
+function checkauth(){
+    var authObjs = $(&quot;auth[TestAuth='true']&quot;);
+    for(var i=0;i&lt;authObjs.length;i++){
+        var oneAuthObj = authObjs[i];
+        var authurl = $(oneAuthObj).attr(&quot;authurl&quot;);
+        var hascode = $(oneAuthObj).attr(&quot;hascode&quot;);
+
+
+
+
+        if(hascode==&quot;true&quot;){
+            var authcode=$(oneAuthObj).attr(&quot;authcode&quot;);
+            if(authurl.indexOf(&quot;?&quot;)==-1){
+                authurl =authurl+&quot;?authorityCode=&quot;+authcode;
+            }else{
+                authurl =authurl+&quot;&amp;authorityCode=&quot;+authcode;
+            }
+        }else{
+            if(authurl.indexOf(&quot;?&quot;)==-1){
+                authurl =authurl+&quot;?authistest=true&quot;
+            }else{
+                authurl =authurl+&quot;&amp;authistest=true&quot;
+            }
+        }
+
+        $.ajax({
+            type: &quot;POST&quot;,
+            url: authurl,
+            async: false,
+            dataType: &quot;html&quot;,
+            success: function(result) {
+                if(hascode==&quot;true&quot;){
+                    if(result.indexOf(&quot;noauth&quot;)&lt;7 &amp;&amp; result.indexOf(&quot;noauth&quot;)&gt;=0){
+                        oneAuthObj.remove();
+                    }
+                }else if (result.indexOf(&quot;&lt;html auth='NOAUTH'&gt;&lt;/html&gt;&quot;)&lt;28 &amp;&amp; result.indexOf(&quot;NOAUTH&quot;)&gt;=0) {
+                    oneAuthObj.remove();
+                }
+            },
+            error:function(date){
+                oneAuthObj.remove();
+            }
+        });
+    }
+}
+
+function checkauthbyurl(authurl){
+    var isPass =false;
+    if(authurl.indexOf(&quot;?&quot;)==-1){
+        authurl =authurl+&quot;?authistest=true&quot;
+    }else{
+        authurl =authurl+&quot;&amp;authistest=true&quot;
+    }
+    $.ajax({
+        type: &quot;POST&quot;,
+        url: authurl,
+        async: false,
+        dataType: &quot;html&quot;,
+        success: function(result) {
+            if (result.indexOf(&quot;&lt;html auth='NOAUTH'&gt;&lt;/html&gt;&quot;)&lt;28 &amp;&amp; result.indexOf(&quot;NOAUTH&quot;)&gt;=0) {
+                isPass= false;
+            }else{
+                isPass= true;
+            }
+        },
+        error:function(date){
+            isPass= false;
+        }
+    });
+    return isPass;
+}
+</span></pre><span style="font-size:18px;"><br></span><h1><span style="font-size:18px;">4，前台代码</span></h1></p><p><pre code_snippet_id="1643613" snippet_file_name="blog_20160412_4_5567084" name="code" class="html"><span style="font-size:18px;">&lt;auth  TestAuth=&quot;true&quot; authurl=&quot;$!homeModule.getTarget('/testauth/edit.action')&quot; &gt;
+    &lt;input type=&quot;button&quot; style=&quot;width:100px;&quot; value=&quot;编辑&quot;&gt;&lt;/input&gt;
+&lt;/auth&gt;</span></pre></p><p><span style="font-size:18px;"><br></span></p><span style="font-size:18px;">效果：</span><p><span style="font-size:18px;"><img src="16654615854935" alt=""><br><br></span></p><h1><span style="font-size:18px;">总结</span></h1><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp;一次次，一次次，验证了那个道理，看似复杂的技术，都是简单技术的复杂化，或者业务话，就这样几个小的技术组合，就完成了基本权限控制的功能，这里我们还是要感谢那些奋斗在开源第一线的人们，分享和开源，已然是这个世界的主声音。</span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;"><br></span></p><p><br></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/51133488'>原文链接</a>

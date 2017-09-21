@@ -1,0 +1,124 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; java工程积累——java反射invoke</div><div style="color:blue" align=center>java工程积累——java反射invoke</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<h1><span style="font-size:18px">引：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在java项目中，我们听了很多ORM的概念，我就一直耿耿于怀，怎么就从rs转换成了对象呢？难道要写非常多的判断吗？答案肯定是否定，我们就要探索怎么解决这个问题，刚好在研究我们系统底层架构的时候，挖掘了这一点，现在和大家分享：</span></p>
+<h1><span style="font-size:18px">深入：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; JAVA反射机制是在运行状态中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意一个方法；这种动态获取的以及动态调用对象的方法的功能称为java语言的反射机制。</span></p>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Java反射机制主要提供了以下功能：在运行时判定任意一个对象所属的类；在运行时构造任意一个类的对象；在运行时判定任意一个类所具有的成员变量和方法；在运行时调用任意一个对象的方法；生成动态代理。<br>
+<br>
+</span>
+<p>
+<pre name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;package com.java.jvm;
+ 
+ 
+import java.lang.reflect.*;
+ 
+ 
+class InvokeTest {
+	public static void main(String[] args) {
+		 try {
+			 Class c = Class.forName(&quot;com.java.jvm.User&quot;);
+			 Object o = c.newInstance();
+			 Method m = c.getMethod(&quot;getName&quot;, null);
+			 Object ret = m.invoke(o, null);
+			 System.out.println( &quot;com.java.jvm.User.getName() = &quot; + ret);
+			  
+			  
+			 m = c.getMethod(&quot;setName&quot;, new Class[]{String.class});
+			 ret = m.invoke(o, new Object[]{&quot;shengjian&quot;});
+			 System.out.println( &quot;com.java.jvm.User.setName() = &quot; + ret);
+			  
+			  
+			 m = c.getMethod(&quot;getName&quot;, null);
+			 ret = m.invoke(o, null);
+			 System.out.println( &quot;com.java.jvm.User.getName() = &quot; + ret);
+			  
+			 //静态方法的调用
+			 m = c.getMethod(&quot;getUserName&quot;, new Class[]{String.class});
+			 ret = m.invoke(null, &quot;fuwang&quot;);
+			 System.out.println( &quot;com.java.jvm.User.getUserName() = &quot; + ret);
+		  
+		 } catch (ClassNotFoundException ex) {
+			System.out.println(&quot;找不到此类别&quot;);
+		 } catch (NoSuchMethodException ex) {
+			System.out.println(&quot;此方法不存在&quot;);
+		 } catch (IllegalAccessException ex) {
+			System.out.println(&quot;没有权限调用此方法&quot;);
+		 } catch (InvocationTargetException ex) {
+			System.out.println(&quot;调用此方法时发生下列例外:\n&quot; + ex.getTargetException());
+		 } catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		 } catch (InstantiationException e) {
+			e.printStackTrace();
+		 }
+	 }
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; c.getMethod(&quot;getName&quot;, null)返回一个 Method 对象，它反映此 Class 对象所表示的类或接口的指定公共成员方法。name 参数是一个String，用于指定所需方法的简称。parameterTypes 参数是按声明顺序标识该方法形参类型的 Class 对象的一个数组。如果&nbsp;&nbsp;parameterTypes 为 null，则按空数组处理。&nbsp; &nbsp; &nbsp; name - 方法名 parameterTypes
+ - 参数列表Method 提供关于类或接口上单独某个方法（以及如何访问该方法）的信息。所反映的方法可能是类方法或实例方法（包括抽象方法）。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">invoke（）</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;对带有指定参数的指定对象调用由此 Method 对象表示的底层方法。个别参数被自动解包，以便与基本形参相匹配，基本参数和引用参数都随需服从方法调用转换。如果底层方法是静态的，那么可以忽略指定的 obj 参数。该参数可以为 null。如果底层方法所需的形参数为 0，则所提供的 args 数组长度可以为 0 或 null。如果底层方法是实例方法，则使用动态方法查找来调用它，这一点记录在 Java Language Specification,
+ Second Edition 的第 15.12.4.4&nbsp;节中；在发生基于目标对象的运行时类型的重写时更应该这样做。如果底层方法是静态的，并且尚未初始化声明此方法的类，则会将其初始化。如果方法正常完成，则将该方法返回的&#20540;返回给调用者；如果该&#20540;为基本类型，则首先适当地将其包装在对象中。但是，如果该&#20540;的类型为一组基本类型，则数组元素不 被包装在对象中；换句话说，将返回基本类型的数组。如果底层方法返回类型为 void，则该调用返回 null。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; obj - 从中调用底层方法的对象args - 用于方法调用的参数。</span></p>
+<p><span style="font-size:18px">User代码：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p>
+<pre code_snippet_id="553047" snippet_file_name="blog_20141215_2_4713863" name="code" class="java">&lt;span style=&quot;font-size:18px;&quot;&gt;package com.java.jvm;
+ 
+public class User {
+     
+    static{
+        System.out.println(&quot;static ---&quot;);
+    }
+     
+    public User(){
+        System.out.println(&quot;name=&quot;+name);
+        name=&quot;xiaotian&quot;;
+    }
+     
+    private String name;
+    private Integer age;
+    private String address;
+     
+    public static String getUserName(String name){
+        return name;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public Integer getAge() {
+        return age;
+    }
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+    public String getAddress() {
+        return address;
+    }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+    @Override
+    public String toString() {
+        return &quot;User [name=&quot; + name + &quot;, age=&quot; + age + &quot;, address=&quot; + address
+                + &quot;]&quot;;
+    }
+     
+}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在我们为了某个实现而辗转反侧，夜不能寐的时候，有一天我们暮然发现，原来这一切竟是如此的简单，java本省的架构和底层，有着无穷的美丽指引着我们去探索和发现！在这个过程中，我们解开java这个虚掩的门缝，查看里面无尽的风光！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 编程很奇妙，有时，需要我们广泛，有时，需要我们深入！</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/41948529'>原文链接</a>

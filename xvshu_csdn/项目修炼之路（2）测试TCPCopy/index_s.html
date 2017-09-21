@@ -1,0 +1,65 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 项目修炼之路（2）测试TCPCopy</div><div style="color:blue" align=center>项目修炼之路（2）测试TCPCopy</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p>上篇博客中，我们介绍了服务化的相关特点，这篇博客主要给大家介绍在预上线之前做的tcpcopy测试。主要是图中红色背景部分：</p>
+<p><img src="43471606315195" alt=""><br>
+</p>
+<p>资源（单击下载）：</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; <a target="_blank" target="_blank" href="http://pan.baidu.com/s/1skvFnuX">
+tcpcopy-0.8.0.tar.gz</a><br>
+</p>
+<p>TCPCopy分为client和server，其中client运行在在线服务器上面，用来捕获在线请求数据包；server（监听端口为36524）运行在测试机器上面，client在测试服务器的响应包丢弃之前截获测试服务器的响应包，并通过client和server之间的tcp连接，传递响应包的tcp和ip头部信息给TCPCopy client，以完成TCP交互，不然TCP包就不能算到达对端。</p>
+<p>下载相应的服务包，拷贝到测试环境，准备一个测试用tomcat<br>
+依次执行下列命令<br>
+</p>
+<pre code_snippet_id="1566065" snippet_file_name="blog_20160126_1_9056664" name="code" class="plain">tar -zxvf tcpcopy-0.8.0.tar.gz
+cd tcpcopy-0.8.0.tar.gz
+./configure
+make
+make install</pre><br>
+结果如下：
+<p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="50671229268871" alt=""><br>
+</p>
+<p><br>
+</p>
+<p>1，启动TCPCopy server&nbsp;</p>
+<p>配置无应答<br>
+1）启动内核模块ip_queue<br>
+#modprobe ip_queue<br>
+2）设置要截获的端口，并且设置对output截获<br>
+#iptables -I OUTPUT -p tcp --sport 18093 -j QUEUE &nbsp; &nbsp; &nbsp;//注意这里的port就是测试服务器监听的端口-此步骤必须设置，否则不通<br>
+3）启动intercept</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="385463310381976" alt=""><br>
+#intercept<br>
+注意：配置好iptbales之后不要去运行service iptables start，不然新加的配置又会被清空了，如果iptables没有启动，可以在加规则之前启动；如果1），2）已经设置并起效的话，只要运行intercept就好了；测试完成之后要调用iptables -F 把过滤规则去掉<br>
+</p>
+<p>2，启动TCP Client进行包的转发</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="7078009652846" alt=""><br>
+./tcpcopy -x 线上服务器监听端口号-测试服务器ip地址：测试服务器监听端口</p>
+<p>另外可以加 -n 参数，进行多重复制，此参数的&#20540;就是代表复制过去的流量是在线的n 倍<br>
+</p>
+<p>例子：</p>
+<p>
+<pre code_snippet_id="1566065" snippet_file_name="blog_20160126_2_7912395" name="code" class="java">./tcpcopy -x 18093-192.168.2.16:18093</pre><br>
+试验用jsp：
+<p>
+<p>
+<pre code_snippet_id="1566065" snippet_file_name="blog_20160126_3_1085742" name="code" class="html">&lt;%
+	System.out.println(&quot;xvshu&quot;);
+%&gt;</pre><br>
+将jsp放到tomcat -&gt; webapp -&gt; ROOT 下
+<p>
+<p>访问地址为：http://192.168.2.200:18093/1.jsp</p>
+<p>测试结果为</p>
+<p>线上环境：</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;<img src="30168838810514" alt=""><br>
+</p>
+<p>测试环境：</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;<img src="49746796374946" alt=""><br>
+</p>
+<p><br>
+</p>
+<p>总结：</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;程序的设计，是为了方便人，提升效率，有了tcpcopy后，我们可以尽最大可能模拟线上的操作，为我们上线提供了保障！</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50586934'>原文链接</a>

@@ -1,0 +1,265 @@
+﻿<div style="color:blue" align=center>面向对象——一起来复习委托与事件！</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp; &nbsp; &nbsp; &nbsp; 事件与委托其实并不难理解，只是因为它们的使用方式与常用的编码有很大的差别，例如通常编写的都是同步代码，调用一个类型的方法，会即刻出现方法执行的结果，这是符合逻辑的。但在某些情况中，同步代码未必满足需求，拿最近的打车软件打个比方，搭车者发送一个信息，就会推送给附近的司机，使用同步代码，搭车对象肯定需要调用司机中心对象，这样就出现了我们一直不愿意看到的情况：两个类型紧密地耦合在一起。既然要其它类型对自己的行为作出反应，亲自调用其类型的方法&#20284;乎不可避免，在同步代码中，很难避免这种紧密的类型调用关系。而我们的代码中，更是很少会考虑将一个方法传递给另一个方法。</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp; &nbsp; &nbsp; &nbsp; 我们回顾在设计模式中，实现观察者模式的例子，有一家公司，董事长不希望自己的雇员在上班时间玩游戏，但又不可能每时每刻都盯着每个雇员，因此，他希望使用一种新的方式实现监视雇员的效果：如果有雇员违反规定，某个设备或专门的监查人员将自动发出一个消息通知他，董事长只需要在事情发生时进行处理。</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp; &nbsp; &nbsp; &nbsp; 因此，这个用例实际上是两种类型——董事长类与雇员类——之间的交互，下面我们来看看如何使用委托与事件机制实现这种交互：</div>
+<h1>举例：</h1>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp; &nbsp; &nbsp; &nbsp; 首先，我们需要在董事长类与雇员类之间定义一个委托，用于传递两者之间的事件，举个例子，这就相当于那个向老板报告的人（通知老板谁玩游戏了）：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_1_7796578" name="code" class="csharp">&#160; &#160; /// &lt;summary&gt;
+&#160; &#160; /// 监听的者的委托
+&#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; public delegate void DelegateClassHandle();&#160;
+</pre><br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+委托的返回&#20540;类型为void，这并非表示委托类型本身带有返回&#20540;，该返回&#20540;类型是指委托的目标函数类型，即它委托的一个事件处理函数返回&#20540;是void类型。</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+新建一个雇员类Employee，其代码如下：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_2_370090" name="code" class="csharp">/// &lt;summary&gt;
+&#160; &#160; /// 雇员类
+&#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; class Employee
+&#160; &#160; {
+&#160; &#160; &#160; &#160; /// &lt;summary&gt;
+&#160; &#160; &#160; &#160; /// 员工玩游戏事件（事件类型为监听者委托）
+&#160; &#160; &#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; &#160; &#160; public event DelegateClassHandle PlayGame;
+
+
+&#160; &#160; &#160; &#160; /// &lt;summary&gt;
+&#160; &#160; &#160; &#160; /// 员工玩游戏的方法
+&#160; &#160; &#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; &#160; &#160; public void Games()
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; if (PlayGame != null)
+&#160; &#160; &#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; PlayGame();
+&#160; &#160; &#160; &#160; &#160; &#160; }
+&#160; &#160; &#160; &#160; } &#160;
+
+
+&#160; &#160; }
+</pre><br>
+</div>
+<div style="font-family:Arial; font-size:14px; line-height:26px"><span style="color:rgb(51,51,51)">雇员类Employee代码中定义了一个DelegateClassHandle类型的事件PlayGame，它的定义方式也很特殊，关键字event表示PlayGame是一个事件，同时还必须声明该事件的委托类型为DelegateClassHandle，</span><span style="background-color:rgb(153,153,153)">即将来由该类型的委托对象负责通知事件。</span></div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+如果有雇员开始玩游戏，它将执行Games方法，而只要该方法一被调用，就会触发一个事件PlayGame，然后董事长就会收到这个事件的消息——有人在玩游戏了。</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+董事长类代码如下，他有一个方法Notify用于接收消息：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_3_1133458" name="code" class="csharp">&#160; &#160; /// &lt;summary&gt;
+&#160; &#160; /// 老板类，相当于监听者传送的对象
+&#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; class Boss
+&#160; &#160; {
+&#160; &#160; &#160; &#160; /// &lt;summary&gt;
+&#160; &#160; &#160; &#160; /// 老板通知的方法
+&#160; &#160; &#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; &#160; &#160; public void Notify()
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; System.Console.WriteLine(&quot;现在，有人玩游戏，赶紧去抓人！&quot;);
+&#160; &#160; &#160; &#160; } &#160;
+
+
+&#160; &#160; }
+</pre><br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+Employee的PlayGame事件如何与Admin的Notify方法关联起来呢？只需通过事件绑定即可实现，具体过程如下列代码：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_4_5069389" name="code" class="csharp">&#160;class Program
+&#160; &#160; {
+&#160; &#160; &#160; &#160; static void Main(string[] args)
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; //实例员工类和老板对象
+&#160; &#160; &#160; &#160; &#160; &#160; Employee employee = new Employee();
+&#160; &#160; &#160; &#160; &#160; &#160; Boss boss = new Boss();
+
+
+&#160; &#160; &#160; &#160; &#160; &#160; //将员工的玩游戏方法加入到监听者中
+&#160; &#160; &#160; &#160; &#160; &#160; employee.PlayGame += new DelegateClassHandle(boss.Notify);
+&#160; &#160; &#160; &#160; &#160; &#160; employee.Games();&#160;
+&#160; &#160; &#160; &#160; }
+&#160; &#160; }
+</pre><br>
+最终的结果为：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<img src="3429188130637" alt=""><br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+请大家注意事件绑定的代码：</div>
+<h1>升级版本：</h1>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+老板希望知道哪个个员工完了游戏</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+从该EventArgs类派生一个自定义的事件参数类CustomeEventArgs，这个类型将携带雇员姓名和年龄信息：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_5_6596125" name="code" class="csharp">&lt;pre name=&quot;code&quot; class=&quot;csharp&quot; style=&quot;color: rgb(51, 51, 51); font-size: 14px; line-height: 26px;&quot;&gt;public class CustomeEvetnArgs : EventArgs
+{
+    string name = &quot;&quot;;
+    int age = 0;
+    public CustomeEvetnArgs()
+    { }
+    public string Name
+    {
+        get { return this.name; }
+        set { this.name = value; }
+    }
+    public int Age
+    {
+        get { return this.age; }
+        set { this.age = value; }
+    }
+}</pre><br>
+<pre></pre>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+修改委托类型DelegateClassHandle的定义，让其携带必要的参数：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_6_5723290" name="code" class="csharp">public delegate void DelegateClassHandle(object sender, CustomeEvetnArgs e);</pre><br>
+<br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+雇员类的代码修改后如下：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_7_74709" name="code" class="csharp">/// &lt;summary&gt;
+&#160; &#160; &#160; &#160; /// 员工玩游戏事件（事件类型为监听者委托）
+&#160; &#160; &#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; &#160; &#160; public event DelegateClassHandle PlayGame;
+
+
+
+
+&#160; &#160; &#160; &#160; private string _name;
+
+
+&#160; &#160; &#160; &#160; public string Name
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; get { return _name; }
+&#160; &#160; &#160; &#160; &#160; &#160; set { _name = value; }
+&#160; &#160; &#160; &#160; }
+&#160; &#160; &#160; &#160; private int _age;
+
+
+&#160; &#160; &#160; &#160; public int Age
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; get { return _age; }
+&#160; &#160; &#160; &#160; &#160; &#160; set { _age = value; }
+&#160; &#160; &#160; &#160; }
+&#160;
+
+
+&#160; &#160; &#160; &#160; /// &lt;summary&gt;
+&#160; &#160; &#160; &#160; /// 员工玩游戏的方法
+&#160; &#160; &#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; &#160; &#160; public void Games()
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; if (PlayGame != null)
+&#160; &#160; &#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; CustomeEvetnArgs e = new CustomeEvetnArgs();
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; e.Name = this._name;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; e.Age = this._age;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; PlayGame(this,e);
+&#160; &#160; &#160; &#160; &#160; &#160; }
+&#160; &#160; &#160; &#160; } &#160;
+
+
+&#160; &#160; }
+</pre><br>
+<br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+在Games方法中，首先新建一个CustomeEventArgs对象，然后设置了必要的属性Name和Age。</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+董事长的通知方法也必须相应地进行修改：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_8_2789924" name="code" class="csharp">&#160;/// &lt;summary&gt;
+&#160; &#160; /// 老板类，相当于监听者传送的对象
+&#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; class Boss
+&#160; &#160; {
+&#160; &#160; &#160; &#160; /// &lt;summary&gt;
+&#160; &#160; &#160; &#160; /// 老板通知的方法
+&#160; &#160; &#160; &#160; /// &lt;/summary&gt;
+&#160; &#160; &#160; &#160; public void Notify(object sender, CustomeEvetnArgs e)
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; System.Console.WriteLine(&quot;有人玩游戏了，名字是： &quot;+e.Name + &quot; 年龄是： &quot; + e.Age.ToString());
+&#160; &#160; &#160; &#160; } &#160;
+
+
+&#160; &#160; }</pre><br>
+<br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+将两个类型对象进行关联的代码进行相应的修改：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_9_837294" name="code" class="csharp">//实例员工类和老板对象
+&#160; &#160; &#160; &#160; &#160; &#160; Employee employee = new Employee();
+&#160; &#160; &#160; &#160; &#160; &#160; Boss boss = new Boss();
+&lt;span style=&quot;font-family: Arial;&quot;&gt;&#160; &#160; &#160; &#160; &#160; &lt;span style=&quot;white-space:pre&quot;&gt;	&lt;/span&gt;employee.Name = &quot;张三&quot;;&lt;/span&gt;
+&#160; &#160; &#160; &#160; &#160; &#160; employee.Age = 25;
+&#160; &#160; &#160; &#160; &#160;&#160;
+&#160; &#160; &#160; &#160; &#160; &#160; employee.PlayGame += new DelegateClassHandle(boss.Notify);
+&#160; &#160; &#160; &#160; &#160; &#160; employee.Games();</pre><br>
+<br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+运行结果：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<img src="42795869197599" alt=""><br>
+</div>
+<h1>&nbsp;多路广播：</h1>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+实际，我们还要清除一个概念，委托是可以多路广播（Mulitcast）的，即一个事件可以委托给多个对象接收并处理。比如经理也要处理员工的玩游戏事件，也可以让委托对象将雇员的PlayGame事件通知他。</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+首先定义经理类：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_10_2505734" name="code" class="csharp">public class Manager
+{
+    public void Notify(object sender, CustomeEvetnArgs e)
+    {
+        System.Console.WriteLine(sender.ToString() + &quot;-&quot; + e.Name);
+    }
+}</pre><br>
+<br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+经理Manager类型的Notify方法与Admin一致，他也接受到相应的信息。仍然是使用&#43;=运算符，其方法如下面的代码所示：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<pre code_snippet_id="430375" snippet_file_name="blog_20140719_11_1632899" name="code" class="csharp">Employee employee = new Employee();
+employee.Name = &quot;Mike&quot;;
+employee.Age = 25;
+Admin admin = new Admin();
+Manager manager = new Manager();
+ 
+employee.PlayGame += new DelegateClassHandle(admin.Notify);
+employee.PlayGame += new DelegateClassHandle(manager.Notify);
+employee.Games();</pre>调用结果为：</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<img src="18218417386971" alt=""><br>
+</div>
+<h1>总结：</h1>
+<div>我们通过两幅图看一下采用了委托和事件和普通调用的区别：</div>
+<div><br>
+</div>
+<div><br>
+</div>
+<div><img src="11263269304667" alt=""><br>
+</div>
+<div><img src="29551215488551" alt=""><br>
+</div>
+<div style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp; &nbsp; &nbsp; &nbsp;通过复习委托与事件，我们知道了对象间的关系不仅仅存在调用这种耦合性较强的关系，还有通过这一系列的操作，交由委托机制这个第三方来统一管理，是个不一样的选择，而这个不一样是不是更适用于“高内聚，低耦合”这句话呢？我们以前对面向对象的认识，是不是停留在对象，而没有在类的级别，及架构的级别进行了思考呢？我想，我们应该进行一次深入的面向对象的深入讨论了，随着我的学习，后期博文会逐步跟进！</div>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/37704281'>原文链接</a>

@@ -1,0 +1,66 @@
+﻿<div style="color:blue" align=center>大数据解决之道——动态数据库方案V10</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;这次博客主要是和大家分享数据库这块关于建立动态数据库的一些想法，我总结了一个文档，供大家交流，欢迎大家提意见啊！</span></p>
+<h1><span style="font-size:18px">起因：</span></h1>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; 上次考试系统的数据量太大，导致有部分学生数据没有写进入，经讨论研究，决定研究动态数据库，现将第一版方案公布，大家研究！<br>
+</span>
+<h1><span style="font-size:18px">方案大纲：</span></h1>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp;将整体的数据库优化分为四个部分，第一部分为基础简化部分，第二部分为动态建库部分，第三部分为动态建表部分，第四部分为索引优化部分。<br>
+<br>
+<br>
+</span>
+<h1><span style="font-size:18px">基础简化：</span></h1>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;在一个系统中，构成这个系统的必要组成部分，他们变化机会小，数据量稳定，我们称为基础部分，将这部分抽象，做成基础数据库，将基础与变化分类封装，这样就保证了稳定性，和灵活性的合理平衡！<br>
+<br>
+<br>
+</span>
+<h2><span style="font-size:18px">动态建库：</span></h2>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; 基础数据库建好，和基础数据库配套的是动态数据库，也叫从数据库，他是动态生成的，我们只对里面的结构做个规范，不要求他的存储量有多大，他的建立，是为了让数据更优化地存储，也是避免表的过多，造成逻辑混乱！<br>
+<br>
+<br>
+</span>
+<h2><span style="font-size:18px">动态建表：</span></h2>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;架构好动态数据库后，库里有些表也是动态生成的，这样是因为，数据量大，单表保存不利于系统优化，动态保存，将当前的表用完后作为历史表封存，这样在保证数据量不超标的基础上，增加灵活性与统一性！<br>
+<br>
+<br>
+</span>
+<h2><span style="font-size:18px">索引优化：</span></h2>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;在建立好数据库基本机构后，要优化索引表，对系统的需求充分分析，建立合适的索引表，确保数据检索的快速性和整体性统一。<br>
+<br>
+<br>
+</span>
+<h1><span style="font-size:18px">方案具体实施办法：</span></h1>
+<h2><span style="font-size:18px">数据分析：</span></h2>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;认真分析系统需求，抽象出具体的表与字段，分析系统中可能出现问题的关键节点，将表分类：<br>
+大致分为以下几类：<br>
+（1），数据变动类<br>
+&nbsp; &nbsp; &nbsp; 将表按照数据变动的快慢分类表，一般分为三种，快，中和慢<br>
+（2），数据量大小类<br>
+&nbsp; &nbsp; &nbsp; &nbsp;将表按照数据量的大小分为，大，中和小三种<br>
+</span>
+<h2><span style="font-size:18px">数据分类：</span></h2>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;将表分好类后，将表按照以上两种方案作图：<br>
+<br>
+<img src="23020727166147" alt=""><br>
+&nbsp;<br>
+</span>
+<h2><span style="font-size:18px">详细设计：</span></h2>
+<span style="font-size:18px">（1），索引设计：<br>
+&nbsp; &nbsp; &nbsp; &nbsp;数据分类做好后，要仔细研究数据之间的关系，建立充足且合适的衔接表（索引表），原则是尽量简单，让衔接表最好只涉及到两张表！<br>
+（2），关口设计：<br>
+&nbsp; &nbsp; &nbsp; &nbsp;关口设计，就是设计什么时候动态创建库，什么时候动态创建表，要保证时间上和空间上的统一，保证用户同时面对的表不能太繁琐！<br>
+（3），操作设计：<br>
+&nbsp; &nbsp; &nbsp; &nbsp;一般而言，我们设计完动态库后，必须有自动控制，手动控制，混合控制三个选项供用户选择，还要设计好，控制的时间，一般自动选在闲置时间！<br>
+（4），安全设计：<br>
+&nbsp; &nbsp; &nbsp; &nbsp;在设计完数据库后，必须考虑数据安全性的问题，其中包括数据的一致性，完整性，保密性，操作权限等，保证用户整体数据不分离，用户必要数据不丢失，用户数据逻辑性不混乱！<br>
+（5），文档设计<br>
+&nbsp; &nbsp; &nbsp; &nbsp;设计完数据库后，必须配备详细的文档说明，不必到每个字段，但是关键字段要充分说明，方便后来者理解！<br>
+（6），维护设计<br>
+&nbsp; &nbsp; &nbsp; &nbsp;设计数据库时，要考虑好后期维护的难易程度，给特定用户开放维护接口，并配有相应的帮助文档！<br>
+（7），帮助设计<br>
+&nbsp; &nbsp; &nbsp; &nbsp;书写详细的帮助说明，用户在拿到帮助文档后能够快速上手，维护整个系统！<br>
+</span>
+<h1><span style="font-size:18px">总结：</span></h1>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;遇到问题多思考，多交流，请教高手，这是咱们死不要脸的革命精神的一部分，大家要好好总结自己的错误，有时候，错误是我们成长的关键所在</span>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/12494225'>原文链接</a>

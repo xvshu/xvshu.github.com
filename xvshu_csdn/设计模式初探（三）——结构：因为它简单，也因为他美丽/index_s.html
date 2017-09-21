@@ -1,0 +1,106 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 设计模式初探（三）——结构：因为它简单，也因为他美丽</div><div style="color:blue" align=center>设计模式初探（三）——结构：因为它简单，也因为他美丽</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<span style="font-size:18px"></span>
+<p><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 一个好的程序，有一个公用标准，叫高内聚，低耦合，但是，这是一个度的把握，再高的内聚性也避免不了沟通和交际，一味地抽象，继承是不科学的，我们应该寻找一种更好地解决方法，恰恰在这类设计模式，前人已经替我们做好了铺垫。</p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 结构？什么是结构，在建筑上是承重的部分，意思就是骨架，只有支好一个好的骨架，才能让我们更有效的工作，在面向对象的设计中，类是一根根骨头，将这些东西连接起来的是“关系”，怎么处理这些关系是我们现在这种设计模式要学习的！</span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<p><span style="font-size:18px"><img alt="" src="21136879987737.png"></span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 还是老样子，具体的例子大家去看书就ok，这里咱们谈谈扩展的两种知识：</span></p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<p><span style="font-size:18px">一：聚合和组合（或者称为合成）</span></p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 聚合，是种较弱的关系，例如足球场和观众，就是聚合的关系，他们互相独立，有一场足球赛的时候，他们才聚合到一起。</span></p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 组合，是种较强的关系，例如人与四肢，人和四肢是不可分割的一部分，他们不以意志转移为转移。</span></p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 再编程中，这两种关系帮助我们拜托了过多继承带来的困扰！</span></p>
+<p><span style="font-size:18px">具体应用：</span></p>
+<p><span style="font-size:18px">聚合</span></p>
+<pre class="csharp" name="code">//抽象软件
+    abstract class Soft
+    {
+        public abstract void Run();
+    }
+
+    //游戏
+    class Game : Soft
+    {
+        public override void Run()
+        {
+            Console.WriteLine (&quot;运行手机游戏！&quot;);
+        }
+    }
+
+    //通讯录
+    class AdressList : Soft
+    {
+        public override void Run()
+        {
+            Console.WriteLine (&quot;运行手机通讯录！&quot;);
+        }
+    }
+
+    //抽象品牌
+    abstract class Brand
+    {
+        protected Soft soft;
+
+        //设置软件
+        public void SetSoft(Soft soft)
+        {
+            this.soft = soft;
+        }
+
+        public abstract void Run();
+    }
+
+    //品牌N
+    class BrandN : Brand
+    {
+        public override void Run()
+        {
+            soft .Run ();
+        }
+    }
+
+    //品牌M
+    class BrandM : Brand
+    {
+        public override void Run()
+        {
+            soft.Run ();
+        }
+    }</pre>
+<p><br>
+&nbsp;</p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+<span style="font-size:18px"></span>
+<p><span style="font-size:18px">二：Hashtable</span></p>
+<p><span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 它的中文名字叫哈希表，他是通过key&#20540;来控制存入其中的对象，它是种容器，能够方便检索，快速查找，简单的理解就是这样，我们来看看应用</span></p>
+<p>&nbsp;</p>
+<pre class="csharp" name="code">using System;　　using System.Collections; //使用Hashtable时，必须引入这个命名空间
+　　class hashtable
+　　{
+　　public static void Main()
+　　{
+　　Hashtable ht=new Hashtable(); //创建一个Hashtable实例
+　　//key值唯一,value值可以重复.
+　　ht.Add(&quot;E&quot;,&quot;e&quot;);//添加key/键值对
+　　ht.Add(&quot;A&quot;,&quot;a&quot;);
+　　ht.Add(&quot;C&quot;,&quot;c&quot;);
+　　ht.Add(&quot;B&quot;,&quot;b&quot;);
+　　string s=(string)ht[&quot;A&quot;];
+　　if(ht.Contains(&quot;E&quot;)) //判断哈希表是否包含特定键,其返回值为true或false
+　　Console.WriteLine(&quot;the E key:exist&quot;);
+　　ht.Remove(&quot;C&quot;);//移除一个key/键值对
+　　Console.WriteLine(ht[&quot;A&quot;]);//此处输出a
+　　ht.Clear();//移除所有元素
+　　Console.WriteLine(ht[&quot;A&quot;]); //此处将不会有任何输出
+　　}
+　　}
+</pre>
+<p><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 设计模式的两种类型问题，已经有相对较好的解答，在下一篇博客里我们一起来看看，拥有模式最多的行为模式类型！</p>
+<p>&nbsp;</p>
+<p><span style="font-size:18px"></span>&nbsp;</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/8432262'>原文链接</a>

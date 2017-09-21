@@ -1,0 +1,171 @@
+﻿<div style="color:blue" align=center>隐藏音乐控件——最简单的最兼容</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p>&nbsp;&nbsp;&nbsp; <span style="font-size:18px">在考试系统中，我们有一个需求是在页面中做一个隐藏的音乐空间，并且实现后台顺序可控！经过反复研究和测试，最终用一个简单的方式实现了这个需求，现在拿出来和大家共享，共同交流和研究！</span></p>
+<p><span style="font-size:18px">第一步：在后台添加公共变量</span></p>
+<p><br>
+</p>
+<pre class="csharp" name="code">	<span style="font-size:18px;">public string[] lat = null;//存放文件播放地址lat
+        public string[] lng = null;//存放文件时间长度（包括空白时间）值lng
+        public int lng_len = 0;//用于获得数组长度
+        public int k = 0;//用于赋值循环</span></pre>
+<p><br>
+</p>
+<p><span style="font-size:18px">第二步：在前台获取，并传给js文件</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<pre class="html" name="code"><span style="font-size:18px;">&lt;script type=&quot;text/javascript&quot;&gt;
+
+        var jingdu = new Array();
+        var weidu = new Array();
+        &lt;%
+        for(int k=0;k&lt;lng_len;k++){
+         %&gt;
+        jingdu.push(&quot;&lt;%=lng[k]%&gt;&quot;);
+        weidu.push(&quot;&lt;%=lat[k]%&gt;&quot;);
+        &lt;%
+        }
+         %&gt;
+
+
+        getData(jingdu, weidu)
+
+&lt;/script&gt;</span></pre>
+<p><br>
+</p>
+<p><span style="font-size:18px">第三步：添加前台音乐播放控件</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<pre class="html" name="code"><span style="font-size:18px;">&lt;div id=&quot;OBJplayerDiv&quot;&gt;&lt;embed id=&quot;OBJplayer&quot; style=&quot; FILTER: invert(); WIDTH: 0px; HEIGHT: 0px&quot; src=&quot;&quot; type=&quot;audio/mpeg&quot; autostart=&quot;true&quot;  /&gt;&lt;/div&gt;</span></pre>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">第四步：编辑js文件和控件交互</span></p>
+<p><br>
+</p>
+<p><pre class="javascript" name="code"><span style="font-size:18px;">//经度数组表示听力材料播放的地址
+var jingdu = new Array();
+
+//纬度数组表示听力材料进行的时间，时间为总时间（包含空白时间）
+var weidu = new Array();
+
+//时间标志为第一秒
+var timeRmark = 1;
+
+//听力材料标志位，初始值为0
+var i;
+
+//听力材料共进行多少个
+var j = 0;
+
+//获取数据，实际是给听力用到的数组赋值，界面端调用
+function getData(cjingdu, cweidu) {
+
+    //时间标志为第一秒
+    timeRmark = 1;
+
+    //听力材料标志位，初始值为0
+    i = 0;
+
+    //经度表示听力材料播放的地址
+    jingdu = cjingdu;
+
+    //纬度表示听力材料进行的时间，时间为总时间（包含空白时间）
+    weidu = cweidu;
+    
+    //听力材料共进行多少个
+    j = weidu.length;
+
+ }
+</span>
+<span style="font-size:18px;">
+//每一秒钟就改变一次在界面上显示的时间
+var timer2 = window.setInterval(&quot;AlterPresentationForMusic()&quot;, 1000);
+//向前走的时间值
+var TheTime = 0;
+var theMusicMark = 0;
+function AlterPresentationForMusic() {
+
+/*****************************************************************************************
+------------------------------------------------------------------------------------------
+----------------------------以下js代码是播放听力----------------------------------
+------------------------------------------------------------------------------------------
+*****************************************************************************************/
+
+    //判断是否有听力材料
+    if (j &gt; 0)
+    { 
+        //每个一秒时间值加1
+        TheTime = TheTime + 1;
+
+        //如果时间少于六十秒钟，就跳转到登录页面
+        if (TheTime == '5') {
+            alert(&quot;now is 05！&quot;);
+        }
+
+        //判断是否进行完听力
+        if (i &lt;= j) {
+
+            //如果听力已经进行完最后一题
+            
+            
+                //如果听力执行到下一个开始的时间s
+                if (TheTime == timeRmark) {
+                    //document.getElementById(&quot;OBJplayer&quot;).stop();
+                    //alert(&quot;now is 01！&quot;);
+
+                    if (i == j) {
+                        //结束听力考试
+                        $(&quot;#OBJplayerDiv&quot;).innerHTML = '';
+                        document.getElementById('OBJplayerDiv').innerHTML = '&lt;embed id=&quot;OBJplayer&quot; style=&quot;FILTER: invert(); WIDTH: 0px; HEIGHT: 0px&quot; src=&quot;&quot; type=&quot;audio/mpeg&quot; autostart=&quot;true&quot;  /&gt;'
+                    }
+                    else {
+
+                        //开始下一段听力
+                        $(&quot;#OBJplayerDiv&quot;).innerHTML = '';
+                        document.getElementById('OBJplayerDiv').innerHTML = '&lt;embed id=&quot;OBJplayer&quot; style=&quot;FILTER: invert(); WIDTH: 0px; HEIGHT: 0px&quot; src=&quot;' + jingdu[i] + '&quot; type=&quot;audio/mpeg&quot; autostart=&quot;true&quot;  /&gt;'
+                        //document.getElementById(&quot;OBJplayer&quot;).play();
+
+                        //更新时间标志为下一个听力材料转换时间
+                        timeRmark = parseInt(timeRmark) + parseInt(weidu[i]);
+
+                        //i值标志位加1
+                        i++;
+                    }
+                }
+            
+
+        
+        }
+    }
+ 
+}
+
+</span></pre><br>
+</p>
+<p><span style="font-size:18px"></span></p>
+<p><span style="font-size:18px">第五步：后台加载获取播放地址</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"></span><pre class="csharp" name="code"><span style="font-size:18px;">		//存放文件播放地址list——lat
+                ArrayList lng_list = new ArrayList();
+                //存放文件时间长度（包括空白时间）值lng
+                ArrayList lat_list = new ArrayList();
+
+
+                foreach (DataRow DR in dtDisTableChild.Rows)
+                {
+                    lng_list.Add(DR[&quot;QuestionContent&quot;].ToString());
+                    lat_list.Add(DR[&quot;TimeLength&quot;].ToString());
+                }
+
+                lng = (string[])lng_list.ToArray(typeof(string));
+                lat = (string[])lat_list.ToArray(typeof(string));
+                lng_len = lng_list.Count;</span></pre><br>
+<span style="font-size:18px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 最后简单实现了音乐播放的功能，最后发现最简单的方法组合往往就能实现较为复杂的功能！考试系统的系列博客会持续更新，和大家分享在考试系统中遇到的问题和收获，希望和大家分享所学所得！</span><br>
+</p>
+<p>
+<p><br>
+</p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/16849815'>原文链接</a>

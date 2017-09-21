@@ -1,0 +1,62 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; java工程积累——树形结构的操作</div><div style="color:blue" align=center>java工程积累——树形结构的操作</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 最近一直被树形结构整的很头大，又是递归，又是循环，但是，好在我们在经历了千辛万苦后，终于弄出来了，其实就是组织机构的常规操作，有些是我们过度设计，有些是我们想错了，而对数的逻辑读取，我们就属于想错了的类型，今天拿出来和大家分享，主要是树形结构在数据库的读取问题！</span></p>
+<h1><span style="font-size:18px">原始：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在最开始，我们对树的查询，肯定是从最简单的select开始，我们现在回顾一下：</span></p>
+<h2><span style="font-size:18px">定义：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 表名：tb_tree</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 字段：id（主键），title（标题），parentId（父节点id）</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">举例：</span></h2>
+<p><span style="font-size:18px">1、查找树中的所有顶级父节点（辈份最长的人）。 假设这个树是个目录结构，那么第一个操作总是找出所有的顶级节点，再根据该节点找到其下属节点。<br>
+</span></p>
+<pre code_snippet_id="560617" snippet_file_name="blog_20141223_1_9066445" name="code" class="sql">select * from tb_tree m where m.parent is null;</pre><span style="font-size:18px"><br>
+</span>
+<p>
+<p><span style="font-size:18px">2、查找一个节点的直属子节点（所有儿子）。 如果查找的是直属子类节点，也是不用用到树型查询的。<br>
+</span></p>
+<pre code_snippet_id="560617" snippet_file_name="blog_20141223_2_7142689" name="code" class="sql">select * from tb_tree m where m.parent=1;</pre>
+<p>
+<h1><span style="font-size:18px">递归：</span></h1>
+<h2><span style="font-size:18px">简介：</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 经过一段时间的维护，我们发现，当我们处理的逻辑复杂时，我们和数据库就会与多次交互，而这是不符合网络交互的现状的，我们还是希望，尽量通过一次交互，传递更多的信息，减少对带宽的压力，经过多方讨论，我们发现Oracle其实已经做了这个工作，我们一起来看看：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们经过不断的探索，发现oracle树查询的最重要的就是select…start with…connect by…prior语法了。依托于该语法，我们可以将一个表形结构以树的顺序列出来。<br>
+</span></p>
+<p><span style="font-size:18px">1、start with id= 是定义起始节点（种子），可以是id也可以是root_id,定义为root_Id查询该节点下所有的树结构，定义为id（子节点）则查询指定的树</span></p>
+<p><span style="font-size:18px">2、connect by prior ：prior的含义为先前，前一条记录。prior id=root_id 也就是前一条记录的id等于当前记录的root_id(父id)<br>
+<br>
+<br>
+<br>
+<br>
+</span></p>
+<h2><span style="font-size:18px">举例：</span></h2>
+<p><span style="font-size:18px">1、查找一个节点的所有直属子节点（所有后代）。<span style="white-space:pre"></span></span></p>
+<p>
+<pre code_snippet_id="560617" snippet_file_name="blog_20141223_3_9943194" name="code" class="sql">select * from tb_menu m start with m.id=1 connect by m.parent=prior m.id;</pre>
+<p><span style="font-size:18px">这个查找的是id为1的节点下的所有直属子类节点，包括子辈的和孙子辈的所有直属节点。</span></p>
+<p><span style="font-size:18px">&nbsp;&nbsp;</span></p>
+<p><span style="font-size:18px">2、查找一个节点的直属父节点（父亲）。 如果查找的是节点的直属父节点，也是不用用到树型查询的。<br>
+</span></p>
+<pre code_snippet_id="560617" snippet_file_name="blog_20141223_4_8632260" name="code" class="sql">--c--&gt;child, p-&gt;parent
+select c.id, c.title, p.id parent_id, p.title parent_title
+from tb_menu c, tb_menu p
+where c.parent=p.id and c.id=6</pre>
+<p>
+<p><span style="font-size:18px"><br>
+3、查找一个节点的所有直属父节点（祖宗）。<br>
+</span></p>
+<pre code_snippet_id="560617" snippet_file_name="blog_20141223_5_9480918" name="code" class="sql">select * from tb_menu m start with m.id=38 connect by prior m.parent=m.id;</pre>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">4、level字段为oracle特有的层级字段，可以通过level字段查询指定的层级<br>
+</span><pre code_snippet_id="560617" snippet_file_name="blog_20141223_6_7514518" name="code" class="sql">select root_id,id,name,level from t2 where level=1
+ start with root_id = 0 
+connect by prior id = root_id;</pre>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 通过这几天的观察，我们发现，集体的智慧永远是最强大的，每个人贡献一点点，我们就能将问题的解决方案在设计之初就升级到一个客观的程度，包括这次的树形结构的研究，相信你的队友不论他在你心理到底是什么状态，他既然被招进公司，肯定有他的闪光点打动了人力部门，且还有一句话，高手在民间，这句话，已经多次被验证了！</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/42110687'>原文链接</a>

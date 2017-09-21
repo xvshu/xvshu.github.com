@@ -1,0 +1,50 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; java工程积累——前台页面的统一校验</div><div style="color:blue" align=center>java工程积累——前台页面的统一校验</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在项目中，我们面临这样的问题，就是如果在前台做抽象，大家想想后台代码的抽象，我们耳熟能详，但是前台的抽象，我们是如何做的呢？恐怕这个问题，如果是第一次抛给自己，自己也很惶恐，就是，我们不是对应一个业务写好一个页面吗？以前从来没有想过抽象，这里，我就要说，那是咱们最初级的方式，今天带大家一起见证先比较靠谱一种方式！</span></p>
+<h1><span style="font-size:18px">回顾</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们回顾下html编码的历程，在web1.0时代，我们面向的大多是静态页面，这时候，能够展示出来就好，由于网速的限制，电脑处理能力的约束，我们只能把什么都写在一起，但是随着时间的推移，技术革新，网速提升，个人电脑和服务器技术的提升，允许我们可以显示动态的页面，这时，我们称之为web2.0！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在web2.0时代，我们能做的更多，可以做很多，css虽然不是web2.0的代表技术，但是，他给我们提供了思路，就是页面对象化，将样式作为一种类存在，这个类的载体就是一个个的css文件，而我们每次写的class属性就是在实例一个个的对象，这样的技术，给了我们很大的启发，我们是不是也可以将很多概念剥离开html，做抽象和封装，打包成一个类呢？答案当然是肯定的！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 今天，我在我们项目中，就发现了牛人的存在，之所以牛，是他找到了一个概念的抽象，就是统一验证的js代码，说白了，就是我们不需要写太多常规的长度，字符验证，这些统一交由某个类完成，我们看看，他是怎么实现的！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 类文件：validateform.js</span></p>
+<h1><span style="font-size:18px">对比：</span></h1>
+<h2><span style="font-size:18px">1，以前的页面验证代码</span></h2>
+<p>
+<pre name="code" class="javascript">&lt;span style=&quot;font-size:18px;&quot;&gt;//为了验证就医单号是否为空
+  	var isDBNull = &#39;true&#39;
+  	//判断就医单号是否为空，为空：true，否则false；
+  	function isInoputNull(){
+		for(var i = 0;i &lt; detailSourceList.length; i++){
+         	
+         	var dateStr = $(&#39;#txtOriginalCode&#39; + i)[0].value;
+         	
+ 			if(dateStr.trim()==&#39;&#39;){
+ 				isDBNull=&#39;false&#39;;
+    		}
+    			
+         }
+  	}&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<p><span style="font-size:18px">这样我们每个需要验证的页面都要在提交时走一遍这个函数，我们如果验证多了，就会在提交表单是写N个类&#20284;的函数 ，这样，实际浪费的是我们的时间！</span></p>
+<h2><span style="font-size:18px">2，改进之后</span></h2>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p>
+<pre name="code" class="html">&lt;span style=&quot;font-size:18px;&quot;&gt;&lt;input type=&quot;text&quot; vtype=&quot;NumAndStr&quot; notNull=&quot;true&quot; vdisp=&quot;提示信息&quot; id=&quot;isOldLeader&quot;   value=&quot;${LoginUser.NLeader}&quot;/&gt;&lt;/span&gt;</pre><span style="font-size:18px"><br>
+<br>
+</span>
+<p>
+<p><span style="font-size:18px">在提交表单是，我们只需要调用一个统一的验证入口（doValidate）就可以了</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 前台页面的封装，实际上是减少了代码人员的开发量，做到一次开发，多次复用的效果，这样开发，还有很多，比如说日期控制，按钮控制等，还有一种层面上的封装，就是前台页面的动态组合，就是一次开发模板页面，多次利用，说白了就是由后台组合页面，发给前台，这样的例子，我在早些博客中写过，大家可以去看看“<a target="_blank" href="http://blog.csdn.net/xvshu/article/details/14226989" target="_blank">论道——工厂模式与装饰模式的融合</a>”</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 封装，在今天的我看来，没有什么是绝对不可以封装的，我们发现，当初做系统是，觉得这个是特殊的，那个是特殊的，实际上是我们对业务的不熟悉，在做系统时，我们还发现，系统做到一半，突然才发现，有很多东西是可以封装的，我们不必懊恼，这就是经验，我们对某类型业务的封装，也是从无到有的，积累了一定的代码和业务后，我们就可以利用现有巨人，就是网络，在做系统以前不妨多看看网上别人是怎么做的，对我们就会很有启发！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">附件：<a target="_blank" href="http://pan.baidu.com/s/1i3pDkc1" target="_blank">后台单击js下载</a></span></p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/41627121'>原文链接</a>

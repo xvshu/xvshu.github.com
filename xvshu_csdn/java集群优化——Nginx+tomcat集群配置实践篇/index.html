@@ -1,0 +1,157 @@
+﻿<div style="color:blue" align=center>java集群优化——Nginx+tomcat集群配置实践篇</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 上篇文章，我们针对集群中的Nginx&#43;tomcat技术理论进行了介绍，今天，咱们一起来完成一个简单的集群搭建</span></p>
+<h1><span style="font-size:18px">结果预览</span></h1>
+<p><span style="font-size:18px">大家先看看配置之后的结果：</span></p>
+<p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;<img src="23840585557757" alt=""></span></p>
+<span style="font-size:18px"><br>
+</span>
+<h1><span style="font-size:18px">配置步骤：</span></h1>
+<h2><span style="font-size:18px">&nbsp;1. &nbsp; &nbsp; &nbsp; &nbsp;安装</span></h2>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 从Nginx官网下载页面（http://nginx.org/en/download.html）下载Nginx最新版本（目前是1.9.3版本）安装包，解压后复制到部署目录。<br>
+<br>
+</span>
+<h2><span style="font-size:18px">2. &nbsp; &nbsp; &nbsp; &nbsp;启动和停止Nginx</span></h2>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Nginx目前只支持命令行操作，操作前先进入Dos命令环境（cmd命令），并进入Nginx部署目录。<br>
+&nbsp; &nbsp; &nbsp; &nbsp;启动Nginx：start nginx<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 停止Nginx：nginx -s stop<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 修改配置后重启：nginx -s reload<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 这三个命令可分别做成bat文件，放在部署目录下，方便后续操作。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; start nginx.bat文件内容：start nginx<br>
+&nbsp; &nbsp; &nbsp; &nbsp; stop nginx.bat文件内容：nginx -s stop<br>
+</span>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; reload nginx.bat文件内容：nginx -s reload</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h2><span style="font-size:18px">3. &nbsp; &nbsp; &nbsp; &nbsp;反向代理配置</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 修改部署目录下conf子目录的nginx.conf文件（如nginx-1.5.13\conf\nginx.conf）内容，可调整相关配置。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<span style="font-size:18px">反向代理配置示例：<br>
+</span><pre name="code" class="html">location / {
+
+             #设置主机头和客户端真实地址，以便服务器获取客户端真实IP
+             proxy_set_header Host $host;
+             proxy_set_header X-Real-IP $remote_addr;
+             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+             #禁用缓存
+             proxy_buffering off;
+
+             #设置反向代理的地址
+             proxy_pass http://192.168.1.1;       
+      }</pre><span style="font-size:18px"><br>
+</span>
+<h2><span style="font-size:18px">4. &nbsp; &nbsp; &nbsp; &nbsp;负载均衡配置</span></h2>
+<span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; nginx 的 upstream默认是以轮询的方式实现负载均衡，这种方式中，每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down掉，能自动剔除。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 另外一种方式是ip_hash：每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，可以解决session的问题。&nbsp;<br>
+<br>
+负载均衡配置示例<br>
+</span><pre name="code" class="html">upstream xvshu.com{
+             #ip_hash;
+             server 192.168.121.251 1;
+             server 192.168.121.252 1;
+             server 192.168.121.253 1;
+         }
+
+server {
+        listen       80
+        server_name  trffweb;
+
+        location / {
+
+             #反向代理的地址
+             proxy_pass http://&lt;span style=&quot;font-family: Arial, Helvetica, sans-serif;&quot;&gt;xvshu.com&lt;/span&gt;&lt;span style=&quot;font-family: Arial, Helvetica, sans-serif;&quot;&gt;;     &lt;/span&gt;
+        }
+
+}</pre><span style="font-size:18px"><br>
+<br>
+</span>
+<h2><span style="font-size:18px">5. &nbsp; &nbsp; &nbsp; &nbsp;完整配置示例</span></h2>
+<pre name="code" class="html">nginx.conf：
+#Nginx所用用户和组，window下不指定 &#160;
+#user &#160;niumd niumd; &#160;
+&#160;&#160;
+#工作的子进程数量（通常等于CPU数量或者2倍于CPU） &#160;
+worker_processes &#160;1; &#160;
+&#160;&#160;
+#错误日志存放路径 &#160;
+#error_log &#160;logs/error.log; &#160;
+#error_log &#160;logs/error.log &#160;notice; &#160;
+error_log &#160;logs/error.log &#160;info; &#160;
+&#160;&#160;
+#指定pid存放文件 &#160;
+pid &#160; &#160; &#160; &#160;logs/nginx.pid; &#160;
+&#160;&#160;
+events { &#160;
+&#160; &#160; #使用网络IO模型linux建议epoll，FreeBSD建议采用kqueue，window下不指定。 &#160;
+&#160; &#160; #use epoll; &#160;
+&#160; &#160; &#160;&#160;
+&#160; &#160; #允许最大连接数 &#160;
+&#160; &#160; worker_connections &#160;2048; &#160;
+} &#160;
+&#160;&#160;
+http { &#160;
+&#160; &#160; include &#160; &#160; &#160; mime.types; &#160;
+&#160; &#160; default_type &#160;application/octet-stream; &#160;
+&#160;&#160;
+&#160; &#160; &#160; &#160; #定义日志格式 &#160;
+&#160; &#160; #log_format &#160;main &#160;&#39;$remote_addr - $remote_user [$time_local] $request &#39; &#160;
+&#160; &#160; # &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;&#39;&quot;$status&quot; $body_bytes_sent &quot;$http_referer&quot; &#39; &#160;
+&#160; &#160; # &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;&#39;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#39;; &#160;
+&#160;&#160;
+&#160; &#160; #access_log &#160;off; &#160;
+&#160; &#160; #access_log &#160;logs/access.log; &#160;
+&#160;&#160;
+&#160; &#160; #client_header_timeout &#160;3m; &#160;
+&#160; &#160; #client_body_timeout &#160; &#160;3m; &#160;
+&#160; &#160; #send_timeout &#160; &#160; &#160; &#160; &#160; 3m; &#160;
+&#160; &#160;
+&#160; &#160; #client_header_buffer_size &#160; &#160;1k; &#160;
+&#160; &#160; #large_client_header_buffers &#160;4 4k; &#160;
+&#160;&#160;
+&#160; &#160; sendfile &#160; &#160; &#160; &#160;on; &#160;
+&#160; &#160; #tcp_nopush &#160; &#160; &#160;on; &#160;
+&#160; &#160; #tcp_nodelay &#160; &#160; on; &#160;
+&#160;&#160;
+&#160; &#160; keepalive_timeout &#160;75; &#160;
+&#160;&#160;
+&#160; &#160; #include &#160; &#160;gzip.conf; &#160;
+&#160; &#160; upstream xvshu.cn{ &#160;
+&#160; &#160; &#160; #根据ip计算将请求分配各那个后端tomcat，许多人误认为可以解决session问题，其实并不能。 &#160;
+&#160; &#160; &#160; #同一机器在多网情况下，路由切换，ip可能不同 &#160;
+&#160; &#160; &#160; #ip_hash; &#160;&#160;
+&#160; &#160; &#160; server 192.168.112.250:18080 weight=1; &#160;
+server 192.168.112.251:18080 weight=1; &#160;
+&#160; &#160; &#160;} &#160;
+&#160;&#160;
+&#160; &#160; server { &#160;
+&#160; &#160; &#160; &#160; &#160; &#160; listen &#160; &#160; &#160; 80; &#160;
+&#160; &#160; &#160; &#160; &#160; &#160; server_name &#160;localhost; &#160; &#160;&#160;
+&#160;&#160;
+#定义server_name &#160;localhost中的请求都叫给xvshu.cn处理
+&#160; &#160; &#160; &#160; &#160; &#160; location / { &#160;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; #proxy_connect_timeout &#160; 3; &#160;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; #proxy_send_timeout &#160; &#160; &#160;30; &#160;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; #proxy_read_timeout &#160; &#160; &#160;30; &#160;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; proxy_pass http://xvshu.cn;
+proxy_redirect default;
+&#160; &#160; &#160; &#160; &#160; &#160; } &#160;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160;&#160;
+&#160; &#160;} &#160;
+} &#160;
+
+</pre>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">遇到的问题：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;重新加载nginx服务失败，提示没有对应的服务，这时候可以尝试手动重启服务器</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="38790138151115" alt=""><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 一个好的工具，不仅仅是实现了好的功能，还有更重要的一点就是，一定要有更简单的业务逻辑，这样用户在使用这款工具的时候才能顺利过渡，而Nginx这款软件，对于广大开发者恰恰符合这两个要求，不用心，用户就会体会到，用心了，就是让用户体会不到，离不开！这不就是互联网产品的思维吗？</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/47319541'>原文链接</a>

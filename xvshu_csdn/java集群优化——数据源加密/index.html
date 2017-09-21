@@ -1,0 +1,24 @@
+﻿<div style="color:blue" align=center>java集群优化——数据源加密</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p>项目中，安全是一个永恒的话题，我们项目中对敏感信息的处理，一般采取加密的方式，而在以前的框架下我们一般自己写一个加密解密类操作敏感信息，但是在jboss6以后，针对加密自己实现了一套更好的接口，今天咱们就一起探究一下这里的秘密：</p>
+<p>首先在&lt;subsystem xmlns=&quot;urn:jboss:domain:security:1.1&quot;&gt;增加一段</p>
+<br>
+&lt;security-domain name=&quot;EncryptedPassword&quot;&gt; &nbsp;<br>
+&nbsp; &lt;authentication&gt; &nbsp;<br>
+&nbsp; &nbsp; &lt;login-module code=&quot;SecureIdentityLogin&quot; flag=&quot;required&quot;&gt; &nbsp;<br>
+&nbsp; &nbsp; &nbsp; &lt;module-option name=&quot;username&quot; value=&quot;yinming&quot;/&gt; &nbsp;<br>
+&nbsp; &nbsp; &nbsp; &lt;module-option name=&quot;password&quot; value=&quot;-1232db1ef431ba0c927d8272ac02de90&quot;/&gt; &nbsp;<br>
+&nbsp; &nbsp; &lt;/login-module&gt; &nbsp;<br>
+&nbsp; &lt;/authentication&gt; &nbsp;<br>
+&lt;/security-domain&gt; &nbsp;<br>
+&nbsp;其中密文是通过如下命令行生成的：<br>
+Java代码 &nbsp;收藏代码<br>
+java -cp %JBOSS_HOME%/modules/org/picketbox/main/picketbox-4.0.7.final.jar;%JBOSS_HOME%/modules/org/jboss/logging/main/jboss-logging-3.1.0.GA.jar org.picketbox.datasource.security.SecureIdentityLoginModule mypassword &nbsp;<br>
+&nbsp;最后替换掉datasources下的security节点如下：<br>
+Xml代码 &nbsp;收藏代码<br>
+&lt;security&gt; &nbsp;<br>
+&nbsp; &nbsp; &lt;security-domain&gt;EncryptedPassword&lt;/security-domain&gt; &nbsp;<br>
+&lt;/security&gt; &nbsp;<br>
+&nbsp;&nbsp;
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/46989695'>原文链接</a>

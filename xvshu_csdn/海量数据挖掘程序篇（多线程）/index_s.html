@@ -1,0 +1,25 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 海量数据挖掘程序篇（多线程）</div><div style="color:blue" align=center>海量数据挖掘程序篇（多线程）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">让我们先看一段多线程的定义，试着理解他要说的意思：</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; </p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">多线程：在一个程序中，这些独立运行的程序片断叫作“线程”（Thread），利用它编程的概念就叫作“多线程处理”。多线程处理一个常见的例子就是用户界面。利用线程，用户可按下一个按钮，然后程序会立即作出响应，而不是让用户等待程序完成了当前任务以后才开始响应。</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">这样，我们简单理解就是让</span><span lang="en-US" style="font-family:Calibri">cpu</span><span lang="zh-CN" style="font-family:SimSun">同时干多件事，这样的设计是不错的选择，但是我们也要视情况而定，在一个简单的系统中，数据量很小，逻辑很简单，我们就不需要多线程来操控，而另一种情况，我们却不得不考虑。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:SimSun">单线程：</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="41683567222944" alt=""></span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:SimSun">多线程：</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="33715358664196" alt="">&nbsp;
+ &nbsp;</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">一个系统在设计之初，我们就要想到这么一个问题，就是大数据量的处理，在上一篇博客里我们提到过大数据处理的关键之处，就是循环，程序中的循环和</span><span lang="en-US" style="font-family:Calibri">sql</span><span lang="zh-CN" style="font-family:SimSun">中的循环，从这两方面下手就可以让我们减轻一部分工作，但这仅仅是一个开始。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">即便我们处理好数据的调度问题，在处理</span><span lang="en-US" style="font-family:Calibri">10</span><span lang="zh-CN" style="font-family:SimSun">万条数据，一般的电脑，还是很轻松的，但是数据量上了</span><span lang="en-US" style="font-family:Calibri">20</span><span lang="zh-CN" style="font-family:SimSun">万条，我们的调度就会捉襟见肘，这时，解决方案有两个方面：</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp; 1</span><span lang="zh-CN" style="font-family:SimSun">，数据分离，或者建立缓存和索引，让数据不再聚集在一起，建立动态的数据处理机制，分离</span><span lang="en-US" style="font-family:Calibri">cpu</span><span lang="zh-CN" style="font-family:SimSun">当前的压力，这样可以让</span><span lang="en-US" style="font-family:Calibri">cpu</span><span lang="zh-CN" style="font-family:SimSun">在当下当时的处理游刃有余，但是，它会带来另外一个问题，就是数据分散，他的解决方法，有待我们继续研究，我们可以改变数据处理方法，将录入与计算数据分开，改变</span><span lang="en-US" style="font-family:Calibri">cpu</span><span lang="zh-CN" style="font-family:SimSun">的集中使用时间，还有优化数据结构等！</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp; 2</span><span lang="zh-CN" style="font-family:SimSun">，提高服务器性能，一个程序再优化，运行在一般的服务器上，总有一天数据量会爆掉，在优化做好的情况下，就要考虑数据的分布处理，考虑数据库的优化，就像船和码头的关系，码头就是程序，船就是计算机，码头的工作效率高了，如果货物多了，大了，小船总是不能胜任，那么我们就要换大船，当有一天我们用油轮的时候，我们也许在为全世界人民服务……</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">回到多线程，他就是码头开了好几个装配线，为多个船同时服务，如果我们只有一个运货车怎么办，这时，我们学的另外一个科目就派上了用场，就是作业调度，或者资源调度，调度算法也是生活的概括和总结，有先来先得，资源要求级别高先得，紧急情况高先得，等等算法，这里我们的知识网，向外扩充了一步！</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">总结：多线程是个解决问题的思路，具体的实现要和实际情况相验证，要考虑好需求和本身的条件等等，要从多个方面综合运用我们学到的知识！</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:16.0pt">&nbsp;</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/9277985'>原文链接</a>

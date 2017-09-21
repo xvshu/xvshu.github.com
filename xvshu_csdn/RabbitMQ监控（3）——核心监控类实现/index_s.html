@@ -1,0 +1,1044 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; RabbitMQ监控（3）——核心监控类实现</div><div style="color:blue" align=center>RabbitMQ监控（3）——核心监控类实现</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><br>
+</p>
+<p><br>
+</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 在监控时，我们的思路大概是这样的，使用rabbitmq的java客户端开发检测端口，发现不符合要求的性能参数，予以警告，给负责人发送短信或邮件，并提供前台可视化的监控界面，大家先看整体设计：</p>
+<p><br>
+</p>
+<h1>流程设计：</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="398792010252258" alt=""><br>
+</p>
+<p><br>
+</p>
+<h1>数据设计</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;根据这个过程，我们看看数据库设计图：</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;请参看文章底部《附录：数据库设计》</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<h1>代码实现</h1>
+<div><br>
+</div>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;其中我们用到一个比较关键的方法，在官方api中如此介绍：</p>
+<p><br>
+</p>
+<p><img src="35852618797683" alt=""><br>
+</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<p>RabbitMQ监控类：</p>
+<p>
+<pre code_snippet_id="1620667" snippet_file_name="blog_20160323_1_7556513" name="code" class="java">@Service(&quot;rabbitMQService&quot;)
+public class RabbitMQServiceImpl implements IRabbitMQService, IDebugService {
+
+    
+    @Override
+    public Boolean checkOneBusinessMQ(Business business) throws Exception {
+        if(business == null ){
+            return false;
+        }
+        boolean isFinish=false;
+        Channel channel = null;
+        Connection conn = null;
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setUsername(business.getMqUsername());
+        factory.setPassword(business.getMqPassword());
+        if(!(business.getMqVirtualhost()==null || business.getMqVirtualhost().trim().isEmpty() || business.getMqVirtualhost().equals(&quot;no&quot;))){
+            factory.setVirtualHost(business.getMqVirtualhost());
+        }
+
+        factory.setHost(business.getMqHost());
+        factory.setPort(Integer.valueOf(business.getMqPort()));
+        try {
+            conn = factory.newConnection();
+            channel = conn.createChannel();
+            long count = channel.messageCount(business.getMqQueueName());
+            HashMap&lt;String,String&gt; hashMap = JSON.parseObject(business.getWarningconfig(),HashMap.class);
+            Integer max=Integer.valueOf(hashMap.get(RabbitMQ.WarningConfig_Max.getValue()));
+            try {
+                FileSaveMq.addOneBusinessDate(business.getId().toString(), count + &quot;&quot;);
+            }catch (Exception e){
+                log.error(&quot;=checkOneBusinessMQ=&gt;error write file&quot;+business.getBusinessName(),e);
+            }
+            if(count &lt;=max){
+                isFinish=true;
+            }else{
+                isFinish=false;
+                isFinish = sendWarningOnebusiness(business);
+            }
+        }catch(Exception e){
+            log.error(&quot;=checkOneBusinessMQ=&gt;error business name:&quot;+business.getBusinessName(),e);
+            sendWarningOnebusiness(business);
+        }finally {
+            if(channel !=null){
+                channel.close();
+                if(conn != null){
+                    conn.close();
+                }
+            }
+        }
+        return isFinish;
+    }
+
+    @Override
+    public Boolean checkOneService(ControlService controlService) throws Exception {
+        if(controlService == null ){
+            return false;
+        }
+        boolean isFinish=false;
+        if(URLUtils.isConnect(controlService.getServiceUrl())){
+            isFinish=true;
+        }else{
+            isFinish = sendWarningOneservice(controlService);
+            isFinish=false;
+        }
+        return isFinish;
+    }
+
+}</pre>
+<p>
+<p><br>
+</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<h1>总结：</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;有了核心代码，其他的都是辅助其实现的工具，在这个基础之上，我们就可以扩展我们的思路，想想如何做页面展示，如何发送短信，邮件等，看&#20284;高大上的技术，其实也是简单技术的积累加上人的大脑创新！现在看看，“世上无难事，只怕有心人”这句话，真的是至理名言！<br>
+<br>
+</p>
+<p><br>
+</p>
+<h1>附录</h1>
+<p>File帮助类：</p>
+<p>
+<pre code_snippet_id="1620667" snippet_file_name="blog_20160323_2_174236" name="code" class="java">/**
+ * Created by Administrator on 2016/3/22.
+ */
+public class FileSaveMq {
+
+    public static void addOneBusinessDate(String key,String value){
+        String json = getDate();
+        HashMap&lt;String,String&gt; hashMap = null;
+        List&lt;String&gt; listvalue=null;
+        if(json==null||json.trim().isEmpty()){
+            hashMap=new  HashMap&lt;String,String&gt;();
+        }else{
+            hashMap = JSON.parseObject(json,HashMap.class);
+        }
+
+        if(hashMap.containsKey(key)){
+            String OneValueJson = hashMap.get(key);
+            if(OneValueJson==null ||OneValueJson.trim().isEmpty()){
+                listvalue = new ArrayList&lt;String&gt;();
+                listvalue.add(value);
+            }else{
+                listvalue = JSON.parseObject(OneValueJson, List.class);
+                listvalue.add(value);
+                if(listvalue.size()&gt;100){
+                    listvalue.remove(listvalue.size()-1);
+                }
+            }
+        }else{
+            listvalue = new ArrayList&lt;String&gt;();
+            listvalue.add(value);
+        }
+
+        hashMap.put(key,JSON.toJSONString(listvalue));
+        addDate(JSON.toJSONString(hashMap));
+
+    }
+
+    public static void addDate(String oneValue){
+        File file = new File(&quot;D://export/date/mq.log&quot;);
+        if(!file.canWrite()){
+            try {
+                file.createNewFile();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            FileUtils.write(file, oneValue);
+        }catch (Exception e1){
+            e1.printStackTrace();
+        }
+
+    }
+
+    public static String getDate(){
+        File file = new File(&quot;D://export/date/mq.log&quot;);
+        if(!file.canRead()){
+            try {
+                file.createNewFile();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        String result = &quot;&quot;;
+        try {
+            result  =FileUtils.readFileToString(file);
+        }catch (Exception e){
+           e.printStackTrace();
+        }
+        return result;
+    }
+}
+</pre><br>
+<br>
+<p>
+<p>数据库设计（部分字段已经改动）：</p>
+<p>
+<p align="left">d_responsible_user（责任人）</p>
+<table border="1" cellspacing="1" cellpadding="1" width="518">
+<tbody>
+<tr>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>字段名称</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>类型</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>必填</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">id</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">username</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>用户名（未来登录用）</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>password</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>密码（未来登录用）</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>chinesename</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>中文姓名</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>mobile</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>手机号</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>email</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>邮箱</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>remark</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>created</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>modified</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>修改时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">createusername</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建人</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p align="left">d_service（需要监控的服务）</p>
+<table border="1" cellspacing="1" cellpadding="1" width="518">
+<tbody>
+<tr>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>字段名称</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>类型</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>必填</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">id</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">servicename</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>服务名称</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>serviceurl</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>服务监控地址</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>warningmsg</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>报警信息</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>remark</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>created</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>modified</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>修改时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">createusername</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建人</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p align="left">d_service_user（服务与负责人关系）</p>
+<table border="1" cellspacing="1" cellpadding="1" width="518">
+<tbody>
+<tr>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>字段名称</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>类型</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>必填</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">id</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">serviceid</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>服务id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>servicename</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>服务名称</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>uid</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>用户id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>chinesename</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>中文名称</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>isemail</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>报警是否发邮件</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>ismessage</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>报警是否发短信</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>remark</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>created</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>modified</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>修改时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">createusername</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建人</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p align="left">d_ business（需要监控的业务）</p>
+<table border="1" cellspacing="1" cellpadding="1" width="518">
+<tbody>
+<tr>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>字段名称</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>类型</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>必填</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">id</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>businessname</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>业务名称</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>mqhost</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>mqhost</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>mqport</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>mq端口</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>mqusername</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>mq用户名</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>mqpassword</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>mq密码</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>mqvirtualhost</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>mq虚拟host</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>mqconnectiontimeout</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>mq链接超时</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>warningconfig</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>警告策略（阻塞&#20540;等）</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>remark</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>created</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>modified</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>修改时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">createusername</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建人</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p align="left">d_ business_user（监控的业务与用户关系）</p>
+<table border="1" cellspacing="1" cellpadding="1" width="518">
+<tbody>
+<tr>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>字段名称</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>类型</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>必填</p>
+</td>
+<td nowrap="nowrap" style="background:#DDD9C3">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">id</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>businessid</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>业务id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>businessname</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>业务名称</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>uid</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>用户id</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>isemail</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>报警是否发邮件</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>ismessage</p>
+</td>
+<td nowrap="nowrap">
+<p>integer</p>
+</td>
+<td nowrap="nowrap">
+<p>y</p>
+</td>
+<td nowrap="nowrap">
+<p>报警是否发短信</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>remark</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>备注</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>created</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p>modified</p>
+</td>
+<td nowrap="nowrap">
+<p>timestamp</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>修改时间</p>
+</td>
+</tr>
+<tr>
+<td nowrap="nowrap">
+<p align="left">createusername</p>
+</td>
+<td nowrap="nowrap">
+<p>string</p>
+</td>
+<td nowrap="nowrap">
+<p>n</p>
+</td>
+<td nowrap="nowrap">
+<p>创建人</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left"><br>
+</p>
+<p align="left"><br>
+</p>
+<p align="left"><br>
+</p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/50962414'>原文链接</a>

@@ -1,0 +1,49 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; java工程积累——如何处理Tomcat内存溢出</div><div style="color:blue" align=center>java工程积累——如何处理Tomcat内存溢出</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 在项目的部署中，我们设置不当，有时会常常遇到一个bug，就是内存溢出，而在百般调试，释放资源之后，却还是没有解决，这时，不要着急，我们静下心来，在数据量，代码量都不多情况下，并且不是很经常出现这bug时，我们要进行一下小小的总结，来处理这类事件的发生！</p>
+<h1>错误</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 我们先看，内存溢出的提示，一般会有三种，我们一一看看：</p>
+<p>这里根据平时遇到的情况和相关资料进行一个总结。常见的一般会有下面三种情况：<br>
+　　1.OutOfMemoryError： Java heap space<br>
+　　2.OutOfMemoryError： PermGen space<br>
+　　3.OutOfMemoryError： unable to create new native thread.<br>
+</p>
+<h1>原因及解决方式</h1>
+<p><br>
+</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 我们翻译下这几个错误，OutOfMemoryError：内存溢出错误&nbsp;，Java heap space：java 堆空间 ，&nbsp;PermGen space：永久区域空间 ， &nbsp;unable to create new native thread.不能创建本地线程，本次在公司遇到的就是第一个错误。</p>
+<p><br>
+</p>
+<h2>1.OutOfMemoryError： Java heap space</h2>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 我们先来找找下第一个错误的原因，网络上还是有牛人的，大家请看：</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; JVM堆的设置是指java程序运行过程中JVM可以调配使用的内存空间的设置.JVM在启动的时候会自动设置Heap size的&#20540;，其初始空间(即-Xms)是物理内存的1/64，最大空间(-Xmx)是物理内存的1/4。可以利用JVM提供的-Xmn -Xms -Xmx等选项可进行设置。Heap size 的大小是Young Generation 和Tenured Generaion 之和。<br>
+在JVM中如果98％的时间是用于GC且可用的Heap size 不足2％的时候将抛出此异常信息。<br>
+Heap Size 最大不要超过可用物理内存的80％，一般的要将-Xms和-Xmx选项设置为相同，而-Xmn为1/4的-Xmx&#20540;。<br>
+　　没有内存泄露的情况下，调整-Xms -Xmx参数可以解决。</p>
+<p><br>
+</p>
+<p>关于参数的设置，大家参考这篇博客：<a target="_blank" target="_blank" href="http://www.cnblogs.com/redcreen/archive/2011/05/04/2037057.html">JVM系列三:JVM参数设置、分析</a></p>
+<h2>2.OutOfMemoryError： PermGen space</h2>
+<p>再看看第二个错误：</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; PermGen space的全称是Permanent Generation space,是指内存的永久保存区域，这块内存主要是被JVM存放Class和Meta信息的,Class在被Loader时就会被放到PermGen space中，它和存放类实例(Instance)的Heap区域不同,GC(Garbage Collection)不会在主程序运行期对PermGen space进行清理，所以如果你的应用中有很CLASS的话,就很可能出现PermGen space错误，这种错误常见在web服务器对JSP进行pre
+ compile的时候。如果你的WEB APP下都用了大量的第三方jar, 其大小超过了jvm默认的大小(4M)那么就会产生此错误信息了。但目前的hibernate和spring项目中也很容易出现这样的问题。可能是由于这些框架会动态class，而且jvm的gc是不会清理PemGen space的，超过了jvm默认的大小(4M)，导致内存溢出。<br>
+　　建议：将相同的第三方jar文件移置到tomcat/shared/lib目录下，这样可以达到减少jar 文档重复占用内存的目的。<br>
+这一个一般是加大-XX：PermSize -XX：MaxPermSize 来解决问题。<br>
+　　-XX：PermSize 永久保存区域初始大小<br>
+　　-XX：PermSize 永久保存区域初始最大&#20540;<br>
+　　这一般结合第一条使用，比如 set JAVA_OPTS= -Xms1024m -Xmx1024m -XX：PermSize=128M -XX：PermSize=256M<br>
+</p>
+<h2>3.OutOfMemoryError： unable to create new native thread.</h2>
+<p>第三个呢？</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 每一个32位的进程最多可以使用2G的可用内存，因为另外2G被操作系统保留。这里假设使用1.5G给JVM，那么还余下500M可用内存。这500M内存中的一部分必须用于系统dll的加载，那么真正剩下的也许只有400M，现在关键的地方出现了：当你使用Java创建一个线程，在JVM的内存里也会创建一个Thread对象，但是同时也会在操作系统里创建一个真正的物理线程（参考JVM规范），操作系统会在余下的 400兆内存里创建这个物理线程，而不是在JVM的1500M的内存堆里创建。在jdk1.4里头，默认的栈大小是256KB，但是在jdk1.5里头，默认的栈大小为1M每线程，因此，在余下400M的可用内存里边我们最多也只能创建400个可用线程。<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 这样结论就出来了，要想创建更多的线程，你必须减少分配给JVM的最大内存。还有一种做法是让JVM宿主在你的JNI代码里边。<br>
+　　给出一个有关能够创建线程的最大个数的估算公式：<br>
+　　（MaxProcessMemory - JVMMemory - ReservedOsMemory） / （ThreadStackSize） = Number of threads</p>
+<h1>总结</h1>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 通过第一步，我就将问题解决了，但是，顺便多学了很多了很多关于jvm虚拟机的一些知识，这些知识，让我们在面对以后可能出现的错误时，做到了消灭“不知道”的恐惧，而且知道怎么去解决，这样的连带学习，让我们每天的学习都在做着i&#43;1的进步，正是这些进步，使得我们面对未来时，没那么匆忙！</p>
+<p><br>
+</p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/41457491'>原文链接</a>

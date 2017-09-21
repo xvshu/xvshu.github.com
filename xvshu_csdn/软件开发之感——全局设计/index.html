@@ -1,0 +1,31 @@
+﻿<div style="color:blue" align=center>软件开发之感——全局设计</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; &nbsp;昨天和今天上午，为了大家更好地合作，解决一部分出现的冲突和问题，我们小组和师兄一起研究了敏捷开发的</span><span lang="en-US" style="font-family:Calibri">svn</span><span lang="zh-CN" style="font-family:SimSun">使用，发现了我们在开发时，需要注意的问题，也是我们思想上的缺失</span><span lang="en-US" style="font-family:Calibri">!</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">在自考的过程中我们解除了很多和项目开发相关的书籍，其中有《软件开发工具》，《信息系统开发与管理》，《网络经济与企业管理》，《信息资源管理》等等书籍，其中有不止一本书提到了软件开发的过程：</span></p>
+<h1><span style="font-size:18px">开发流程：</span></h1>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 1需求分析</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;&nbsp; &nbsp;</span><span style="font-size:18px">2概要设计</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 3详细设计</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 4编码</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 5测试</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 6软件交付</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 7验收</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp; &nbsp; 其中需求分析分析我再上篇博客详细讲了，这次主要是从概要设计和详细设计两个对比的方便来谈谈我的收获！</span></p>
+<h2><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">1</span><span lang="zh-CN" style="font-family:SimSun">，概要设计</span></span></h2>
+<p style="margin:0in"><span style="font-size:18px; font-family:SimSun">&nbsp; &nbsp; 首先，系统的需求基本明朗之后，需要对软件系统进行概要设计，即系统分析与设计。包括系统的基本处理流程、系统的组织结构、模块划分、功能分配、接口设计、运行设计、数据结构设计和出错处理设计等，为下一步工作提供基础。</span></p>
+<p style="margin:0in"><span lang="zh-CN" style="font-size:18px; font-family:SimSun">&nbsp; &nbsp; 而在这一步，我们其他的做的还说的过去，但是，其中，模块划分和全局性的规定做的尤为不足，导致了后期的很多问题！</span><span lang="en-US" style="font-size:18px; font-family:Calibri">svn</span><span lang="zh-CN" style="font-size:18px; font-family:SimSun">的冲突问题，也是由此产生，我们做的时候没有及时规定统一的前缀与后缀，没有统一的文件夹管理，也没有抽象好公用类，导致开发的重复，修正工作占据了过大的时间部分！</span></p>
+<p style="margin:0in"><span style="font-size:18px; font-family:SimSun">&nbsp; &nbsp; 而我们另外一个错误就是会议的缺失，我们确定尝试敏捷开发的基本方法后，忽略了敏捷开发的特点，就是及时沟通，敏捷变化，导致问题的积累较为严重，直接导致一段时间的进度停滞！</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<h2><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">2</span><span lang="zh-CN" style="font-family:SimSun">，详细设计</span></span></h2>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">&nbsp;&nbsp; &nbsp;</span></span><span lang="zh-CN" style="font-size:18px; font-family:SimSun">在稍后的详细设计中，我们也犯了全局性的错误，其中</span><span lang="en-US" style="font-size:18px; font-family:Calibri">svn</span><span lang="zh-CN" style="font-size:18px; font-family:SimSun">的设计出了较大的纰漏，我们为此也付出了相应的代价，就是整体停滞了</span><span lang="en-US" style="font-size:18px; font-family:Calibri">2</span><span lang="zh-CN" style="font-size:18px; font-family:SimSun">天，当然原因不仅仅是</span><span lang="en-US" style="font-size:18px; font-family:Calibri">svn</span><span lang="zh-CN" style="font-size:18px; font-family:SimSun">，但是这是个引子，后来我细细想想之后发现，这是一个团队进行到一个阶段的必然现象！</span></p>
+<p style="margin:0in"><span lang="zh-CN" style="font-size:18px; font-family:SimSun">&nbsp; &nbsp; 现在的问题就是怎么解决以及如何在以后的工作中规避！我仔细想想这里的问题是激励机制的问题，系统的复杂性要在合适的时机合适地增加难度，系统的完成度，松紧程度要实时更新，在大前提不变的前提下，适时调整</span><span lang="en-US" style="font-size:18px; font-family:Calibri">!</span></p>
+<p lang="en-US" style="margin:0in 0in 0in 0.375in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<h1><span style="font-size:18px">收获：</span></h1>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1</span><span lang="zh-CN" style="font-family:SimSun">，没有一个真理可以让我们的团队成为优秀的团队，我们坚信我们是最优秀的团队，我们就一定可以是最优秀的团队，我们的效率也会是最高的。不要为了一时的松紧而紧张，是我们在掌握进度，而不是进度掌握我们！</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2</span><span lang="zh-CN" style="font-family:SimSun">，没有什么是我们不了解的，只是我们还没有了解，再新鲜的技术，与自己的知识体系一定可以挂钩！</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;3</span><span lang="zh-CN" style="font-family:SimSun">，没有什么是不可能的，不要急着下结论，做了在讨论！有时候的表象不是我们想要的，但是深深挖掘，我们发现，他恰恰就是我们最需要的！</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">&nbsp;</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/12953065'>原文链接</a>

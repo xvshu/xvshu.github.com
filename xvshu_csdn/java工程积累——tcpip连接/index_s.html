@@ -1,0 +1,54 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; java工程积累——tcpip连接</div><div style="color:blue" align=center>java工程积累——tcpip连接</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 公司的项目，在计划之中，如期上线，当然也在计划之中，出现了问题，这些我们都计划到了，但是，还是让我意料到了，我终于高兴地遇到了，我一个不太理解的问题！大家跟着我的描述，一起来看看，这个问题带给我们的困恼和收获！</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">背景：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 环境：程序服务器（ win server 2008 ）&#43; tomcat &nbsp;</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 数据服务器（unix）&#43; oracle 10 G</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 程序架构：经典SSH</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">故障表现：</span></h1>
+<h2><span style="font-size:18px">1，程序</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在进行业务操作时，比较卡顿，而在进行报销打印时，有时会出现数据库连接失败的错误（后台报错，不能打开这个连接）</span></p>
+<h2><span style="font-size:18px">2，数据库</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 用plsql连接时，我们发现，使用公司分配的数据库服务器时（新部署），也会出现时断时续的情况</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">排查办法：</span></h1>
+<h2><span style="font-size:18px">1，程序</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 数据库连接和测试环境相同（测试环境是数据服务和应用程序服务分离），仅仅修改ip，数据库服务名（和公司的对过，是正确的）</span></p>
+<h2><span style="font-size:18px">2，数据库</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 程序服务器新装oracle数据库，数据连接正常</span></p>
+<h2><span style="font-size:18px">3，链路</span></h2>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 使用ping命令，一个小时内没有问题</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 使用telnet命令，一分钟后断开</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 使用TcpClientServer，一分钟后断开</span></p>
+<p><span style="font-size:18px">截图：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="42254619146846" alt=""><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">初步诊断结果：网路连接出现故障</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">科普：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Telnet协议是TCP/IP协议族中的一员，是Internet远程登陆服务的标准协议和主要方式。它为用户提供了在本地计算机上完成远程主机工作的能力。在终端使用者的电脑上使用telnet程序，用它连接到服务器。终端使用者可以在telnet程序中输入命令，这些命令会在服务器上运行，就像直接在服务器的控制台上输入一样。可以在本地就能控制服务器。要开始一个telnet会话，必须输入用户名和密码来登录服务器。Telnet是常用的远程控制Web服务器的方法。<br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 我们应该熟练掌握一些网络命令，这对于排错来说非常重要。Windows下常用的网络排错命令有：&nbsp;<br>
+ping&nbsp;</span></p>
+<p><span style="font-size:18px">tracert&nbsp;</span></p>
+<p><span style="font-size:18px">&nbsp;telnet&nbsp;</span></p>
+<p><span style="font-size:18px">nslookup&nbsp;</span></p>
+<p><span style="font-size:18px"><br>
+&nbsp; &nbsp; &nbsp; &nbsp; ping主要是判断网络的连通性，tracert主要是判断网络路径和延时，，telnet常用于连接远端设备的端口，检测相关服务是否正常工作，nslookup常用于检查域名解析是否正常。<br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<h1><span style="font-size:18px">总结：</span></h1>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 在很多时候，我们的工作的最大价&#20540;就是能够解决问题，以及能够持续学习以保证我们解决问题能力的升级，像这次的情况，如果没有这些工具的帮助，能够让用户看到实实在在的数据，这些问题就会困扰我们很长时间也会影响我们在客户心中的形象，就像曾经听到的一句话，客户之所以在众多的选择中，选择你，就是因为你能为客户提供更多的选择，在我们这个行业，又何尝不是呢！</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 持续学习，不仅仅是提升自己的知识，也是在提升自己的自信，自信到，有个问题抛给你，你可以自信地说，我能试试，并且从容地准备好资料和数据（我们老板称之为弹药），为公司和个人制造双赢的局面！</span></p>
+<p><span style="font-size:18px">&nbsp;</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/42980469'>原文链接</a>
