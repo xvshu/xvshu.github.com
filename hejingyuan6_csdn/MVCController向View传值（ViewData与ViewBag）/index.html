@@ -1,0 +1,143 @@
+﻿<div style="color:blue" align=center>MVCController向View传值（ViewData与ViewBag）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">最近在开发项目中，使用的是</span><span lang="en-US" style="font-family:Tahoma">ASP.NET MVC</span><span lang="zh-CN" style="font-family:华文中宋">由于之前并没有接触，对于它的传&#20540;方式有些陌生，在这里进行初步总结积累学习！</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:华文中宋; font-size:14.0pt">一：使用</h1>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Tahoma">ViewData</span><span lang="zh-CN" style="font-family:华文中宋">使用：</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<pre name="code" class="csharp">public ActionResult Index()
+{
+	List&lt;string&gt; colors = new List&lt;string&gt;();
+	colors.Add(&quot;red&quot;);
+	colors.Add(&quot;green&quot;);
+	colors.Add(&quot;blue&quot;);
+	ViewData[&quot;listColors&quot;] = colors;
+	ViewData[&quot;dateNow&quot;]= DateTime.Now;
+	ViewData[&quot;name&quot;] = &quot;hejingyuan&quot;;
+	ViewData[&quot;age&quot;]= 25;
+	return View();
+}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">View<br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<pre name="code" class="html">&lt;p&gt;
+	My name is &lt;b&gt;@ViewData[&quot;name&quot;] &lt;/b&gt;,&lt;b&gt;@ViewData[&quot;age&quot;] &lt;/b&gt;years old.
+	&lt;br /&gt;
+	I like the following colors:
+&lt;/p&gt;
+&lt;ul id=&quot;colors&quot;&gt;
+	@foreach (var color in ViewData[&quot;listColors&quot;] as List&lt;string&gt;)
+	{
+	&lt;li&gt;&lt;font color=&quot;@color&quot;&gt;@color &lt;/font&gt;&lt;/li&gt;
+	}
+&lt;/ul&gt;
+&lt;p&gt;
+	@ViewData[&quot;dateNow&quot;]
+&lt;/p&gt;
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="en-US" style="font-family:Tahoma">ViewBag</span><span lang="zh-CN" style="font-family:华文中宋">使用：</span><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"></span></span></p>
+<pre name="code" class="csharp">public ActionResult Index()
+{
+	List&lt;string&gt;colors = new List&lt;string&gt;();
+	colors.Add(&quot;red&quot;);
+	colors.Add(&quot;green&quot;);
+	colors.Add(&quot;blue&quot;);
+	ViewBag.ListColors = colors; //colors is List
+	ViewBag.DateNow= DateTime.Now;
+	ViewBag.Name= &quot;hejingyuan&quot;;
+	ViewBag.Age = 25;
+	return View(); 
+}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋">View<br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"></span></span></p>
+<pre name="code" class="html">&lt;p&gt;
+	My name is &lt;b&gt;@ViewBag.Name&lt;/b&gt;, &lt;b&gt;@ViewBag.Age&lt;/b&gt; years old.
+	&lt;br /&gt;
+	I like the following colors:
+&lt;/p&gt;
+&lt;ul id=&quot;colors&quot;&gt;
+	@foreach (var color in ViewBag.ListColors)
+	{
+	&lt;li&gt;&lt;font color=&quot;@color&quot;&gt;@color&lt;/font&gt; &lt;/li&gt;
+	}
+&lt;/ul&gt;
+&lt;p&gt;
+	@ViewBag.DateNow
+&lt;/p&gt;
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"></span></span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">在使用上，我们可以很明显的看出这两种方式的区别，只是存取&#20540;得方式有些区别而已！</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:华文中宋; font-size:14.0pt">二，定义</h1>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">ViewBag定义</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<pre name="code" class="csharp">public dynamic ViewBag {
+    get {
+        if (_dynamicViewData == null) {
+            _dynamicViewData = new DynamicViewDataDictionary(() =&gt; ViewData);
+        }
+        return _dynamicViewData;
+    }
+}
+</pre><br>
+<p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">ViewData定义</p>
+<pre name="code" class="csharp">public ViewDataDictionary ViewData {
+    get {
+        if (_viewData == null) {
+            SetViewData(new ViewDataDictionary());
+        }
+        return _viewData;
+    }
+    set {
+        SetViewData(value);
+    }
+}
+</pre><br>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">通过定义我们可以看出ViewBag 是ViewData的动态封装器，相当于在</span><span lang="en-US" style="font-family:Tahoma">ViewData</span><span lang="zh-CN" style="font-family:华文中宋">的基础上进行了封装处理。</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:华文中宋; font-size:14.0pt">三：对比</h1>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">ViewData与ViewBag的区别</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">1、ViewData是字典类型，赋&#20540;方式用字典方式，通过key&#20540;读取对应的value，ViewData[&quot;myName&quot;]</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">2、ViewBag是动态类型，使用时直接添加属性赋&#20540;即可ViewBag.myName</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">3、ViewBag和ViewData只在当前Action中有效，等同于View</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">4、ViewData和ViewBag中的&#20540;可以互相访问，因为ViewBag的实现中包含了ViewData</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin-top:0pt; margin-bottom:6pt; font-family:华文中宋; font-size:14.0pt">
+注意：</p>
+<p style="margin-top:0pt; margin-bottom:6pt; font-family:华文中宋; font-size:14.0pt">
+&nbsp;</p>
+<p style="margin-top:0pt; margin-bottom:6pt; font-size:14.0pt"><span lang="en-US" style="font-family:Tahoma">1</span><span lang="zh-CN" style="font-family:华文中宋">，只有当要访问的关键字是一个有效的C#标识符时，ViewBag 才起作用。&nbsp;</span><span lang="en-US" style="font-family:华文中宋"></span></p>
+<p style="margin-top:0pt; margin-bottom:6pt; font-family:华文中宋; font-size:14.0pt">
+<span lang="zh-CN">例如，如果在</span><span lang="en-US">ViewData[&quot;Key With Spaces&quot;]</span><span lang="zh-CN">中存放一个&#20540;，那么就不能使用</span><span lang="en-US">ViewBag</span><span lang="zh-CN">访问。因为这样根本就无法通过编译。</span></p>
+<p style="margin-top:0pt; margin-bottom:6pt; font-size:14.0pt"><span lang="en-US" style="font-family:Tahoma">2</span><span lang="zh-CN" style="font-family:华文中宋">，动态&#20540;不能作为一个参数传递给扩展方法。因为C#编译器为了选择正确的扩展方法，在编译时必须知道每一个参数的真正类型。如果其中任何一个参数是动态的，那么就不会通过编译。</span></p>
+<p style="margin-top:0pt; margin-bottom:6pt; font-family:华文中宋; font-size:14.0pt">
+例如，这行代码就会编译失败：@Html.TextBox(&quot;name&quot;,ViewBag.Name)。要使这行代码通过编译有两种方法：第一是使用ViewData[&quot;Name&quot;]，第二是把ViewBag.Name&#20540;转换为一个具体的型：(string)ViewBag.Name 。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:华文中宋; font-size:14.0pt">四：总结</h1>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">对于传&#20540;方式这个话题，对于大家来说应该是有些老套，因为只要接触过项目的人都很了解，这是一个非常基础的知识，在这里列出来，主要的目的也不是说要告诉大家如何如何传&#20540;，如何如何操作，然后要求大家记下来等，而是要通过上面的知识，告诉大家其实知识并没有我们想的那么高深莫测，所有的知识即使我们没有听说过，但只要我们花一些时间去研究，去总结，那么一切困难都变得</span><span lang="en-US" style="font-family:Tahoma">easy</span><span lang="zh-CN" style="font-family:华文中宋">了！</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<br>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/39377553'>原文链接</a>

@@ -1,0 +1,253 @@
+﻿<div style="color:blue" align=center>【升级篇】JBPM44过渡到Activiti</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14.0pt"><strong><span lang="zh-CN" style="font-family:SimSun">简单介绍一下</span><span lang="en-US" style="font-family:Calibri">Activiti</span><span lang="zh-CN" style="font-family:SimSun">背景</span></strong></p>
+<p lang="en-US" style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">Activiti</span><span lang="zh-CN" style="font-family:SimSun">的出现：</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">Activiti</span><span lang="zh-CN" style="font-family:SimSun">的创始人</span><span lang="en-US" style="font-family:Calibri">Tom</span><span lang="en-US" style="font-family:SimSun">
+ Baeyens</span><span lang="zh-CN" style="font-family:SimSun">是</span><span lang="en-US" style="font-family:SimSun">JBPM</span><span lang="zh-CN" style="font-family:SimSun">的创始人，由于与合作伙伴在</span><span lang="en-US" style="font-family:SimSun">JBPM</span><span lang="zh-CN" style="font-family:SimSun">的未来架构上产生意见分歧，</span><span lang="en-US" style="font-family:Calibri">Tom</span><span lang="en-US" style="font-family:SimSun">
+ Baeyens</span><span lang="zh-CN" style="font-family:SimSun">在</span><span lang="en-US" style="font-family:SimSun">2010</span><span lang="zh-CN" style="font-family:SimSun">年离开了</span><span lang="en-US" style="font-family:SimSun">JBoss</span><span lang="zh-CN" style="font-family:SimSun">并加入</span><span lang="en-US" style="font-family:SimSun">Alfresco</span><span lang="zh-CN" style="font-family:SimSun">公司。</span><span lang="en-US" style="font-family:Calibri">Tom</span><span lang="en-US" style="font-family:SimSun">
+ Baeyens</span><span lang="zh-CN" style="font-family:SimSun">的离开使得</span><span lang="en-US" style="font-family:SimSun">JBPM5</span><span lang="zh-CN" style="font-family:SimSun">完全放弃了</span><span lang="en-US" style="font-family:SimSun">JBPM4</span><span lang="zh-CN" style="font-family:SimSun">的架构，基于</span><span lang="en-US" style="font-family:SimSun">Drools
+ Flow</span><span lang="zh-CN" style="font-family:SimSun">重新开发。而在</span><span lang="en-US" style="font-family:SimSun">2010</span><span lang="zh-CN" style="font-family:SimSun">年的</span><span lang="en-US" style="font-family:SimSun">5</span><span lang="zh-CN" style="font-family:SimSun">月，</span><span lang="en-US" style="font-family:Calibri">Tom</span><span lang="en-US" style="font-family:SimSun">
+ Baeyens</span><span lang="zh-CN" style="font-family:SimSun">发布了第一个</span><span lang="en-US" style="font-family:SimSun">Activiti</span><span lang="zh-CN" style="font-family:SimSun">版本（</span><span lang="en-US" style="font-family:SimSun">5.0alphal</span><span lang="zh-CN" style="font-family:SimSun">），由此看来，</span><span lang="en-US" style="font-family:SimSun">Activiti</span><span lang="zh-CN" style="font-family:SimSun">更像是</span><span lang="en-US" style="font-family:SimSun">JBPM4</span><span lang="zh-CN" style="font-family:SimSun">的延续，也许是为了让其看起来更像</span><span lang="en-US" style="font-family:SimSun">JBPM4</span><span lang="zh-CN" style="font-family:SimSun">的延续，</span><span lang="en-US" style="font-family:SimSun">Activiti</span><span lang="zh-CN" style="font-family:SimSun">团队直接将</span><span lang="en-US" style="font-family:SimSun">Activiti</span><span lang="zh-CN" style="font-family:SimSun">的第一个版本定义为</span><span lang="en-US" style="font-family:SimSun">5.0</span><span lang="zh-CN" style="font-family:SimSun">。</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><span lang="zh-CN">选择</span><span lang="en-US">Activiti</span><span lang="zh-CN">还是</span><span lang="en-US">JBPM</span></p>
+<p lang="en-US" style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><span lang="zh-CN">对于我们来说，</span><span lang="en-US">JBPM5</span><span lang="zh-CN">和</span><span lang="en-US">Activiti</span><span lang="zh-CN">同样支持</span><span lang="en-US">BPMN2.0</span><span lang="zh-CN">规范，但是实际上</span><span lang="en-US">JBPM5</span><span lang="zh-CN">已经推翻了</span><span lang="en-US">JBPM3</span><span lang="zh-CN">和</span><span lang="en-US">JBPM4</span><span lang="zh-CN">的架构，使用了</span><span lang="en-US">Drools
+ Flow</span><span lang="zh-CN">作为工作流架构，这对于原来使用</span><span lang="en-US">JBPM3</span><span lang="zh-CN">和</span><span lang="en-US">JBPM4</span><span lang="zh-CN">的用户来说是非常郁闷的一件事（从零开始重新学习</span><span lang="en-US">JBPM5</span><span lang="zh-CN">）。而</span><span lang="en-US">Activiti</span><span lang="zh-CN">更像是原来</span><span lang="en-US">JBPM4</span><span lang="zh-CN">的延续，因此对于原来使用</span><span lang="en-US">JBPM3</span><span lang="zh-CN">和</span><span lang="en-US">JBPM4</span><span lang="zh-CN">的用户来说，推荐使用</span><span lang="en-US">Activiti</span><span lang="zh-CN">。但是由于</span><span lang="en-US">JBoss</span><span lang="zh-CN">中有一些优秀的项目，</span><span lang="en-US">JBPM5</span><span lang="zh-CN">与这些项目进行整合具有先天的优势，因为如何选择还需要权衡。</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin-top:7pt; margin-bottom:7pt; font-family:SimSun; font-size:12.75pt; color:#333333">
+<span style="">Activiti5与jBPM5技术组成对比</span></p>
+<p style="margin-top:7pt; margin-bottom:7pt; font-family:SimSun; font-size:12.75pt; color:#333333">
+<span style=""><br>
+</span></p>
+<div style="direction:ltr">
+<table border="1" cellpadding="0" cellspacing="0" valign="top" style="direction:ltr; border-collapse:collapse; border-style:solid; border-color:#A3A3A3; border-width:1pt">
+<tbody>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><span style="font-style:italic">序号</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><span style="font-style:italic">技术组成</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><span style="font-style:italic">Activiti</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><span style="font-style:italic">jBPM5</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">1</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">数据库持久层ORM</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">MyBatis3</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Hibernate3</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">2</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">持久化标准</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">无</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">JPA规范</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">3</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">事务管理</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">MyBatis机制/Spring事务控制</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Bitronix，基于JTA事务管理</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">4</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">数据库连接方式</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Jdbc/DataSource</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Jdbc/DataSource</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">5</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">支持数据库</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Oracle、SQL Server、MySQL等多数数据库</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Oracle、SQL Server、MySQL等多数数据库</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">6</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">设计模式</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Command模式、观察者模式等</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:Calibri; font-size:14.0pt">&nbsp;</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">7</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">内部服务通讯</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Service间通过API调用</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">基于Apache Mina异步通讯</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">8</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">集成接口</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">SOAP、Mule、RESTful</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">消息通讯</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">9</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">支持的流程&#26684;式</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">BPMN2、xPDL、jPDL等</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">目前仅只支持BPMN2 xml</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">10</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">引擎核心</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">PVM（流程虚拟机）</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Drools</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">11</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">技术前身</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">jBPM3、jBPM4</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Drools Flow</p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:.6673in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">12</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:1.3201in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">所属公司</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6423in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">Alfresco</p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; background-color:#F9F9F9; vertical-align:top; width:2.6916in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">jBoss.org</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-family:SimSun; font-size:14.0pt">
+Activiti5使用Spring进行引擎配置以及各个Bean的管理，综合使用IoC和AOP技术，使用CXF作为WebServices实现的基础，使用MyBatis进行底层数据库ORM的管理，预先提供Bundle化包能较容易的与OSGi进行集成，通过与MuleESB的集成和对外部服务（Web Service、RESTful等）的接口可以构建全面的SOA应用；</p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-family:SimSun; font-size:14.0pt">
+jBPM5使用jBoss.org社区的大多数组件，以DroolsFlow为核心组件作为流程引擎的核心构成，以Hibernate作为数据持久化ORM实现，采用基于JPA/JTA的可插拔的持久化和事务控制规范，使用Guvnor作为流程管理仓库，能够与Seam、Spring、OSGi等集成。</p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-family:SimSun; font-size:14.0pt">
+需要指出的是Activiti5是在jBPM3、jBPM4的基础上发展而来的，是原jBPM的延续，而jBPM5则与之前的jBPM3、jBPM4没有太大关联，且舍弃了备受推崇的PVM（流程虚拟机）思想，转而选择jBoss自身产品DroolsFlow作为流程引擎的核心实现，工作流最为重要的“人机交互”任务（类&#20284;于审批活动）则由单独的一块“Human Task Service”附加到DroolsFlow上实现，任务的查询、处理等行为通过Apache Mina异步通信机制完成。</p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-family:SimSun; font-size:14.0pt">
+<br>
+</p>
+<p style="margin-top:7pt; margin-bottom:7pt; font-family:SimSun; font-size:14.0pt">
+<strong>优劣对比：</strong></p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-family:SimSun; font-size:14.0pt">
+从技术组成来看，Activiti最大的优势是采用了PVM（流程虚拟机），支持除了BPMN2.0规范之外的流程&#26684;式，与外部服务有良好的集成能力，延续了jBPM3、jBPM4良好的社区支持，服务接口清晰，链式API更为优雅；劣势是持久化层没有遵循JPA规范。</p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-family:SimSun; font-size:14.0pt">
+jBPM最大的优势是采用了ApacheMina异步通信技术，采用JPA/JTA持久化方面的标准，以功能齐全的Guvnor作为流程仓库，有RedHat(jBoss.org被红帽收购)的专业化支持；但其劣势也很明显，对自身技术依赖过紧且目前仅支持BPMN2。</p>
+<p style="margin-top:15pt; margin-bottom:7pt; font-size:14.0pt"><strong><span lang="zh-CN" style="font-family:SimSun">再结合项目（</span><span lang="en-US" style="font-family:Calibri">hibernate</span><span lang="en-US" style="font-family:SimSun">4.3</span><span lang="zh-CN" style="font-family:SimSun">）来说为什么从</span><span lang="en-US" style="font-family:Calibri">JBPM4.4</span><span lang="zh-CN" style="font-family:SimSun">转变为使用</span><span lang="en-US" style="font-family:Calibri">Activiti</span></strong></p>
+<p style="margin-top:15pt; margin-bottom:7pt; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">JBPM4.4</span><span lang="zh-CN" style="font-family:SimSun">与</span><span lang="en-US" style="font-family:Calibri">Hibernate</span><span lang="en-US" style="font-family:SimSun">4.3</span><span lang="zh-CN" style="font-family:SimSun">结合出现不兼容问题。那么</span><span lang="en-US" style="font-family:SimSun">hibernate3</span><span lang="zh-CN" style="font-family:SimSun">和</span><span lang="en-US" style="font-family:SimSun">hibernate4</span><span lang="zh-CN" style="font-family:SimSun">有什么区别？</span></p>
+<p style="margin-top:15pt; margin-bottom:7pt; font-family:Calibri; font-size:14.0pt">
+<a target="_blank" target="_blank" href="http://hi.baidu.com/austincao/item/fc9907da3d854e44fa576861">http://hi.baidu.com/austincao/item/fc9907da3d854e44fa576861</a></p>
+<p style="margin-top:15pt; margin-bottom:7pt; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun">附：</span><span lang="en-US" style="font-family:Calibri">Hibernate</span><span lang="en-US" style="font-family:SimSun">3</span><span lang="zh-CN" style="font-family:SimSun">的配置：</span></p>
+<p style="margin-top:15pt; margin-bottom:7pt; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun"></span></p>
+<pre code_snippet_id="601602" snippet_file_name="blog_20150210_1_5851184" name="code" class="html">&lt;!-- 配置SessionFactory --&gt;  
+    &lt;bean id=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.LocalSessionFactoryBean&quot;&gt;  
+        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;&gt;&lt;/property&gt;  
+        &lt;property name=&quot;configLocation&quot; value=&quot;classpath:hibernate.cfg.xml&quot;&gt;&lt;/property&gt;  
+
+    &lt;/bean&gt; </pre>
+<p><br>
+</p>
+<p style="margin-top:15pt; margin-bottom:7pt; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun"><span style="font-size:14pt">总结</span></span></p>
+<p style="margin-top:15pt; margin-bottom:7pt; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun"></span></p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun">以上只是将</span><span lang="en-US" style="font-family:Calibri">JBPM</span><span lang="zh-CN" style="font-family:SimSun">与</span><span lang="en-US" style="font-family:Calibri">Activiti</span><span lang="zh-CN" style="font-family:SimSun">简单进行对比，然后大家可以根据需要选择，虽然是比较，但不一定要有胜负，只有适合自己的才是最好的，而且无论是</span><span lang="en-US" style="font-family:Calibri">JBPM5</span><span lang="zh-CN" style="font-family:SimSun">还是</span><span lang="en-US" style="font-family:Calibri">Activiti</span><span lang="zh-CN" style="font-family:SimSun">来说都了解不是很深的我们，也没有太多的发言权，还需要在实践中慢慢体会。</span></p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun">对于不兼容的问题，也是这次我们项目将</span><span lang="en-US" style="font-family:Calibri">jbpm</span><span lang="zh-CN" style="font-family:SimSun">转换为</span><span lang="en-US" style="font-family:Calibri">Activiti</span><span lang="zh-CN" style="font-family:SimSun">的主要原因，说到底我们还是要深入理解一下各个框架的原理，对于不兼容问题，后续我们可以尝试重写方法实现。</span></p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-size:14.0pt"><span style="font-family:SimSun">资料：</span><span style="font-family:SimSun">（<a target="_blank" target="_blank" href="http://lijiejava.iteye.com/blog/1934927">jBPM(三)：Spring 集成 jBPM4.3 （jBPM4&#43;Hibernate4）</a></span><span style="font-size:14pt">）</span></p>
+<p style="margin-top:0pt; margin-bottom:7pt; font-family:Calibri; font-size:14.0pt">
+&nbsp;</p>
+<br>
+<p style="margin-top:15pt; margin-bottom:7pt; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/43701603'>原文链接</a>

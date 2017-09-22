@@ -1,0 +1,257 @@
+﻿<div style="color:blue" align=center>【整合篇】Activiti业务与流程整合之查询（三）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">继前两篇博客：应用第三种方式</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">实体中不需要引入任何与</span><span lang="en-US"></span><span lang="zh-CN">工作流相关的任何属性，单纯的做好自己即可！例如如下申请实体（</span><span lang="zh-CN">Leave</span><span lang="zh-CN">）：</span></span></p>
+<p style="margin:0in; font-size:14pt">
+<pre code_snippet_id="607055" snippet_file_name="blog_20150223_1_44503" name="code" class="java" style="font-family: SimSun;">package com.tgb.itoo.basic.entity;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.springframework.format.annotation.DateTimeFormat;
+
+/**
+ * Entity: Leave
+ *
+ * @author hejingyuan IdEntity implements Serializable
+ */
+@Entity
+@Table(name = &quot;OA_LEAVE&quot;)
+public class Leave  extends IdEntity { 
+	
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String processInstanceId;
+    private String userId;
+    private String testId;
+    private String oldCourse;
+    private String applyCourse;
+    @Column
+    public String getApplyCourse() {
+		return applyCourse;
+	}
+
+	public void setApplyCourse(String applyCourse) {
+		this.applyCourse = applyCourse;
+	}
+
+	@Column
+    public String getOldCourse() {
+		return oldCourse;
+	}
+
+	public void setOldCourse(String oldCourse) {
+		this.oldCourse = oldCourse;
+	}
+	@Column
+	public String getNewCourse() {
+		return newCourse;
+	}
+
+	public void setNewCourse(String newCourse) {
+		this.newCourse = newCourse;
+	}
+
+	private String newCourse;
+   
+    @Column
+    public String getTestId() {
+		return testId;
+	}
+
+	public void setTestId(String testId) {
+		this.testId = testId;
+	}
+
+   @DateTimeFormat(pattern = &quot;yyyy-MM-dd HH:mm&quot;)
+    private Date startTime;
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd HH:mm&quot;)
+    private Date endTime;
+
+    private Date applyTime;
+    private String leaveType;
+    private String reason;
+
+    //-- 临时属性 --//
+
+    private Map&lt;String, Object&gt; variables;
+    
+    @Column
+    public String getProcessInstanceId() {
+        return processInstanceId;
+    }
+
+    public void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
+    @Column
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = &quot;START_TIME&quot;)
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = &quot;END_TIME&quot;)
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    public Date getApplyTime() {
+        return applyTime;
+    }
+
+    public void setApplyTime(Date applyTime) {
+        this.applyTime = applyTime;
+    }
+
+    @Column
+    public String getLeaveType() {
+        return leaveType;
+    }
+
+    public void setLeaveType(String leaveType) {
+        this.leaveType = leaveType;
+    }
+
+    @Column
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+   
+  
+    @Transient
+    public Map&lt;String, Object&gt; getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Map&lt;String, Object&gt; variables) {
+        this.variables = variables;
+    }
+	
+}
+</pre><span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">那么查询时要如何与工作流进行整合？</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">我们来看待办任务结点：</span></p>
+<p style="font-family:SimSun; margin:0in; font-size:14pt"><br>
+</p>
+<p style="font-family:SimSun; margin:0in; font-size:14pt">
+<pre code_snippet_id="607055" snippet_file_name="blog_20150223_2_6296281" name="code" class="java"> /**
+     * 任务列表ERROR [stderr] (http-localhost/127.0.0.1:8080-3) ScriptEngineManager providers.next(): javax.script.ScriptEngineFactory: Provider com.sun.script.javascript.RhinoScriptEngineFactory not found
+     *
+     * @param leave
+     */
+    @RequestMapping(value = &quot;list/task&quot;)
+    public ModelAndView taskList(HttpSession session, HttpServletRequest request) {
+    	List&lt;Map&lt;String, Object&gt;&gt; results = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();
+    	String userId = UserUtil.getUserFromSession(session).getId();
+    	results=abstractTaskList(userId);    	
+    	return new ModelAndView(&quot;/oa/leave/taskList&quot;,&quot;results&quot;,results);
+                                      
+    }
+    
+ 
+ /**
+     * 抽象出来的查看任务列表，与基本业务无关
+     *
+     * @param userId 用户id
+     * @return
+     */
+	public List&lt;Map&lt;String, Object&gt;&gt; abstractTaskList(String userId){
+	    List&lt;Leave&gt; results = new ArrayList&lt;Leave&gt;();
+	     // 根据当前人的ID查询
+	     TaskQuery taskQuery = taskService.createTaskQuery().taskCandidateOrAssigned(userId);        
+	     List&lt;Task&gt; tasks = taskQuery.list();     
+	     int i=0;	   
+	     
+	     List&lt;Map&lt;String, Object&gt;&gt; mapList = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();
+	     // 根据流程的业务ID查询实体并关联
+	     for (Task task : tasks) {
+	         String processInstanceId = task.getProcessInstanceId();
+	         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).active().singleResult();
+	         String businessKey = processInstance.getBusinessKey();
+	         if (businessKey == null) {
+	             continue;
+	         } 
+	         
+	         Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+	         
+	         Leave leave = leaveBean.findEntityById(businessKey);
+	         
+	    		                 		
+		 map.put(&quot;leave&quot;, leave);//存入“申请信息”
+		 map.put(&quot;task&quot;, task);
+		 map.put(&quot;processDefinition&quot;, getProcessDefinition(processInstance.getProcessDefinitionId()));
+		 map.put(&quot;processInstance&quot;, processInstance);//存入“流程实例”
+		 mapList.add(map);
+	         /*Leave leave=updateEntity(processInstance,task,businessKey);
+	         results.add(leave); */
+	         i=i+1;
+	     }
+		return mapList;
+	}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">此时我们采用的方式是利用</span><span lang="en-US">businessKey</span><span lang="zh-CN">，并不使用流程变量中存放的业务数据，而是直接去业务表中进行查询，避免了不同步的情况，而且返回&#20540;采用</span><span lang="en-US">map</span><span lang="zh-CN">的形式，并不需要业务实体去添加额外的属性，离我们所说的</span><span lang="en-US">AOP</span><span lang="zh-CN">更近了一步。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">以上的这些方式也都是在实践中的积累，做个总结记录一下！</span></p>
+<p style="font-family:SimSun; margin:0in; font-size:14pt"><br>
+</p>
+<p style="font-family:SimSun; margin:0in; font-size:14pt"><br>
+</p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/43850553'>原文链接</a>

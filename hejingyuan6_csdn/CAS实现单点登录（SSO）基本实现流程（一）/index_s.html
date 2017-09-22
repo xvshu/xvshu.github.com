@@ -1,0 +1,147 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; CAS实现单点登录（SSO）基本实现流程（一）</div><div style="color:blue" align=center>CAS实现单点登录（SSO）基本实现流程（一）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<h1 style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">概念：</span></span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">单点登录（</span><span lang="en-US">Single Sign On），简称为SSO，是目前比较流行的企业业务整合的解决方案之一。SSO的定义是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CAS</span><span lang="zh-CN">（</span><span lang="zh-CN">Central Authentication Service</span><span lang="zh-CN">），中央认证服务。</span><span lang="en-US">CAS(Central Authentication
+ Service)</span><span lang="en-US">是一款不错的针对</span><span lang="en-US"> Web</span><span lang="en-US">应用的单点登录框架。</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">讲解</span><span lang="en-US">CAS</span><span lang="zh-CN">之前先来学习两个基本术语</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h2 style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">术语解释：</span></h2>
+<p style="margin-top:6pt; margin-bottom:0pt; line-height:19pt; color:#333333"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US" style=""><br>
+</span></span></p>
+<p style="margin-top:6pt; margin-bottom:0pt; line-height:19pt; color:#333333"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US" style="">Ø&nbsp;</span><span lang="en-US" style="">&nbsp;&nbsp;</span><span lang="en-US" style="">&nbsp;Ticket Grangting Ticket(TGT)&nbsp;</span><span lang="en-US" style="">：</span></span></p>
+<p style="margin-top:6pt; margin-bottom:0pt; line-height:19pt; color:#333333"><span lang="zh-CN" style="font-family:KaiTi_GB2312; font-size:18px; line-height:19pt">TGT是</span><span lang="en-US" style="font-family:KaiTi_GB2312; font-size:18px; line-height:19pt">CAS为用户签发的登录票据，拥有了TGT，用户就可以证明自己在CAS成功登录过。TGT封装了Cookie&#20540;以及此Cookie&#20540;对应的用户信息。用户在CAS认证成功后，CAS生成cookie（叫TGC），写入浏览器，同时生成一个TGT对象，放入自己的缓存，TGT对象的ID就是cookie的&#20540;。当HTTP再次请求到来时，如果传过来的有CAS生成的cookie，则CAS以此cookie&#20540;为key查询缓存中有无TGT，如果有的话，则说明用户之前登录过，如果没有，则用户需要重新登录。</span></p>
+<p style="margin-top:6pt; margin-bottom:0pt; line-height:19pt; color:#333333"><span lang="en-US" style="font-family:KaiTi_GB2312; font-size:18px">Ø&nbsp;</span><span lang="zh-CN" style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span><span lang="en-US" style="font-family:KaiTi_GB2312; font-size:18px">Ticket-granting
+ cookie(</span><span lang="zh-CN" style="font-family:KaiTi_GB2312; font-size:18px">TGC</span><span lang="en-US" style="font-family:KaiTi_GB2312; font-size:18px">)：</span></p>
+<p style="margin:0in; color:rgb(51,51,51)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN" style="">存放用户身份认证凭证的</span><span lang="en-US" style="">cookie，在浏览器和CAS Server间通讯时使用，并且只能基于安全通道传输（Https），是CASServer用来明确用户身份的凭证。</span></span></p>
+<p style="margin-top:6pt; margin-bottom:0pt; line-height:19pt; color:#333333"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US" style="">Ø&nbsp;</span><span lang="en-US" style="">&nbsp;&nbsp;</span><span lang="en-US" style="">Service ticket(ST)&nbsp;</span><span lang="en-US" style="">：服务票据，服务的惟一标识码&nbsp;</span><span lang="en-US" style="">,&nbsp;</span><span lang="en-US" style="">由&nbsp;</span><span lang="en-US" style="">CASServer&nbsp;</span><span lang="en-US" style="">发出（&nbsp;</span><span lang="en-US" style="">Http&nbsp;</span><span lang="en-US" style="">传送），</span><span lang="zh-CN" style="">用户访问</span><span lang="en-US" style="">Service</span><span lang="zh-CN" style="">时，</span><span lang="en-US" style="">service</span><span lang="zh-CN" style="">发现用户没有</span><span lang="en-US" style="">ST</span><span lang="zh-CN" style="">，则要求用户去</span><span lang="en-US" style="">CAS</span><span lang="zh-CN" style="">获取</span><span lang="en-US" style="">ST.</span><span lang="zh-CN" style="">用户向</span><span lang="en-US" style="">CAS</span><span lang="zh-CN" style="">发出获取</span><span lang="en-US" style="">ST</span><span lang="zh-CN" style="">的请求，</span><span lang="en-US" style="">CAS</span><span lang="zh-CN" style="">发现用户有</span><span lang="en-US" style="">TGT</span><span lang="zh-CN" style="">，则签发一个</span><span lang="en-US" style="">ST</span><span lang="zh-CN" style="">，返回给用户。用户拿着</span><span lang="en-US" style="">ST</span><span lang="zh-CN" style="">去访问</span><span lang="en-US" style="">service</span><span lang="zh-CN" style="">，</span><span lang="en-US" style="">service</span><span lang="zh-CN" style="">拿</span><span lang="en-US" style="">ST</span><span lang="zh-CN" style="">去</span><span lang="en-US" style="">CAS</span><span lang="zh-CN" style="">验证，验证通过后，允许用户访问资源</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h1 style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">深入CAS</span></span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h2 style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">从结构上看，</span><span lang="en-US">CAS</span><span lang="en-US">包含两个部分：</span></span></h2>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">CAS Server</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CASServer 负责完成对用户的认证工作</span><span lang="en-US"> , 需要独立部署 , CAS Server 会处理用户名 /密码等凭证 (Credentials) 。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">CAS Client</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">负责处理对客户端受保护资源的访问请求，需要对请求方进行身份认证时，重定向到</span><span lang="en-US"> CAS Server 进行认证。（原则上，客户端应用不再接受任何的用户名密码等 Credentials ）。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CASClient 与受保护的客户端应用部署在一起，以</span><span lang="en-US"> Filter 方式保护受保护的资源。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h2 style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">CAS最基本的协议过程：</span></h2>
+<div><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></div>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="10290058610919" alt=""><br>
+</span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p lang="en-US" style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CAS Client 与受保护的客户端应用部署在一起，以</span><span lang="en-US">Filter方式保护 Web应用的受保护资源，过滤从客户端过来的每一个 Web 请求</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">1</span><span lang="zh-CN">，（</span><span lang="en-US">step</span><span lang="en-US"> 1</span><span lang="zh-CN">）</span><span lang="en-US">Web</span><span lang="zh-CN">浏览器访问</span><span lang="en-US">CAS
+ Client</span><span lang="zh-CN">，无</span><span lang="en-US">session</span><span lang="zh-CN">并且无票据</span><span lang="en-US">(ST)</span><span lang="zh-CN">，定向到</span><span lang="en-US">CASServer</span><span lang="zh-CN">（</span><span lang="en-US">step</span><span lang="en-US">
+ 2</span><span lang="zh-CN">），又因为浏览器中并没有</span><span lang="en-US">cookie</span><span lang="zh-CN">，故服务端拿不到</span><span lang="en-US">TGC</span><span lang="zh-CN">，因此需要重新登录</span></span></p>
+<p lang="en-US" style="margin:0in"><br>
+</p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">2</span><span lang="zh-CN">，（</span><span lang="en-US">Step 3</span><span lang="zh-CN">）</span><span lang="en-US">是用户认证过程，如果用户提供了正确的</span><span lang="zh-CN">CAS
+ Server 会处理用户名</span><span lang="en-US"> / 密码等凭证 (Credentials) ，</span><span lang="zh-CN">认证成功后，</span><span lang="en-US">CAS</span><span lang="en-US">生成</span><span lang="en-US">cookie</span><span lang="en-US">（叫</span><span lang="en-US">TGC</span><span lang="en-US">），写入浏览器，同时生成一个</span><span lang="en-US">TGT</span><span lang="en-US">对象</span><span lang="zh-CN">，</span><span lang="en-US">再根据TGT发放票据ST</span><span lang="zh-CN">，</span><span lang="en-US">并且重定向用户到CAS
+ Client（附带刚才产生的ServiceTicket）， Service Ticket 是不可以伪造的</span><span lang="zh-CN">（</span><span lang="en-US">step</span><span lang="en-US">4</span><span lang="zh-CN">）</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">注：</span><span lang="en-US" style="font-family:KaiTi_GB2312; font-size:18px">ST</span><span lang="zh-CN" style="font-family:KaiTi_GB2312; font-size:18px">前半部分为登录</span><span lang="en-US" style="font-family:KaiTi_GB2312; font-size:18px">url</span><span lang="zh-CN" style="font-family:KaiTi_GB2312; font-size:18px">，后半部分为我客户端要访问的页面地址，只有当登录成功才会直接转向客户端访问的页面</span></p>
+<p lang="en-US" style="margin:0in"><br>
+</p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">3</span><span lang="zh-CN">，（</span><span lang="en-US">Step 5</span><span lang="zh-CN">）拿着</span><span lang="en-US">ST</span><span lang="zh-CN">去</span><span lang="en-US">
+ CAS Server</span><span lang="zh-CN">验证一下，验证成功返回用户信息（</span><span lang="en-US">step</span><span lang="en-US">6</span><span lang="zh-CN">）</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">注：收到</span><span lang="en-US">ST</span><span lang="zh-CN">后，为什么还要验证呢？</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">因为</span><span lang="en-US">CAS</span><span lang="zh-CN">知道这个用户已经登录过了，但是对于这个项目来说，我并不知道这个用户已经登录过了，故需要验证</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p lang="en-US" style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">4，当用户访问另一个应用的服务再次被重定向到</span><span lang="en-US">&nbsp;CAS Server 的时候， CAS Server 会主动获到这个 TGC cookie ，然后做下面的事情：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">1)如果</span><span lang="en-US">&nbsp;User 持有 TGC 且其还没失效，那么就走基础协议图的 Step4 ，达到了 SSO 的效果；</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">2)如果</span><span lang="en-US">&nbsp;TGC 失效，那么用户还是要重新认证 ( 走基础协议图的 Step3) 。</span></span></p>
+<br>
+<p lang="en-US" style="margin:0in"><br>
+</p>
+<h2 style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">CAS 请求认证时序图如下：</span></h2>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="19771159558065" alt=""><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p lang="en-US" style="margin:0in">
+<h3 style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:14px"><span lang="zh-CN">１</span><span lang="en-US">.&nbsp; CAS</span><span lang="zh-CN">服务端</span><span lang="en-US">登录时处理：</span></span></span></h3>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">第一步：</span><span lang="en-US">cas往浏览器增加cookie（TGC）</span></span><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CAS向浏览器送回一个所谓的“内存</span><span lang="en-US">cookie”。这种cookie并不是真的保存在内存中，而只是浏览器一关闭，cookie就自动过期。这个cookie称为“ticket-grantingcookie”，用来表明用户已经成功地登录。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">这个</span><span lang="en-US">Cookie是一个加密的Cookie，其中保存了用户登录的信息。用于以后其它应用客户端登录。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">第二步：</span><span lang="en-US">cas同时创建一个ticket(ST)重定向到原来的cas客户端</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">认证成功后，</span><span lang="en-US">CAS服务器创建一个很长的、随机生成的字符串，称为“Ticket”。随后，CAS将这个ticket和成功登录的用户，以及服务联系在一起。这个ticket是一次性使用的一种凭证，它只对登录成功的用户及其服务使用一次。使用过以后立刻失效。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h3 style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:14px"><span lang="zh-CN">２</span><span lang="en-US">.&nbsp; CAS 客户端应用Ａ的处理</span></span></span></h3>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">第一步：收到ticket后，向cas提交验证ticket</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">第二步：</span><span lang="en-US">ticket验证后创建session</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">以后登录此应用时，没有</span><span lang="en-US">ticket，但IE能提供session,从session中取得CASReceipt,并验证如果有效说明已经在此应用认证过，允许访问此应用</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">到此为止，</span><span lang="en-US">CAS</span><span lang="zh-CN">会记录用户已在应用Ａ已经登录</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h3 style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:14px"><span lang="zh-CN">３</span><span lang="en-US">.&nbsp; 用户登录到应用Ｂ是如何处理</span></span></span></h3>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">用户进入应用Ｂ时，首先仍然会重定向到</span><span lang="en-US">CAS服务器。不过此时CAS服务器不再要求用户输入用户名和密码，而是首先自动寻找Cookie，根据Cookie中保存的信息，进行登录。然后，CAS同样给出新的ticket重定向应用Ｂ给cas验证（流程同应用Ａ验证方式），如果验证成功则应用Ｂ创建session记录CASReceipt信息到session中，以后凭此session登录应用Ｂ。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">原理：１个</span><span lang="en-US">cookie&#43;</span><span lang="en-US">Ｎ个</span><span lang="en-US">session</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">CAS</span><span lang="zh-CN">创建</span><span lang="en-US">cookie</span><span lang="en-US">在所有应用中登录时</span><span lang="en-US">cas</span><span lang="en-US">使用</span><span lang="en-US">,</span><span lang="en-US">各应用通过在</span><span lang="en-US">IE</span><span lang="en-US">创建各自的</span><span lang="en-US">session</span><span lang="en-US">来标识应用是否已经登录。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">Cookie:</span><span lang="zh-CN">在</span><span lang="en-US">cas</span><span lang="en-US">为各应用登录时使用，实现了只须一次录入用户密码</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">Session:</span><span lang="zh-CN">各应用会创建自己的</span><span lang="en-US">session</span><span lang="en-US">表示是否登录</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h2 style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">具体描述一下客户端消息流程</span></h2>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">1.第一次访问</span><span lang="en-US">http://localhost:8080/a,</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CLIENT：没票据且</span><span lang="en-US">SESSION中没有消息所以跳转至CAS</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CAS：拿不到</span><span lang="en-US">TGC故要求用户登录</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">2. 认证成功后回跳</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CAS：通过</span><span lang="en-US">TGT生成ST发给客户端，客户端保存TGC，并重定向到http://localhost:8080/a</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CLIENT：带有票据</span><span lang="en-US">(ST)</span><span lang="zh-CN">所以不跳转只是后台发给</span><span lang="en-US">CAS验证票据（浏览器中无法看到这一过程）</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">3.第一次访问</span><span lang="en-US">http://localhost:8080/b</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CLIENT：没票据且</span><span lang="en-US">SESSION中没有消息所以跳转至CAS</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CAS：从客户端取出</span><span lang="en-US">TGC，如果TGC有效则给用户ST并后台验证ST，从而SSO。【如果失效重登录或注销时，怎么通知其它系统更新SESSION信息呢？？TicketGrantingTicketImpl类grantServiceTicket方法里this.services.put(id,service);可见CAS端已经记录了当前登录的子系统】</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">单点退出：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;<img src="38631009131770" alt=""><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p lang="en-US" style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">4.再次访问</span><span lang="en-US">http://localhost:8080/a</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">CLIENT：没票据但是</span><span lang="en-US">SESSION中有消息故不跳转也不用发CAS验证票据，允许用户访问</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h1 style="margin:0in"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><span style="font-size:24px">总结：</span></span></span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 以上只是</span><span lang="en-US">CAS</span><span lang="zh-CN">实现的整个流转过程，帮助我们理解</span><span lang="en-US">CAS</span><span lang="zh-CN">是如何做到的</span><span lang="en-US">SSO
+ ,</span><span lang="zh-CN">当然这只是一个基础，在理论的基础上帮助大家理解，接下来会实现一个简单实例，让大家通过代码来理解一下这个过程。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">下篇继续！</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/44277023'>原文链接</a>

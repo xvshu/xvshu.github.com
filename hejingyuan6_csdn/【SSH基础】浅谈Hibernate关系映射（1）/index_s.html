@@ -1,0 +1,117 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【SSH基础】浅谈Hibernate关系映射（1）</div><div style="color:blue" align=center>【SSH基础】浅谈Hibernate关系映射（1）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">继上篇博客：</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">hibernate</span><span lang="zh-CN" style="font-family:华文中宋">的关系映射，如图：</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><img src="572585611458" alt=""><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">多对一关系映射：（多个用户属于一个组）</p>
+<br>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><img src="30889866258207" alt=""><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">通过用户，可以看到组信息</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">即在多的一端加入一个外键（影响存储），指向一的一端</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">多对一关联映射是在多的一端来维护关联字段，在我们这个例子中也就是在用户一端来维护关系字段</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">具体代码：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">User</span><span lang="zh-CN" style="font-family:华文中宋">实体类</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<pre code_snippet_id="440793" snippet_file_name="blog_20140802_1_5848454" name="code" class="java">package com.bjpowernode.hibernate;
+
+public class User {
+
+	private int id;	
+	private String name;	
+	private Group group;
+	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Group getGroup() {
+		return group;
+	}
+	public void setGroup(Group group) {
+		this.group = group;
+	}
+}</pre>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">group</span><span lang="zh-CN" style="font-family:华文中宋">实体类：</span></p>
+<pre code_snippet_id="440793" snippet_file_name="blog_20140802_2_6862993" name="code" class="java">package com.bjpowernode.hibernate;
+
+public class Group {
+
+	private int id;	
+	private String name;
+
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+}
+</pre>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="en-US" style="font-family:Calibri">User</span><span lang="zh-CN" style="font-family:华文中宋">映射文件：</span><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"></span></span></p>
+<pre code_snippet_id="440793" snippet_file_name="blog_20140802_3_1988187" name="code" class="html">&lt;hibernate-mapping&gt;
+	&lt;class name=&quot;com.bjpowernode.hibernate.User&quot; table=&quot;t_user&quot;&gt;
+		&lt;id name=&quot;id&quot;&gt;
+			&lt;generator class=&quot;native&quot;/&gt;
+		&lt;/id&gt;
+		&lt;property name=&quot;name&quot;/&gt;
+		&lt;many-to-one name=&quot;group&quot; column=&quot;groupid&quot; /&gt;
+	&lt;/class&gt;
+&lt;/hibernate-mapping&gt;
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"><span lang="en-US" style="font-family:Calibri">Group</span><span lang="zh-CN" style="font-family:华文中宋">映射文件：</span><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"></span></span></span></p>
+<pre code_snippet_id="440793" snippet_file_name="blog_20140802_4_7354144" name="code" class="html">&lt;hibernate-mapping&gt;
+	&lt;class name=&quot;com.bjpowernode.hibernate.Group&quot; table=&quot;t_group&quot;&gt;
+		&lt;id name=&quot;id&quot;&gt;
+			&lt;generator class=&quot;native&quot;/&gt;
+		&lt;/id&gt;
+		&lt;property name=&quot;name&quot;/&gt;
+	&lt;/class&gt;
+&lt;/hibernate-mapping&gt;
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"><span lang="zh-CN" style="font-family:华文中宋"></span></span></span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">多对一的关系是通过many-to-one元素定义的。多对一关联改变了存储结构（在多的一端添加了一一端的主键）</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">总结：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">对于关系映射中的多对一关系，是在多的一端加入了一个外键即</span><span lang="en-US" style="font-family:Calibri">group_id</span><span lang="zh-CN" style="font-family:华文中宋">，当我们查询用户信息时，可以将组信息查询上来。这种映射方式，其实和我们在数据库中直接建立关联的效果一样，只是</span><span lang="en-US" style="font-family:Calibri">Hibernate</span><span lang="zh-CN" style="font-family:华文中宋">利用这种映射方式避免了我们直接和数据库打交道，使我们的编程更加面向对象化。</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">下篇继续！</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/38346957'>原文链接</a>

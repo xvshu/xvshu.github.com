@@ -1,0 +1,383 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; MyBatis学习总结(五)——实现关联表查询</div><div style="color:blue" align=center>MyBatis学习总结(五)——实现关联表查询</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<h2 id="blogTitle0">一、一对一关联</h2><h3 id="blogTitle1">&nbsp;1.1、提出需求</h3><p>　　根据班级id查询班级信息(带老师的信息)</p><h3 id="blogTitle2">1.2、创建表和数据</h3><p>　　创建一张教师表和班级表，这里我们假设一个老师只负责教一个班，那么老师和班级之间的关系就是一种一对一的关系。</p><p><pre name="code" class="sql">CREATE TABLE teacher(
+    t_id INT PRIMARY KEY AUTO_INCREMENT, 
+    t_name VARCHAR(20)
+);
+CREATE TABLE class(
+    c_id INT PRIMARY KEY AUTO_INCREMENT, 
+    c_name VARCHAR(20), 
+    teacher_id INT
+);
+ALTER TABLE class ADD CONSTRAINT fk_teacher_id FOREIGN KEY (teacher_id) REFERENCES teacher(t_id);    
+
+INSERT INTO teacher(t_name) VALUES('teacher1');
+INSERT INTO teacher(t_name) VALUES('teacher2');
+
+INSERT INTO class(c_name, teacher_id) VALUES('class_a', 1);
+INSERT INTO class(c_name, teacher_id) VALUES('class_b', 2);</pre><br><p><p>表之间的关系如下：</p><p><img src="36670726390895" alt=""><br></p><p><h3 id="blogTitle3">1.3、定义实体类</h3><p><p>　　1、Teacher类，Teacher类是teacher表对应的实体类。</p><pre name="code" class="java">package me.gacl.domain;
+
+/**
+ * @author gacl
+ * 定义teacher表对应的实体类
+ */
+public class Teacher {
+
+    //定义实体类的属性，与teacher表中的字段对应
+    private int id;            //id===&gt;t_id
+    private String name;    //name===&gt;t_name
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return &quot;Teacher [id=&quot; + id + &quot;, name=&quot; + name + &quot;]&quot;;
+    }
+}</pre><br><p>2、Classes类，Classes类是class表对应的实体类</p><br><p><pre name="code" class="java">package me.gacl.domain;
+
+/**
+ * @author gacl
+ * 定义class表对应的实体类
+ */
+public class Classes {
+
+    //定义实体类的属性，与class表中的字段对应
+    private int id;            //id===&gt;c_id
+    private String name;    //name===&gt;c_name
+    
+    /**
+     * class表中有一个teacher_id字段，所以在Classes类中定义一个teacher属性，
+     * 用于维护teacher和class之间的一对一关系，通过这个teacher属性就可以知道这个班级是由哪个老师负责的
+     */
+    private Teacher teacher;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
+
+    @Override
+    public String toString() {
+        return &quot;Classes [id=&quot; + id + &quot;, name=&quot; + name + &quot;, teacher=&quot; + teacher+ &quot;]&quot;;
+    }
+}</pre><br><h3 id="blogTitle4">1.4、定义sql映射文件classMapper.xml</h3><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+&lt;!-- 为这个mapper指定一个唯一的namespace，namespace的值习惯上设置成包名+sql映射文件名，这样就能够保证namespace的值是唯一的
+例如namespace=&quot;me.gacl.mapping.classMapper&quot;就是me.gacl.mapping(包名)+classMapper(classMapper.xml文件去除后缀)
+ --&gt;
+&lt;mapper namespace=&quot;me.gacl.mapping.classMapper&quot;&gt;
+
+    &lt;!-- 
+        根据班级id查询班级信息(带老师的信息)
+        ##1. 联表查询
+        SELECT * FROM class c,teacher t WHERE c.teacher_id=t.t_id AND c.c_id=1;
+        
+        ##2. 执行两次查询
+        SELECT * FROM class WHERE c_id=1;  //teacher_id=1
+        SELECT * FROM teacher WHERE t_id=1;//使用上面得到的teacher_id
+     --&gt;
+
+    &lt;!-- 
+    方式一：嵌套结果：使用嵌套结果映射来处理重复的联合结果的子集
+             封装联表查询的数据(去除重复的数据)
+        select * from class c, teacher t where c.teacher_id=t.t_id and c.c_id=1
+    --&gt;
+    &lt;select id=&quot;getClass&quot; parameterType=&quot;int&quot; resultMap=&quot;ClassResultMap&quot;&gt;
+        select * from class c, teacher t where c.teacher_id=t.t_id and c.c_id=#{id}
+    &lt;/select&gt;
+    &lt;!-- 使用resultMap映射实体类和字段之间的一一对应关系 --&gt;
+    &lt;resultMap type=&quot;me.gacl.domain.Classes&quot; id=&quot;ClassResultMap&quot;&gt;
+        &lt;id property=&quot;id&quot; column=&quot;c_id&quot;/&gt;
+        &lt;result property=&quot;name&quot; column=&quot;c_name&quot;/&gt;
+        &lt;association property=&quot;teacher&quot; javaType=&quot;me.gacl.domain.Teacher&quot;&gt;
+            &lt;id property=&quot;id&quot; column=&quot;t_id&quot;/&gt;
+            &lt;result property=&quot;name&quot; column=&quot;t_name&quot;/&gt;
+        &lt;/association&gt;
+    &lt;/resultMap&gt;
+    
+    &lt;!-- 
+    方式二：嵌套查询：通过执行另外一个SQL映射语句来返回预期的复杂类型
+        SELECT * FROM class WHERE c_id=1;
+        SELECT * FROM teacher WHERE t_id=1   //1 是上一个查询得到的teacher_id的值
+    --&gt;
+     &lt;select id=&quot;getClass2&quot; parameterType=&quot;int&quot; resultMap=&quot;ClassResultMap2&quot;&gt;
+        select * from class where c_id=#{id}
+     &lt;/select&gt;
+     &lt;!-- 使用resultMap映射实体类和字段之间的一一对应关系 --&gt;
+     &lt;resultMap type=&quot;me.gacl.domain.Classes&quot; id=&quot;ClassResultMap2&quot;&gt;
+        &lt;id property=&quot;id&quot; column=&quot;c_id&quot;/&gt;
+        &lt;result property=&quot;name&quot; column=&quot;c_name&quot;/&gt;
+        &lt;association property=&quot;teacher&quot; column=&quot;teacher_id&quot; select=&quot;getTeacher&quot;/&gt;
+     &lt;/resultMap&gt;
+     
+     &lt;select id=&quot;getTeacher&quot; parameterType=&quot;int&quot; resultType=&quot;me.gacl.domain.Teacher&quot;&gt;
+        SELECT t_id id, t_name name FROM teacher WHERE t_id=#{id}
+     &lt;/select&gt;
+
+&lt;/mapper&gt;</pre><br><p><p>在conf.xml文件中注册classMapper.xml</p><pre name="code" class="html">&lt;mappers&gt;
+        &lt;!-- 注册classMapper.xml文件， 
+        classMapper.xml位于me.gacl.mapping这个包下，所以resource写成me/gacl/mapping/classMapper.xml--&gt;
+        &lt;mapper resource=&quot;me/gacl/mapping/classMapper.xml&quot;/&gt;
+&lt;/mappers&gt;</pre><br><h3 id="blogTitle5">1.5、编写单元测试代码</h3><pre name="code" class="java">package me.gacl.test;
+
+import me.gacl.domain.Classes;
+import me.gacl.util.MyBatisUtil;
+import org.apache.ibatis.session.SqlSession;
+import org.junit.Test;
+
+public class Test3 {
+    
+    @Test
+    public void testGetClass(){
+        SqlSession sqlSession = MyBatisUtil.getSqlSession();
+        /**
+         * 映射sql的标识字符串，
+         * me.gacl.mapping.classMapper是classMapper.xml文件中mapper标签的namespace属性的值，
+         * getClass是select标签的id属性值，通过select标签的id属性值就可以找到要执行的SQL
+         */
+        String statement = &quot;me.gacl.mapping.classMapper.getClass&quot;;//映射sql的标识字符串
+        //执行查询操作，将查询结果自动封装成Classes对象返回
+        Classes clazz = sqlSession.selectOne(statement,1);//查询class表中id为1的记录
+        //使用SqlSession执行完SQL之后需要关闭SqlSession
+        sqlSession.close();
+        System.out.println(clazz);//打印结果：Classes [id=1, name=class_a, teacher=Teacher [id=1, name=teacher1]]
+    }
+    
+    @Test
+    public void testGetClass2(){
+        SqlSession sqlSession = MyBatisUtil.getSqlSession();
+        /**
+         * 映射sql的标识字符串，
+         * me.gacl.mapping.classMapper是classMapper.xml文件中mapper标签的namespace属性的值，
+         * getClass2是select标签的id属性值，通过select标签的id属性值就可以找到要执行的SQL
+         */
+        String statement = &quot;me.gacl.mapping.classMapper.getClass2&quot;;//映射sql的标识字符串
+        //执行查询操作，将查询结果自动封装成Classes对象返回
+        Classes clazz = sqlSession.selectOne(statement,1);//查询class表中id为1的记录
+        //使用SqlSession执行完SQL之后需要关闭SqlSession
+        sqlSession.close();
+        System.out.println(clazz);//打印结果：Classes [id=1, name=class_a, teacher=Teacher [id=1, name=teacher1]]
+    }
+}</pre><br><h3 id="blogTitle6">1.6、MyBatis一对一关联查询总结</h3><p>　　MyBatis中使用association标签来解决一对一的关联查询，association标签可用的属性如下：</p><ul><li>property:对象属性的名称</li><li>javaType:对象属性的类型</li><li>column:所对应的外键字段名称</li><li>select:使用另一个查询封装的结果</li></ul><h2 id="blogTitle7">二、一对多关联</h2><h3 id="blogTitle8">2.1、提出需求</h3><p>　　根据classId查询对应的班级信息,包括学生,老师</p><h3 id="blogTitle9">2.2、创建表和数据</h3><p>　　在上面的一对一关联查询演示中，我们已经创建了班级表和教师表，因此这里再创建一张学生表</p><pre name="code" class="sql">CREATE TABLE student(
+    s_id INT PRIMARY KEY AUTO_INCREMENT, 
+    s_name VARCHAR(20), 
+    class_id INT
+);
+INSERT INTO student(s_name, class_id) VALUES('student_A', 1);
+INSERT INTO student(s_name, class_id) VALUES('student_B', 1);
+INSERT INTO student(s_name, class_id) VALUES('student_C', 1);
+INSERT INTO student(s_name, class_id) VALUES('student_D', 2);
+INSERT INTO student(s_name, class_id) VALUES('student_E', 2);
+INSERT INTO student(s_name, class_id) VALUES('student_F', 2);</pre><p><br></p><img src="15876227210067" alt=""><br><h3 id="blogTitle10">2.3、定义实体类</h3><p>　　1、Student类</p><pre name="code" class="java">package me.gacl.domain;
+
+/**
+ * @author gacl
+ * 定义student表所对应的实体类
+ */
+public class Student {
+
+    //定义属性，和student表中的字段对应
+    private int id;            //id===&gt;s_id
+    private String name;    //name===&gt;s_name
+    
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return &quot;Student [id=&quot; + id + &quot;, name=&quot; + name + &quot;]&quot;;
+    }
+}</pre><br><p>2、修改Classes类，添加一个List&lt;Student&gt; students属性，使用一个List&lt;Student&gt;集合属性表示班级拥有的学生，如下：</p><br><pre name="code" class="java">package me.gacl.domain;
+
+import java.util.List;
+
+/**
+ * @author gacl
+ * 定义class表对应的实体类
+ */
+public class Classes {
+
+    //定义实体类的属性，与class表中的字段对应
+    private int id;            //id===&gt;c_id
+    private String name;    //name===&gt;c_name
+    
+    /**
+     * class表中有一个teacher_id字段，所以在Classes类中定义一个teacher属性，
+     * 用于维护teacher和class之间的一对一关系，通过这个teacher属性就可以知道这个班级是由哪个老师负责的
+     */
+    private Teacher teacher;
+    //使用一个List&lt;Student&gt;集合属性表示班级拥有的学生
+    private List&lt;Student&gt; students;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
+
+    public List&lt;Student&gt; getStudents() {
+        return students;
+    }
+
+    public void setStudents(List&lt;Student&gt; students) {
+        this.students = students;
+    }
+
+    @Override
+    public String toString() {
+        return &quot;Classes [id=&quot; + id + &quot;, name=&quot; + name + &quot;, teacher=&quot; + teacher
+                + &quot;, students=&quot; + students + &quot;]&quot;;
+    }
+}</pre><br><h3 id="blogTitle11">2.4、修改<span lang="EN-US">sql映射文件c<span lang="EN-US">lassMapper.xml</span></span></h3><p><span lang="EN-US">　　添加如下的SQL映射信息</span></p><pre name="code" class="java">&lt;!-- 
+        根据classId查询对应的班级信息,包括学生,老师
+     --&gt;
+    &lt;!-- 
+    方式一: 嵌套结果: 使用嵌套结果映射来处理重复的联合结果的子集
+    SELECT * FROM class c, teacher t,student s WHERE c.teacher_id=t.t_id AND c.C_id=s.class_id AND  c.c_id=1
+     --&gt;
+    &lt;select id=&quot;getClass3&quot; parameterType=&quot;int&quot; resultMap=&quot;ClassResultMap3&quot;&gt;
+        select * from class c, teacher t,student s where c.teacher_id=t.t_id and c.C_id=s.class_id and  c.c_id=#{id}
+    &lt;/select&gt;
+    &lt;resultMap type=&quot;me.gacl.domain.Classes&quot; id=&quot;ClassResultMap3&quot;&gt;
+        &lt;id property=&quot;id&quot; column=&quot;c_id&quot;/&gt;
+        &lt;result property=&quot;name&quot; column=&quot;c_name&quot;/&gt;
+        &lt;association property=&quot;teacher&quot; column=&quot;teacher_id&quot; javaType=&quot;me.gacl.domain.Teacher&quot;&gt;
+            &lt;id property=&quot;id&quot; column=&quot;t_id&quot;/&gt;
+            &lt;result property=&quot;name&quot; column=&quot;t_name&quot;/&gt;
+        &lt;/association&gt;
+        &lt;!-- ofType指定students集合中的对象类型 --&gt;
+        &lt;collection property=&quot;students&quot; ofType=&quot;me.gacl.domain.Student&quot;&gt;
+            &lt;id property=&quot;id&quot; column=&quot;s_id&quot;/&gt;
+            &lt;result property=&quot;name&quot; column=&quot;s_name&quot;/&gt;
+        &lt;/collection&gt;
+    &lt;/resultMap&gt;
+    
+    &lt;!-- 
+        方式二：嵌套查询：通过执行另外一个SQL映射语句来返回预期的复杂类型
+            SELECT * FROM class WHERE c_id=1;
+            SELECT * FROM teacher WHERE t_id=1   //1 是上一个查询得到的teacher_id的值
+            SELECT * FROM student WHERE class_id=1  //1是第一个查询得到的c_id字段的值
+     --&gt;
+     &lt;select id=&quot;getClass4&quot; parameterType=&quot;int&quot; resultMap=&quot;ClassResultMap4&quot;&gt;
+        select * from class where c_id=#{id}
+     &lt;/select&gt;
+     &lt;resultMap type=&quot;me.gacl.domain.Classes&quot; id=&quot;ClassResultMap4&quot;&gt;
+        &lt;id property=&quot;id&quot; column=&quot;c_id&quot;/&gt;
+        &lt;result property=&quot;name&quot; column=&quot;c_name&quot;/&gt;
+        &lt;association property=&quot;teacher&quot; column=&quot;teacher_id&quot; javaType=&quot;me.gacl.domain.Teacher&quot; select=&quot;getTeacher2&quot;&gt;&lt;/association&gt;
+        &lt;collection property=&quot;students&quot; ofType=&quot;me.gacl.domain.Student&quot; column=&quot;c_id&quot; select=&quot;getStudent&quot;&gt;&lt;/collection&gt;
+     &lt;/resultMap&gt;
+     
+     &lt;select id=&quot;getTeacher2&quot; parameterType=&quot;int&quot; resultType=&quot;me.gacl.domain.Teacher&quot;&gt;
+        SELECT t_id id, t_name name FROM teacher WHERE t_id=#{id}
+     &lt;/select&gt;
+     
+     &lt;select id=&quot;getStudent&quot; parameterType=&quot;int&quot; resultType=&quot;me.gacl.domain.Student&quot;&gt;
+        SELECT s_id id, s_name name FROM student WHERE class_id=#{id}
+     &lt;/select&gt;</pre><br><h3 id="blogTitle12"><span lang="EN-US">2.5、编写单元测试代码</span></h3><pre name="code" class="java">package me.gacl.test;
+
+import me.gacl.domain.Classes;
+import me.gacl.util.MyBatisUtil;
+import org.apache.ibatis.session.SqlSession;
+import org.junit.Test;
+
+public class Test4 {
+    
+    @Test
+    public void testGetClass3(){
+        SqlSession sqlSession = MyBatisUtil.getSqlSession();
+        /**
+         * 映射sql的标识字符串，
+         * me.gacl.mapping.classMapper是classMapper.xml文件中mapper标签的namespace属性的值，
+         * getClass3是select标签的id属性值，通过select标签的id属性值就可以找到要执行的SQL
+         */
+        String statement = &quot;me.gacl.mapping.classMapper.getClass3&quot;;//映射sql的标识字符串
+        //执行查询操作，将查询结果自动封装成Classes对象返回
+        Classes clazz = sqlSession.selectOne(statement,1);//查询class表中id为1的记录
+        //使用SqlSession执行完SQL之后需要关闭SqlSession
+        sqlSession.close();
+        //打印结果：Classes [id=1, name=class_a, teacher=Teacher [id=1, name=teacher1], students=[Student [id=1, name=student_A], Student [id=2, name=student_B], Student [id=3, name=student_C]]]
+        System.out.println(clazz);
+    }
+    
+    @Test
+    public void testGetClass4(){
+        SqlSession sqlSession = MyBatisUtil.getSqlSession();
+        /**
+         * 映射sql的标识字符串，
+         * me.gacl.mapping.classMapper是classMapper.xml文件中mapper标签的namespace属性的值，
+         * getClass4是select标签的id属性值，通过select标签的id属性值就可以找到要执行的SQL
+         */
+        String statement = &quot;me.gacl.mapping.classMapper.getClass4&quot;;//映射sql的标识字符串
+        //执行查询操作，将查询结果自动封装成Classes对象返回
+        Classes clazz = sqlSession.selectOne(statement,1);//查询class表中id为1的记录
+        //使用SqlSession执行完SQL之后需要关闭SqlSession
+        sqlSession.close();
+        //打印结果：Classes [id=1, name=class_a, teacher=Teacher [id=1, name=teacher1], students=[Student [id=1, name=student_A], Student [id=2, name=student_B], Student [id=3, name=student_C]]]
+        System.out.println(clazz);
+    }
+}</pre><br><div id="cnblogs_post_body"><h3 id="blogTitle13">2.6、MyBatis一对多关联查询总结</h3><p>　　MyBatis中使用collection标签来解决一对多的关联查询，ofType属性指定集合中元素的对象类型。</p><p><br></p><p><br></p><p><br></p></div><br>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/48689571'>原文链接</a>

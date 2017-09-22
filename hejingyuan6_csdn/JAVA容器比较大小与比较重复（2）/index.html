@@ -1,0 +1,188 @@
+﻿<div style="color:blue" align=center>JAVA容器比较大小与比较重复（2）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">承接上文：</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h1><span style="font-family:KaiTi_GB2312"><span lang="en-US">C</span><span lang="en-US">omparable</span><span lang="zh-CN">接口：针对排序list</span></span></h1>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">问题：上面的算法根据什么确定容器中对象的“大小”顺序？</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">所有可以“排序”的类都实现了</span><span lang="en-US">java.lang.Comparable</span><span lang="zh-CN">接口，</span><span lang="en-US">C</span><span lang="en-US">omparable</span><span lang="zh-CN">接口中只有一个方法</span></span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">Publicint compareTo(Object obj)</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">返回</span><span lang="en-US">0</span><span lang="zh-CN">：表示</span><span lang="en-US">this==obj</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">返回正数：表示</span><span lang="en-US">this&gt;obj</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">返回负数：表示</span><span lang="en-US">this</span><span lang="en-US">&lt;</span><span lang="en-US">obj</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">实现了</span><span lang="en-US">C</span><span lang="en-US">omparable</span><span lang="zh-CN">接口的类通过实现</span><span lang="en-US">comparaTo</span><span lang="zh-CN">方法从而确定该对象的排序方式</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN"></span></p>
+<h1><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">equals()与</span><span lang="en-US">hashCode</span><span lang="zh-CN">()：保证不重复</span></span></h1>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2><span style="font-family:KaiTi_GB2312">由来：</span></h2>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp;</span><span lang="en-US">&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">要想保证元素不重复，可两个元素是否重复应该依据什么来判断呢？这就是Object.equals方法了。但是，如果每增加一个元素就检查一次，那么当元素很多时，后添加到集合中的元素比较的次数就非常多了。也就是说，如果集合中现在已经有1000个元素，那么第1001个元素加入集合时，它就要调用1000次equals方法。这显然会大大降低效率。&nbsp;&nbsp;</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 于是，Java采用了哈希表的原理。哈希算法也称为散列算法，是将数据依特定算法直接指定到一个地址上。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 这样一来，当集合要添加新的元素时，先调用这个元素的hashCode方法，就一下子能定位到它应该放置的物理位置上。如果这个位置上没有元素，它就可以直接存储在这个位置上，不用再进行任何比较了；如果这个位置上已经有元素了，就调用它的equals方法与新元素进行比较，相同的话就不存了，不相同就散列其它的地址。所以这里存在一个冲突解决的问题。这样一来实际调用equals方法的次数就大大降低了，几乎只需要一两次。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2><span style="font-family:KaiTi_GB2312">规则：</span></h2>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 所以，Java对于eqauls方法和hashCode方法是这样规定的：</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.如果两个对象相同，那么它们的hashCode&#20540;一定要相同；</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; 2.如果两个对象的hashCode相同，它们并不一定相同（这里说的对象相同指的是用eqauls方法比较）。<span style="font-size:16pt">如不按要求去做了，会发现相同的对象可以出现在Set集合中，同时，增加新元素的效率会大大下降。</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; 3.equals()相等的两个对象，hashcode()一定相等；equals()不相等的两个对象，却并不能证明他们的hashcode()不相等。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 在object类中，hashcode()方法是本地方法，返回的是对象的地址&#20540;，而object类中的equals()方法比较的也是两个对象的地址&#20540;，如果equals()相等，说明两个对象地址&#20540;也相等，当然hashcode()也就相等了；</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">在String类中，equals()返回的是两个对象内容的比较，当两个对象内容相等时Hashcode()方法根据String类的重写代码的分析，也可知道hashcode()返回结果也会相等。</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">以此类推，可以知道Integer、Double等封装类中经过重写的equals()和hashcode()方法也同样适合于这个原则。当然没有经过重写的类，在继承了object类的equals()和hashcode()方法后，也会遵守这个原则。</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2><span style="font-family:KaiTi_GB2312">总结：</span></h2>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; hashCode()方法被用来获取给定对象的唯一整数。这个整数被用来确定对象被存储在HashTable类&#20284;的结构中的位置。默认的，Object类的hashCode()方法返回这个对象存储的内存地址的编号。<span style="font-family:KaiTi_GB2312; font-size:21px">&nbsp;hashCode()和equals()定义在Object类中，这个类是所有java类的基类，所以所有的java类都继承这两个方法。</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 如果我们不重写这两个方法，将几乎不遇到任何问题，但是有的时候程序要求我们必须改变一些对象的默认实现。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">举例说明：</span></p>
+<pre code_snippet_id="278599" snippet_file_name="blog_20140407_1_2977285" name="code" class="java">public class TestString{
+	public static void main(String[] args){
+		String s1=&quot;Hello&quot;;
+		String s2=&quot;World&quot;;
+		String s3=&quot;Hello&quot;;
+		System.out.println(s1 == s3);
+		
+		s1=new String(&quot;hello&quot;);
+		s2=new String(&quot;hello&quot;);
+		System.out.println(s1 == s2);
+		System.out.println(s1.equals(s2));
+		
+		
+		}
+}</pre><br>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN"><img src="5437796799985" alt=""><br>
+<br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312">以上的正确执行是因为我们已经默认重写了String类的<span style="font-size:21px">equals()方法和</span><span style="font-size:21px">hashCode()方法。但是如果是Object类呢？</span></span></p>
+<p style="margin:0in">
+<pre code_snippet_id="278599" snippet_file_name="blog_20140407_2_578497" name="code" class="java" style="font-size: 16pt;">import java.util.HashSet;
+import java.util.Set;
+
+public class TestEquals1{
+	public static void main(String[] args){
+			Cat cl=new Cat(1,2,3);
+			Cat c2=new Cat(1,2,3);
+			System.out.println(cl==c2);
+			System.out.println(cl.equals(c2));
+			
+		}
+	}
+
+class Cat{
+		
+		int color,height,weight;
+		public Cat(int color,int height,int weight){
+			
+			this.color=color;
+			this.height=height;
+			this.weight=weight;
+			}
+		
+}</pre>
+<p>
+<p style="font-size:16pt; margin:0in"><br>
+</p>
+<p style="font-size:16pt; margin:0in"><img src="35090498303436" alt=""></p>
+<p style="font-size:16pt; margin:0in"><br>
+</p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><span style="font-family:KaiTi_GB2312; font-size:21px">毫无疑问，上面的程序将输出false，但是，事实上上面两个对象代表的是通过一个cat。真正的商业逻辑希望我们返回true。重写equals()方法！</span></span>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in; font-size:16.0pt">
+<pre code_snippet_id="278599" snippet_file_name="blog_20140407_3_861905" name="code" class="java" style="font-family: 宋体;">public class TestEquals{
+	public static void main(String[] args){
+			Cat cl=new Cat(1,2,3);
+			Cat c2=new Cat(1,2,3);
+			System.out.println(cl==c2);
+			System.out.println(cl.equals(c2));
+		}
+	}
+
+class Cat{
+		
+		int color,height,weight;
+		public Cat(int color,int height,int weight){
+			
+			this.color=color;
+			this.height=height;
+			this.weight=weight;
+			}
+		public boolean equals(Object obj){
+			if(obj==null)return false;
+			else{
+				if(obj instanceof Cat){
+					Cat c=(Cat)obj;
+					if(c.color==this.color &amp;&amp; c.height==this.height &amp;&amp; c.weight==this.weight){
+						return true;
+						}
+					}
+				}
+				return false;
+			}
+	}
+</pre>
+<p>
+<p style="margin:0in; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-size:16.0pt"><img src="497268660547" alt=""><br>
+</p>
+<br>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">So are we done?没有，让我们换一种测试方法来看看。</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN"></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">上面的程序输出的结果是两个。如果两个cat对象equals返回true，Set中应该只存储一个对象才对，而且<span style="font-family:KaiTi_GB2312; font-size:21px">System.out.println(cat.contains(newCat(1,2,3)));判断是否存在时，结果输出为false，如图：</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span style="font-family:KaiTi_GB2312; font-size:21px"><br>
+</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span style="font-family:KaiTi_GB2312; font-size:21px"><img src="45048207745957" alt=""><br>
+</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">那么问题在哪里呢？</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">我们忘掉了第二个重要的方法hashCode()。就像JDK的Javadoc中所说的一样，如果重写equals()方法必须要重写hashCode()方法。我们加上下面这个方法，程序将执行正确。</span></p>
+<br>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN"></span></p>
+<pre code_snippet_id="278599" snippet_file_name="blog_20140407_4_829668" name="code" class="java" style="font-family: 宋体;">public int hashCode()
+     {
+      final int PRIME =31;
+      int result = 1;
+      result = PRIME * result ;
+      return result;
+}
+</pre>
+<p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN"><img src="6787809237480" alt=""><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><br>
+</p>
+<br>
+<h1><span style="font-family:KaiTi_GB2312">再总结：</span></h1>
+<p><span style="font-size:21px"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:宋体">&nbsp; &nbsp;</span><span style="font-family:KaiTi_GB2312"> 以上这些都是针对容器来说的（如何判断set中不重复，如何判断list中的顺序），当然最主要的是解释为什么重写equals()方法必须要重写hashCode()方法的问题。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 根据一个类的equals方法（改写后），两个截然不同的实例有可能在逻辑上是相等的，但是，根据Object.hashCode方法，它们仅仅是两个对象。因此，违反了“相等的对象必须具有相等的散列码”。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 所以只要重写了equals()，一定要重写hashCode，否则Hash表都会失效，工作不正常。即便你用equals方法比较得到两个对象是相等的结论那你也得不到相同的哈希码</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 即如果cat类只重写了equals（），hashcode没有被重写，加入元素时使用的hashcode（）是继承于set&lt;-collection&lt;-object的，所以计算的hashcode&#20540;不同，存储位置不同，则认为元素不相同，也就能明白为什么上面的判断是否存在（<span style="font-size:21px">System.out.println(cat.contains(newCat(1,2,3)))</span>）时输入的结果为false了。</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<br>
+<p><span style="font-family:KaiTi_GB2312"><br>
+<br>
+</span><br>
+</p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/22398151'>原文链接</a>

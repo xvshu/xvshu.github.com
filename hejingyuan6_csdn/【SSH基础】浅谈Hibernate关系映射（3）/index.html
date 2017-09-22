@@ -1,0 +1,137 @@
+﻿<div style="color:blue" align=center>【SSH基础】浅谈Hibernate关系映射（3）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">继上篇博客</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">一对多关联映射（单向）</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">上面我们介绍了多对一，我们反过来看一对多不就是多对一吗？那还用再进行不同的映射吗？有什么差别吗？一对多和多对一映射原理是一致的，存储是相同的，也就是生成的数据库的表是一样的，他们之间不同的是维护的关系不同。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">他们之间不同点是维护的关系不同</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">*多对一维护的关系是：多指向一的关系，有了此关系，加载多的时候可以将一加载上来。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">*一对多维护的关系是：一指向多的关系，有了此关系，在加载一的时候可以将多加载上来。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">一个班级有多个学生，通过班级可以看到学生信息。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="18634167833788" alt=""><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">Classes</span><span lang="zh-CN" style="font-family:华文中宋">的映射关系</span></p>
+<pre name="code" class="html">&lt;hibernate-mapping&gt;
+	&lt;class name=&quot;com.bjpowernode.hibernate.Classes&quot;&gt;
+		&lt;id name=&quot;id&quot;&gt;
+			&lt;generator class=&quot;native&quot;&gt;&lt;/generator&gt;
+		&lt;/id&gt;
+		&lt;property name=&quot;name&quot;&gt;&lt;/property&gt;
+		&lt;set name=&quot;students&quot;&gt;
+			&lt;key column=&quot;classesid&quot;/&gt;
+			&lt;one-to-many class=&quot;com.bjpowernode.hibernate.Student&quot;/&gt;
+		&lt;/set&gt;
+	&lt;/class&gt;
+&lt;/hibernate-mapping&gt;
+</pre><br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">Student</span><span lang="zh-CN" style="font-family:华文中宋">的映射关系</span><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<pre name="code" class="html">&lt;hibernate-mapping&gt;
+	&lt;class name=&quot;com.bjpowernode.hibernate.Student&quot;&gt;
+		&lt;id name=&quot;id&quot;&gt;
+			&lt;generator class=&quot;native&quot;&gt;&lt;/generator&gt;
+		&lt;/id&gt;
+		&lt;property name=&quot;name&quot;&gt;&lt;/property&gt;
+	&lt;/class&gt;
+
+&lt;/hibernate-mapping&gt;</pre><br>
+<p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">再看保存的代码</span><span lang="en-US" style="font-family:Calibri">:</span><span lang="zh-CN" style="font-family:华文中宋">给班级设置学生，而因为学生维护关系，就要在学生端保存班级</span><span lang="en-US" style="font-family:Calibri">id</span><span lang="en-US" style="font-family:华文中宋">--</span><span lang="zh-CN" style="font-family:华文中宋">会带来什么问题？</span></p>
+<pre name="code" class="java">public void testSave2(){
+		Session session=null;
+		try{
+			session=HibernateUtils.getSession();
+			session.beginTransaction();
+			
+			Student student1=new Student();
+			student1.setName(&quot;张三&quot;);
+			session.save(student1);
+			
+			Student student2=new Student();
+			student2.setName(&quot;李四&quot;);
+			//保存学生
+			session.save(student2);
+		
+			Classes classes=new Classes();
+			classes.setName(&quot;动力节点&quot;);
+			
+			Set students=new HashSet();
+			students.add(student1);
+			students.add(student2);
+			
+			classes.setStudents(students);
+			session.save(classes);
+			session.getTransaction().commit();
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			session.getTransaction().rollback();
+		}finally{
+			HibernateUtils.closeSession(session);
+		}
+	}
+</pre><br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">在保存数据时，会存在这么一个时刻：</span><span lang="en-US" style="font-family:Calibri">so</span><span lang="zh-CN" style="font-family:华文中宋">？带来的问题</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></p>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="40298268782763" alt="">
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">1</span><span lang="zh-CN" style="font-family:华文中宋">，从班级能看到学生，是班级来维护关系，不是学生来维护关系，学生不知道自己是哪个班，所以在保存学生的时候，班级</span><span lang="en-US" style="font-family:华文中宋">id</span><span lang="zh-CN" style="font-family:华文中宋">不知道。为了更新学生是哪个班级的要发出很多update语句来告诉学生是哪个班级的。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">2</span><span lang="zh-CN" style="font-family:华文中宋">，当我们设置classesidnot-null=“true”时，则将无法保存数据，解决办法我们改为双向关联映射。</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">一对多关联映射（双向）</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">为了解决一对多单向可能存在的问题，我们采用双向一对多，每一方都能维护对方。而不是需求驱动</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="2972767545303" alt=""></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">一对多双向关联映射方式：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;&nbsp;&nbsp;&nbsp; *在一的一端的集合上采用&lt;key&gt;标签，在多的一端加入一个外键。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;&nbsp;&nbsp;&nbsp; *在多的一端采用&lt;many-to-one&gt;的标签</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">！~注意&lt;key&gt;标签和&lt;many-to-one&gt;标签加入字段保持一致，否则会产生数据混乱。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">Classes</span><span lang="zh-CN" style="font-family:华文中宋">映射文件</span></p>
+<pre name="code" class="html">&lt;hibernate-mapping&gt;
+	&lt;class name=&quot;com.bjpowernode.hibernate.Classes&quot;&gt;
+		&lt;id name=&quot;id&quot;&gt;
+			&lt;generator class=&quot;native&quot;&gt;&lt;/generator&gt;
+		&lt;/id&gt;
+		&lt;property name=&quot;name&quot;&gt;&lt;/property&gt;
+		&lt;set name=&quot;students&quot; inverse=&quot;true&quot;&gt;
+			&lt;key column=&quot;classesid&quot;/&gt;
+			&lt;one-to-many class=&quot;com.bjpowernode.hibernate.Student&quot;/&gt;
+		&lt;/set&gt;
+	&lt;/class&gt;	
+&lt;/hibernate-mapping&gt;
+</pre><br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">Student</span><span lang="zh-CN" style="font-family:华文中宋">映射文件</span></p>
+<pre name="code" class="html">&lt;hibernate-mapping&gt;
+	&lt;class name=&quot;com.bjpowernode.hibernate.Student&quot;&gt;
+		&lt;id name=&quot;id&quot;&gt;
+			&lt;generator class=&quot;native&quot;&gt;&lt;/generator&gt;
+		&lt;/id&gt;
+		&lt;property name=&quot;name&quot;&gt;&lt;/property&gt;
+		&lt;many-to-one name=&quot;classes&quot; column=&quot;classesid&quot;&gt;&lt;/many-to-one&gt;
+	&lt;/class&gt;	
+&lt;/hibernate-mapping&gt;
+</pre><br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"></span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">注意：Inverse属性</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">1、Inverse中文意思为相反的，反转。在hibernate中inverse可以用在一对多和多对多双向关联上，inverse默认是false，为false的时候表示本端可以维护关系，如果inverse为true，则本端不能维护关系，会交给另一端维护关系，本端失效，所以在一对多关联映射我们通常在多的一端维护关系，让一的一端失效。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">2、Inverse是控制方向上的反转，只影响存储。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">比较一对多单向和双向映射，从存储结构上看没有什么区别，但是从配置文件上看，一对多双向关联的配置文件中在多的一端的配置文件上存在&lt;many-to-one&gt;相关配置，即保证多对一的映射。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">下篇继续！</p>
+<br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/38360231'>原文链接</a>

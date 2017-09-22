@@ -1,0 +1,122 @@
+﻿<div style="color:blue" align=center>SQL锁</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<h1><span style="font-family:KaiTi_GB2312; font-size:24px">引入：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">锁是数据库中的一个非常重要的概念，它主要用于多用户环境下保证数据库完整性和一致性。我们知道，多个用户能够同时操纵同一个数据库中的数据，会发生数据不一致现象。即如果没有锁定且多个用户同时访问一个数据库，则当他们的事务同时使用相同的数据时可能会发生问题。这些问题包括：丢失更新、脏读、不可重复读</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">-丢失更新</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　A,B两个用户读同一数据并进行修改,其中一个用户的修改结果破坏了另一个修改的结果,比如订票系统</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　-脏读</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　A用户修改了数据,随后B用户又读出该数据,但A用户因为某些原因取消了对数据的修改,数据恢复原&#20540;,此时B得到的数据就与数据库内的数据产生了不一致</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　-不可重复读</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　A用户读取数据,随后B用户读出该数据并修改,此时A用户再读取数据时发现前后两次的&#20540;不一致</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 并发控制的主要方法是封锁,锁就是在一段时间内禁止用户做某些操作以避免产生数据不一致</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<h2><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">一</span><span lang="en-US">.</span><span lang="zh-CN">锁的类别</span></span></h2>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">-共享锁</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">　共享锁(S锁)又称为读锁，若事务T对数据对象A加上S锁，则事务T只能读A，不能修改A；其他事务只能再对A加S锁，而不能加X锁，直到T释放A上的S锁。这就保证了其他事务可以读A，但在T释放A上的S锁之前不能对A做任何修改。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">用于不更改或不更新数据的操作（只读操作），如SELECT 语句。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">-排它锁</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　排它(X) 锁可以防止并发事务对资源进行访问。其它事务不能读取或修改排它 (X)锁锁定的数据。如果事务T对数据A加上排他锁后，则其他事务不能再对A加任任何类型的封锁。获准排他锁的事务既能读数据，又能修改数据。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">用于数据修改操作，例如INSERT、UPDATE 或 DELETE。确保不会同时同一资源进行多重更新。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<h2><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">二</span><span lang="en-US">.</span><span lang="zh-CN">锁的粒度</span></span></h2>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　锁粒度是被封锁目标的大小,封锁粒度小则并发性高,但开销大,封锁粒度大则并发性低但开销小</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　SQLServer支持的锁粒度可以分为为行、页、键、键范围、索引、表或数据库获取锁</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">1 如何锁一个表的某一行</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　SET TRANSACTIONISOLATION LEVEL READ UNCOMMITTED</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　SELECT * FROM tableROWLOCK WHERE id = 1</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　 &nbsp;2 锁定数据库的一个表</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　SELECT * FROM tableWITH (HOLDLOCK)</span></p>
+<p lang="en-US" style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;　</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;&nbsp;</span></p>
+<h3><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;SELECT语句中“加锁选项”的功能说明</span></h3>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">SQLServer提供了强大而完备的锁机制来帮助实现数据库系统的并发性和高性能。用户既能使用SQL Server的缺省设置也可以在select语句中使用“加锁选项”来实现预期的效果。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">功能说明（基本）：　</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">NOLOCK（不加锁）</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">此选项被选中时，SQLServer 在读取或修改数据时不加任何锁。 在这种情况下，用户有可能读取到未完成事务（Uncommited Transaction）或回滚(RollBack)中的数据, 即所谓的“脏数据”。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">HOLDLOCK（保持锁）</span><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">此选项被选中时，SQLServer 会将此共享锁保持至整个事务结束，而不会在途中释放。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">UPDLOCK（修改锁）</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">此选项被选中时，SQLServer 在读取数据时使用修改锁来代替共享锁，并将此锁保持至整个事务或命令结束。使用此选项能够保证多个进程能同时读取数据但只有该进程能修改数据。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">TABLOCK（表锁）</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">此选项被选中时，SQLServer 将在整个表上置共享锁直至该命令结束。 这个选项保证其他进程只能读取而不能修改数据。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">TABLOCKX（排它表锁）</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">此选项被选中时，SQLServer 将在整个表上置排它锁直至该命令或事务结束。这将防止其他进程读取或修改表中的数据。</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">ROWLOCK强制使用行锁</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">TABLOCKX强制使用独占表级锁，这个锁在事务期间阻止任何其他事务使用这个表</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">链接：<a target="_blank" target="_blank" href="http://www.cnblogs.com/petitprince/archive/2010/08/27/1810140.html">SQL锁表语句</a></span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">注意:锁定数据库的一个表的区别</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　SELECT* FROM table WITH (HOLDLOCK) 其他事务可以读取表，但不能更新删除</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">　　SELECT* FROM table WITH (TABLOCKX) 其他事务不能读取表,更新和删除</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:24px">　</span></p>
+<h3><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;应用：</span></h3>
+<p style="margin:0in; margin-left:.375in; font-family:宋体; font-size:16.0pt">
+<pre code_snippet_id="115589" snippet_file_name="blog_20131217_1_500165" name="code" class="csharp">        ///避免每个用户同时抽题，要求只能抽到20到互相不同的答题记录
+        /// &lt;summary&gt;
+        /// 更新前二十条未判分答题记录，并附上教师姓名——何静媛
+        /// &lt;/summary&gt;
+        public int UpdateRecordByQuestionID(Hashtable map)
+        {
+            try
+            {
+
+                string strSql = &quot;update &quot; + map[&quot;TableNameRecord&quot;].ToString() + &quot; WITH (UPDLOCK) set Teacher=@Teacher where ID in ( &quot;;
+                     strSql += &quot;select top 20 (ID) from &quot; + map[&quot;TableNameRecord&quot;].ToString() + &quot; where ((Teacher=@Teacher and IsCheck=&#39;否&#39;) or (Teacher is null)) and QuestionID=@QuestionID and ExamID=@ExamID )&quot;;
+                    //StringBuilder strSql = new StringBuilder();
+                    //strSql.Append(&quot;select * &quot;);
+                    //strSql.Append(&quot; FROM  &quot; + map[&quot;TableNameRecord&quot;].ToString());
+                    //strSql.Append(&quot; where  QuestionID=@QuestionID and IsCheck=@IsCheck and ExamID=@ExamID&quot;);
+                    SqlParameter[] parameters = {
+			            new SqlParameter(&quot;@QuestionID&quot;, map[&quot;QuestionID&quot;].ToString ()),  
+                        new SqlParameter(&quot;@Teacher&quot;, map[&quot;Teacher&quot;].ToString ()),    
+                        new SqlParameter (&quot;@ExamID&quot;,map[&quot;ExamID&quot;].ToString ())};
+                    int rows = DbHelperSQL.ExecuteSql(strSql.ToString(), parameters);
+                    return rows;
+               
+            }
+            catch( Exception ex)
+            {
+                    throw ex;
+            }
+            finally
+            {
+            }
+        }
+</pre><br>
+<p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:24px">总结：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 在数据库开发过程中，不得不考虑并发性的问题，因为很有可能当别人正在更新表中记录时，你又从该表中读数据，那你读出来的数据有可能就不是你希望得到的数据。可以说有些数据同时只能有一个事物去更新，否则最终显示给用户的数据不是数据库中现存的数据。锁表就限制不同的事物在同一时间内不允许同时操作一张表，实例很简单，可以用select来锁定整张表，那别人就不可能更新或是读取表的记录（教师读答题记录）。</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<br>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp; &nbsp;&nbsp;</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/17307553'>原文链接</a>

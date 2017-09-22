@@ -1,0 +1,77 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; vb与vbnet的不同</div><div style="color:blue" align=center>vb与vbnet的不同</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;&nbsp; vb.net是完全面向对象的语言，支持面向对象的四个基本属性:抽象,继承，多态，封装，但<span style="line-height:20px">vb是基于对象的程序设计语言</span>，它只支持部分面向对象的内容像多态，接口等，不支持继承。</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; <span style="line-height:20px">
+vb是基于对象的程序设计语言</span>：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="15314867828303.png" alt=""><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; vb.net的类别</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="23135256344337.png" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">下面具体介绍一下它们之间的细微不同:</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">1，数据类型的改变</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="13656678406122.png" alt=""><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">2，变量声明的变化</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 在VB6.0中，变量声明有许多限制。其中之一就是不能同行声明多个变量。如果一定要在一行中声明多个变量，就一定得指明每个变量的类型，否则将被默认为Variant类型。</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="plain">Dim a1, a2 As Integer
+Dim a3 As Integer, a4 As Integer </pre><br>
+<p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 第一行中的a1是Variant类型，a2是Integer类型。第二行中两个变量都是Integer类型。</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt">
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">VB.NET支持同行声明多个变量，举例如下：</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="plain">Dim a1, a2, a3 As Integer </pre>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 变量初始化是另一个问题。在VB6.0中不能同时声明和初始化变量，而VB.NET则支持这个特性。</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt">
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">VB.NET支持同行声明多个变量，举例如下：&nbsp;</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="plain">Dim a1, a2, a3 As Integer</pre>
+<p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 变量初始化是另一个问题。在VB6.0中不能同时声明和初始化变量，而VB.NET则支持这个特性。</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">3，数组</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; VB.NET对数组作了明显的改动。&nbsp;</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 数组范围。在VB.NET中，你需要&#26684;外留意数组范围问题。VB6.0默认数组下界为0，故数组中的元素数量等与数组上界&#20540;加一。下面的数组界限从A(0)到A(10)，共有11个元素：&nbsp;</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="plain">Dim A(10) As Single </pre>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 可以使用OptionBase改变下界&#20540;为1。在VB.NET中，数组和C&#43;&#43;一样，下界&#20540;为0，不支持Option Base。</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">4，布尔操作符</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; VB6.0中的And、Or或是Xor语句是按位操作符。而在VB.NET中，它们是布尔操作符。执行这些操作将返回true或false。VB.NET引入新操作符来完成按位操作。<br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">5，不支持Set语句</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">VB6.0使用Set语句指派对象。例如：&nbsp;</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="plain">Set myObj = new MyObject
+Set a = b </pre>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">在VB.NET中，不需要使用Set指派对象。例如：&nbsp;</span></p>
+<pre name="code" class="plain">myObj = new MyObj()
+a = b</pre><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">6，new和nothing关键字</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">VB6.0中，AS New和Nothing关键字用于声明一个对象并初始化它。&nbsp;</span></p>
+<p style="margin-left:0pt; margin-right:0pt; margin-top:7pt; margin-bottom:7pt"><span style="font-family:KaiTi_GB2312; font-size:24px">VB.NET不支持隐式创建对象。</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-size:24px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/8459513'>原文链接</a>

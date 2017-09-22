@@ -1,0 +1,104 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 程序员编程基础—数据连接</div><div style="color:blue" align=center>程序员编程基础—数据连接</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px; color:#333333">&nbsp;</span></p>
+<p><span style="font-size:18px"><span style="color:#333333">通过</span><span style="color:#333333">ADO</span><span style="color:#333333">连接</span><span style="color:#333333">SQLServer</span><span style="color:#333333">数据库可以分为有源数据库连接和无源数据库连接。</span></span></p>
+<p><span style="font-size:18px">下面我来介绍一下：</span></p>
+<p><span style="font-size:18px"><span style="color:#333333">1 </span><span style="color:#333333">无源数据库连接</span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">其实，</span><span style="color:#333333">“</span><span style="color:#333333">无源数据库</span><span style="color:#333333">”</span><span style="color:#333333">连接也并不是说不需要数据源，如果没有数据源则连接是纸上谈兵，只是不需要配置</span><span style="color:#333333">ODBC</span><span style="color:#333333">数据源，利用</span><span style="color:#333333">ADO</span><span style="color:#333333">（在</span><span style="color:#333333">vb</span><span style="color:#333333">与数据库中讲过）</span><span style="color:#333333">就可通过代码进行连接。</span></span></p>
+<p><span style="color:#333333"><br>
+<span style="font-size:18px"></span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">1.1</span><span style="color:#333333">建立无源数据库连接</span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">首先要在菜单中</span><span style="color:#333333">“</span><span style="color:#333333">工程</span><span style="color:#333333">”</span><span style="color:#333333">—“</span><span style="color:#333333">引用”中选择</span><span style="color:#333333">Microsoft
+ ActiveX DataObjects 2.6 Library&nbsp;</span></span></p>
+<p><span style="font-size:18px; color:#333333"></span></p>
+<pre class="plain" name="code"><span style="font-size:18px;">’定义连接对象和记录集
+  dim objcn as new connection
+   dim objrs as new recordset
+   dim strcn as string
+   dim strSQL as string
+ 
+'建立数据库连接
+Objcn.connectionstring=&quot;Provider=Microsoft.Jet.OLEDB.3.51;&quot;&amp; &quot;Data Source=&quot;&amp;App.Path &amp;&quot;\数据库\实例1.mdb&quot;
+Objcn.open
+ 
+'执行查询命令，获得用户登录口令
+StrSQL=&quot;select 口令 from 系统用户 where 用户名='&quot;&amp; UserName &amp;&quot;'&quot;
+Set objrs.activeconnection=objcn
+Objrs.open(strSQL)
+ 
+'判断有无查询结果
+。。。
+ 
+'关闭数据库连接，释放对象
+Objcn.close
+Set objrs=nothing
+Set objcn=nothing
+ 
+</span></pre><br>
+<p>
+<p>
+<p><span style="font-size:18px"></span></p>
+<p><span style="font-size:18px">&nbsp;<span style="color:#333333">无源数据库连接则不用配置</span><span style="color:#333333">ODBC</span><span style="color:#333333">环境，可以省去手工设置</span><span style="color:#333333">DSN</span><span style="color:#333333">的麻烦，这种方法所编写的软件适应性广，又符合专业软件的要求。</span></span></p>
+<br>
+<p><span style="font-size:18px; color:#333333"></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">２</span><span style="color:#333333">有源数据库的连接</span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">有源数据库连接的首要任务是要注册数据源名称（</span><span style="color:#333333">DSN</span><span style="color:#333333">），通过配置</span><span style="color:#333333">ODBC</span><span style="color:#333333">环境，进行数据源的注册，然后才能在对数据库编程时，对数据源进行连接、访问和操作</span></span></p>
+<p><span style="font-size:18px; color:#333333">下面我们先来说一下什么是ODBC&nbsp;</span></p>
+<p align="left" style="background:white"><span style="font-size:18px">ODBC(Open Database Connectivity，开放数据库互连)是</span><a href="http://baike.baidu.com/view/39784.htm" target="_blank"><span style="font-size:18px">微软公司</span></a><span style="font-size:18px">开放服务结构(WOSA，Windows
+ Open Services Architecture)中有关数据库的一个组成部分，它建立了一组规范，并提供了一组对数据库访问的标准API（</span><a href="http://baike.baidu.com/view/185287.htm" target="_blank"><span style="font-size:18px">应用程序编程接口</span></a><span style="font-size:18px">）。这些API利用SQL来完成其大部分任务。ODBC本身也提供了对SQL语言的支持，用户可以直接将SQL语句送给ODBC。</span></p>
+<p><span style="font-size:18px">它的好处在于，不论是FoxPro、Access还是</span><a href="http://baike.baidu.com/view/1685727.htm" target="_blank"><span style="font-size:18px">Oracle数据库</span></a><span style="font-size:18px">，均可用ODBC API进行访问。由此可见，ODBC的最大优点是能以统一的方式处理所有的数据库。</span></p>
+<p><span style="font-size:18px"><span style="color:black">ODBC</span><span style="color:black">数据源类型</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">用户</span><span style="color:black">DSN</span><span style="color:black">：计算机本地数据源，只能被当前用户使用</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">系统</span><span style="color:black">DSN:</span><span style="color:black">计算机本地数据源，可被任何具有权限的用户使用</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">文件</span><span style="color:black">DSN</span><span style="color:black">：可以不是计算机本地数据源，可被安装了相同驱动程序的用户共享</span><span style="color:black">connection</span><span style="color:black">对象在建立数据源连接时，默认使用</span><span style="color:black">MSDASQL</span><span style="color:black">（</span><span style="color:black">Microsoft
+ OLE DBProvider for ODBC</span><span style="color:black">）驱动程序，所以在连接字符串中只需制定数据源名称即可，例如：</span><span style="color:black">objcn.open &quot;DSN=myaccess&quot;</span><span style="color:black">建立数据库连接</span></span></p>
+<p><span style="color:black"><br>
+<span style="font-size:18px"></span></span></p>
+<p><span style="font-size:18px">2.1创建Access数据库的ODBC数据源</span></p>
+<p><span style="font-size:18px">（1），选择系统“开始--控制面板--小图标--数据源（ODBC）”命令，打开ODBC数据源管理器，单击添加，创建新数据源对话框</span></p>
+<p><span style="font-size:18px">（2），选择表中的MicrosoftAccess Driver（*.mdb）,单击完成，打开“ODBCMicrosoft Access 安装”对话框，输入数据源名称等信息</span></p>
+<p><span style="font-size:18px">（3），单击选项，选择数据库后单击确定按钮</span></p>
+<p><span style="font-size:18px">（4），单击确定关闭“ODBCMicrosoft Access 安装”对话框，新建的数据库名称显示在“ODBC数据源管理器”对话框</span></p>
+<p><span style="font-size:18px"><span style="color:#333333">2</span><span style="color:#333333">．2</span>创建有源数据库连接</span></p>
+<p><span style="font-size:18px"><span style="color:#333333">创建数据源是进行有源数据库连接的第一步，下面同样是运用</span><span style="color:#333333">ADO</span><span style="color:#333333">对象模型的主要元素</span><span style="color:#333333">Connection</span><span style="color:#333333">（连接）进行源数据库连接。</span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">ConnectionString</span><span style="color:#333333">是</span><span style="color:#333333">Connection</span><span style="color:#333333">对象的属性名称，提供数据提供者或服务提供者打开到数据源的连接所需要的特定信息，包括</span><span style="color:#333333">Database</span><span style="color:#333333">、</span><span style="color:#333333">DSN</span><span style="color:#333333">、</span><span style="color:#333333">UID</span><span style="color:#333333">等。</span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">（</span><span style="color:#333333">1</span><span style="color:#333333">）</span><span style="color:#333333"> Database</span><span style="color:#333333">：字符串表达式，指定服务器上的数据库名称。</span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">（</span><span style="color:#333333">2</span><span style="color:#333333">）</span><span style="color:#333333"> UID</span><span style="color:#333333">：字符串表达式，为</span><span style="color:#333333">ODBC</span><span style="color:#333333">数据源指定用户标识（用户账号名）。</span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">（</span><span style="color:#333333">3</span><span style="color:#333333">）</span><span style="color:#333333"> PWD</span><span style="color:#333333">：字符串表达式，为</span><span style="color:#333333">ODBC</span><span style="color:#333333">数据源指定用户口令。</span></span></p>
+<p><span style="font-size:18px"><span style="color:#333333">（</span><span style="color:#333333">4</span><span style="color:#333333">）</span><span style="color:#333333"> DSN</span><span style="color:#333333">：字符串表达式，指定连接的</span><span style="color:#333333">ODBC</span><span style="color:#333333">数据源名称。</span></span></p>
+<br>
+<p><span style="font-size:18px; color:#333333"></span></p>
+<pre class="plain" name="code"><span style="font-size:18px;">’定义
+Dim objrs as recordset
+'用于保存数据源记录集
+Dim objcn as connection
+’用于创建数据源连接
+Dim isneedsave as boolean
+ 
+'建立数据库连接
+Set objcn =new connection
+Objcn.open &quot;DSN=实例2DSN&quot;
+Set objrs=new recordset
+With objrs             ’设置查询
+         .cursorlocation=aduseclient
+         .cursortype=adopenstatic
+         .locktype=adlockoptimistic
+         .open&quot;select * from 系统用户&quot;，objcn
+End with
+ 
+’关闭释放数据库连接
+Set objrs=nothing
+Objcn.close
+Set objcn=nothing 
+</span></pre><br>
+<span style="font-size:18px"><span style="color:#333333">有源数据库连接首先要配置</span><span style="color:#333333">ODBC</span><span style="color:#333333">环境，注册数据源，这种方法有一定的局限性，当程序最终完成并分发到用户手中后，还需要为用户配置</span><span style="color:#333333">ODBC</span><span style="color:#333333">，而且由于参数内容不一，配置时不宜把握。</span><br>
+</span>
+<p>
+<p>
+<p>
+<p><span style="color:#333333"><span style="color:#333333"><br>
+<span style="font-size:18px"></span></span></span></p>
+<p><span style="color:#333333"><span style="color:#333333"><br>
+</span></span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/7800543'>原文链接</a>

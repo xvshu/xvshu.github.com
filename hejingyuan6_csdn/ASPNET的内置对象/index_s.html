@@ -1,0 +1,148 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; ASPNET的内置对象</div><div style="color:blue" align=center>ASPNET的内置对象</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri"></span></p>
+<p><br>
+</p>
+<h1><span lang="en-US" style="font-family:Calibri">Request</span></h1>
+<div><span lang="en-US" style="font-family:Calibri"><br>
+</span></div>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">&nbsp; &nbsp; 该对象用于检索从浏览器向服务器所发送的请求中的信息。在按下“提交”按钮时，</span><span lang="en-US" style="font-family:Calibri">Request</span><span lang="zh-CN" style="font-family:仿宋">对象将读取和提取通过</span><span lang="en-US" style="font-family:Calibri">HTTP</span><span lang="zh-CN" style="font-family:仿宋">请求发送的参数。在用户提交表单时，包含在输入控件中的数据将与表单一起被发送。</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp; 当向服务器提交数据时，分为两种方式：</p>
+<h2>&nbsp; &nbsp;&nbsp;<span lang="en-US" style="font-family:Calibri">Get</span><span lang="zh-CN" style="font-family:仿宋">提交：</span></h2>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"></span></p>
+<pre name="code" class="csharp">//get
+            string userName = Request.QueryString[&quot;txtUserName&quot;].ToString();
+            string userPwd = Request.QueryString[&quot;txtUserPwd&quot;].ToString();
+            Response.Write(&quot;登录的用户名为&quot; + &quot;userName &quot;);</pre>
+<p>
+<h2><span lang="zh-CN" style="font-family:仿宋">&nbsp; <span lang="en-US" style="font-family:Calibri">
+Post</span><span lang="zh-CN" style="font-family:仿宋">提交：</span></span></h2>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"><span lang="zh-CN" style="font-family:仿宋"></span></span></p>
+<pre name="code" class="csharp">//post
+            string userName = Request[&quot;txtUserName&quot;].ToString();
+            string userPwd = Request[&quot;txtUserPwd&quot;].ToString();
+            string userName = Request.Form.Get(&quot;txtUserName&quot;).ToString();
+            string userPwd = Request.Form.Get(&quot;txtUserPwd&quot;).ToString();
+</pre><br>
+<p>
+<h2><span lang="en-US" style="font-family:Calibri">Post</span><span lang="zh-CN" style="font-family:仿宋">与</span><span lang="en-US" style="font-family:Calibri">Get</span><span lang="zh-CN" style="font-family:仿宋">的不同：</span></h2>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1</span><span lang="zh-CN" style="font-family:仿宋">，Get将表单中数据的按照variable=value的形式，添加到action所指向的URL后面，并且两者使用“?”连接，而各个变量之间使用“&amp;”连接；Post是将表单中的数据放在form的数据体中，按照变量和&#20540;相对应的方式，传递到action所指向URL。</span><span lang="en-US" style="font-family:仿宋">&nbsp;</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">&nbsp; &nbsp; 比如你有一个页面index.html，这个页面有一个文本域,名称是：a，&#20540;是123，你用get提交后，你的url会变成：index.html?a=123，在获取的时候，就是从浏览器中回去参数了，而不是表单！</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2</span><span lang="zh-CN" style="font-family:仿宋">，Get是不安全的，因为在传输过程，数据被放在请求的URL中，而如今现有的很多服务器、代理服务器或者用户代理都会将请求URL记录到日志文件中，然后放在某个地方，这样就可能会有一些隐私的信息被第三方看到。另外，用户也可以在浏览器上直接看到提交的数据，一些系统内部消息将会一同显示在用户面前。Post的所有操作对用户来说都是不可见的。</span><span lang="en-US" style="font-family:仿宋">&nbsp;</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;3</span><span lang="zh-CN" style="font-family:仿宋">，Get传输的数据量小，这主要是因为受URL长度限制；而Post可以传输大量的数据，所以在上传文件只能使用Post。</span><span lang="en-US" style="font-family:仿宋">&nbsp;</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4</span><span lang="zh-CN" style="font-family:仿宋">，</span><span lang="en-US" style="font-family:仿宋">Get是Form的默认方法。</span></p>
+<br>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"><span lang="zh-CN" style="font-family:仿宋"></span></span></p>
+<h1><span lang="en-US" style="font-family:Calibri">Response</span></h1>
+<div><span lang="en-US" style="font-family:Calibri"><br>
+</span></div>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">&nbsp; &nbsp; 主要用于服务器端向客户端发送数据，其中可以利用Response.Write直接向客户发送信息，也可以利用response.Redirect进行重新定位客户端到另一个URL上去，当然也可以利用Response.Cookies来设置Cookies的&#20540;。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">Response和Request区别：</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">&nbsp; &nbsp;&nbsp;<img src="10077010346490" alt=""></span></p>
+<h1><span lang="en-US" style="font-family:Calibri">Application</span></h1>
+<div><span lang="en-US" style="font-family:Calibri"><br>
+</span></div>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">&nbsp; &nbsp; 此对象用于共享应用程序级信息。即，维护整个应用程序的一组变量，这些变量可以由所有访问该应用程序的用户共享。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"><span lang="zh-CN" style="font-size:21px; font-family:仿宋">&nbsp; &nbsp;&nbsp;</span><span style="font-size:16pt">使用Application对象来使整个ASP应用程序的所有用户共享数据，把一个ASP程序中的不同用户、不同页面联系在一起</span><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-size:16pt"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-size:16pt"></span></p>
+<h1><span lang="en-US" style="font-family:Calibri">Session</span></h1>
+<div><span lang="en-US" style="font-family:Calibri"><br>
+</span></div>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">&nbsp; &nbsp; 该对象用于存储在多个页面调用之间特定用户的信息。</span><span style="font-size:16pt; font-family:仿宋">存储访问者的用户信息，多个页面可以访问该信息，但是两个访问者之间不能共享该信息。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-size:16pt; font-family:仿宋"><span style="font-size:21px">&nbsp; &nbsp; 每个用户以这台web服务器建立连接时，他就创建链接，并与这个服务器建立了一个session，并且服务器就自动为其分配一个sessionID，用以识别这个用户的唯一身份。特别说明的是Session对象的变量只是对一个用户有效，不同的用户的会话信息用不同的Session对象的变量存储。在网络环境下Session对象的变量是有生命周期的，如果在规定的时间没有对Session对象的变量刷新，系统会终止这些变量。</span><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"></span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-size:16pt"></span></p>
+<h1><span lang="en-US" style="font-family:Calibri">Server</span></h1>
+<div><span lang="en-US" style="font-family:Calibri"><br>
+</span></div>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">&nbsp; &nbsp; 该对象用于访问服务器上的资源。</span><span style="font-family:仿宋">来获取你现在请求的那个服务器中的一些信息。例如：访问服务器上创建和安装的组件。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-size:16pt">&nbsp; &nbsp;&nbsp;</span></p>
+<pre name="code" class="csharp">//单击加载，上传服务器
+ protected void btnLoad_Click(object sender, EventArgs e)
+        {
+            this.FileUpload1.PostedFile.SaveAs(Server.MapPath(&quot;upFile&quot;) + &quot;\\1.jpg&quot;);
+            this.Image1.ImageUrl = Server.MapPath(&quot;upFile&quot;) + &quot;\\1.jpg&quot;;
+        }</pre>
+<h1>Cookie：</h1>
+<div><br>
+</div>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;在Web程序设计中，它表示一个长度不超过4K的一个普通的文本文件。这个文件在用户的硬盘上，可以由Web浏览器进行访问。由WEB服务器嵌入用户浏览器中，以便标识用户，且随同每次用户请求发往WEB服务器。这样可以让服务器识别是哪个用户。<br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><br>
+</p>
+<h1>Global.asa文件：</h1>
+<div><br>
+</div>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;用来存储事件信息和由应用程序全局使用的对象。<span style="font-size:16pt">global.asa是ASP的一个全局应用文件.主要是定义Session对象和Application对象,以及相应的事件.</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><span style="font-size:16pt"></span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16pt">&nbsp; &nbsp;Session对象和Application对象都有两个事件,要使用他们的事件,就必须首先在Global.asa文件文件中声明,该文件对于用户来说是不可见的,文件名也是固定的,并且该文件还必须放在应用程序的根目录下,每个应用程序只能拥有一个Global.asa文件.</p>
+<p style="margin:0in; font-family:仿宋; font-size:16pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16pt">举例：查看在线人数，在global.asa中编写</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">
+<pre name="code" class="csharp"> public class Global : HttpApplication
+    {
+        void Application_Start(object sender, EventArgs e)
+        {
+            // 在应用程序启动时运行的代码
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
+            AuthConfig.RegisterOpenAuth();
+            Application.Add(&quot;count&quot;, 0);
+            Application[&quot;online&quot;] = 0;
+        }
+
+        void Application_End(object sender, EventArgs e)
+        {
+            //  在应用程序关闭时运行的代码
+
+        }
+
+        void Application_Error(object sender, EventArgs e)
+        {
+            // 在出现未处理的错误时运行的代码
+
+        }
+
+        void Session_Start(object sender, EventArgs e)
+        {
+            Session.Timeout = 1;
+            Application.Lock();
+            Application[&quot;count&quot;] = (int)Application[&quot;count&quot;] + 1;
+            Application[&quot;online&quot;] = (int) Application[&quot;online&quot;] +1;
+            Application.UnLock();
+        }
+
+        void Session_End(object sender, EventArgs e)
+        {
+            Application.Lock();
+            Application[&quot;online&quot;] = (int)Application[&quot;online&quot;] - 1;
+            Application.UnLock();
+        }
+        
+    }</pre>
+<p><span style="font-family:仿宋; font-size:21px">在web应用程序中编写：</span><br>
+</p>
+<p>
+<pre name="code" class="csharp">  protected void Page_Load(object sender, EventArgs e)
+        {     
+            Response.Write(Application[&quot;count&quot;].ToString());   
+        }</pre><br>
+<br>
+<p><span style="font-family:仿宋; font-size:21px">&nbsp; &nbsp;以上这些对象提供了相当多的功能，但是不同的对象的应用场合不同，这需要我们加深理解，在以后的实践中应用。</span></p>
+<br>
+<br>
+<br>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/9031983'>原文链接</a>

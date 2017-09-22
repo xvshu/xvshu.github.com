@@ -1,0 +1,128 @@
+﻿<div style="color:blue" align=center>MyBatis学习总结(六)——动态SQL</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">MyBatis的动态SQL是基于OGNL表达式的，它可以帮助我们方便的在SQL语句中实现某些逻辑。</span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">MyBatis中用于实现动态SQL的元素主要有：</span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">&nbsp;</span></p><ul style="margin: 0px 0px 1.5em; padding: 0px; line-height: 25.2000007629395px;"><li style="margin: 0px 0px 0.25em 30px; padding: 0px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">if</span></li><li style="margin: 0px 0px 0.25em 30px; padding: 0px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">choose（when，otherwise）</span></li><li style="margin: 0px 0px 0.25em 30px; padding: 0px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">foreach</span></li><li style="margin: 0px 0px 0.25em 30px; padding: 0px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">where</span></li><li style="margin: 0px 0px 0.25em 30px; padding: 0px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">set</span></li><li style="margin: 0px 0px 0.25em 30px; padding: 0px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">trim</span></li></ul><span style="font-family: KaiTi_GB2312; font-size: 18px;">下面我们主要说 where set trim 这三个标签</span><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">1，where标签</span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><br></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><pre name="code" class="html">&lt;!-- 查询学生list，like姓名，=性别 --&gt;     
+&lt;select id=&quot;getStudentListWhere&quot; parameterType=&quot;StudentEntity&quot; resultMap=&quot;studentResultMap&quot;&gt;     
+    SELECT * from STUDENT_TBL ST      
+        WHERE      
+        &lt;if test=&quot;studentName!=null and studentName!='' &quot;&gt;     
+            ST.STUDENT_NAME LIKE CONCAT(CONCAT('%', #{studentName}),'%')      
+        &lt;/if&gt;     
+        &lt;if test=&quot;studentSex!= null and studentSex!= '' &quot;&gt;     
+            AND ST.STUDENT_SEX = #{studentSex}      
+        &lt;/if&gt;     
+&lt;/select&gt; </pre><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br>&nbsp;如果上面例子，参数studentName为null或’’，则或导致此sql组合成“WHERE AND”之类的关键字多余的错误SQL。<br>&nbsp;这时我们可以使用where动态语句来解决。这个“where”标签会知道如果它包含的标签中有返回值的话，它就插入一个‘where’。此外，如果标签返回的内容是以AND 或OR 开头的，则它会剔除掉。<br></span><p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">使用where标签</span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><pre name="code" class="html">&lt;!-- 查询学生list，like姓名，=性别 --&gt;     
+&lt;select id=&quot;getStudentListWhere&quot; parameterType=&quot;StudentEntity&quot; resultMap=&quot;studentResultMap&quot;&gt;     
+    SELECT * from STUDENT_TBL ST      
+    &lt;where&gt;     
+        &lt;if test=&quot;studentName!=null and studentName!='' &quot;&gt;     
+            ST.STUDENT_NAME LIKE CONCAT(CONCAT('%', #{studentName}),'%')      
+        &lt;/if&gt;     
+        &lt;if test=&quot;studentSex!= null and studentSex!= '' &quot;&gt;     
+            AND ST.STUDENT_SEX = #{studentSex}      
+        &lt;/if&gt;     
+    &lt;/where&gt;     
+&lt;/select&gt;   </pre><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br>2，set标签</span><p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><span style="line-height: 26px;">当在update语句中使用if标签时，如果前面的if没有执行，则或导致逗号多余错误。使用set标签可以将动态的配置SET 关键字，和剔除追加到条件末尾的任何不相关的逗号。</span><br style="padding: 0px; line-height: 22px; margin: 0px;"><span style="line-height: 26px;">没有使用if标签时，如果有一个参数为null，都会导致错误，如下示例：</span></span><br></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><span style="font-family: Arial; line-height: 26px;"><br></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><pre name="code" class="html">&lt;!-- 更新学生信息 --&gt;     
+&lt;update id=&quot;updateStudent&quot; parameterType=&quot;StudentEntity&quot;&gt;     
+    UPDATE STUDENT_TBL      
+       SET STUDENT_TBL.STUDENT_NAME = #{studentName},      
+           STUDENT_TBL.STUDENT_SEX = #{studentSex},      
+           STUDENT_TBL.STUDENT_BIRTHDAY = #{studentBirthday},      
+           STUDENT_TBL.CLASS_ID = #{classEntity.classID}      
+     WHERE STUDENT_TBL.STUDENT_ID = #{studentID};      
+&lt;/update&gt;  </pre><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br><span style="line-height: 26px;">使用set+if标签修改后，如果某项为null则不进行更新，而是保持数据库原值。如下示例：</span></span><br><p><br></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><span style="font-family: Arial; line-height: 26px;"></span></p><pre name="code" class="html">&lt;!-- 更新学生信息 --&gt;     
+&lt;update id=&quot;updateStudent&quot; parameterType=&quot;StudentEntity&quot;&gt;     
+    UPDATE STUDENT_TBL      
+    &lt;set&gt;     
+        &lt;if test=&quot;studentName!=null and studentName!='' &quot;&gt;     
+            STUDENT_TBL.STUDENT_NAME = #{studentName},      
+        &lt;/if&gt;     
+        &lt;if test=&quot;studentSex!=null and studentSex!='' &quot;&gt;     
+            STUDENT_TBL.STUDENT_SEX = #{studentSex},      
+        &lt;/if&gt;     
+        &lt;if test=&quot;studentBirthday!=null &quot;&gt;     
+            STUDENT_TBL.STUDENT_BIRTHDAY = #{studentBirthday},      
+        &lt;/if&gt;     
+        &lt;if test=&quot;classEntity!=null and classEntity.classID!=null and classEntity.classID!='' &quot;&gt;     
+            STUDENT_TBL.CLASS_ID = #{classEntity.classID}      
+        &lt;/if&gt;     
+    &lt;/set&gt;     
+    WHERE STUDENT_TBL.STUDENT_ID = #{studentID};      
+&lt;/update&gt;     </pre><br><p><span style="font-family: KaiTi_GB2312; font-size: 18px;">3，trim标签</span></p><p><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br></span></p><p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="line-height: 26px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">trim是更灵活的去处多余关键字的标签，他可以实践where和set的效果。</span></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="line-height: 26px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">where例子的等效trim语句：<br></span></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><span style="font-family: Arial; line-height: 26px;"><br></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><span style="font-family: Arial; line-height: 26px;"></span></p><pre name="code" class="html">&lt;!-- 查询学生list，like姓名，=性别 --&gt;     
+&lt;select id=&quot;getStudentListWhere&quot; parameterType=&quot;StudentEntity&quot; resultMap=&quot;studentResultMap&quot;&gt;     
+    SELECT * from STUDENT_TBL ST      
+    &lt;trim prefix=&quot;WHERE&quot; prefixOverrides=&quot;AND|OR&quot;&gt;     
+        &lt;if test=&quot;studentName!=null and studentName!='' &quot;&gt;     
+            ST.STUDENT_NAME LIKE CONCAT(CONCAT('%', #{studentName}),'%')      
+        &lt;/if&gt;     
+        &lt;if test=&quot;studentSex!= null and studentSex!= '' &quot;&gt;     
+            AND ST.STUDENT_SEX = #{studentSex}      
+        &lt;/if&gt;     
+    &lt;/trim&gt;     
+&lt;/select&gt;   </pre><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br><span style="line-height: 26px;">set例子的等效trim语句：</span></span><br><p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><span style="font-family: Arial; line-height: 26px;"></span></p><pre name="code" class="html">&lt;!-- 更新学生信息 --&gt;     
+&lt;update id=&quot;updateStudent&quot; parameterType=&quot;StudentEntity&quot;&gt;     
+    UPDATE STUDENT_TBL      
+    &lt;trim prefix=&quot;SET&quot; suffixOverrides=&quot;,&quot;&gt;     
+        &lt;if test=&quot;studentName!=null and studentName!='' &quot;&gt;     
+            STUDENT_TBL.STUDENT_NAME = #{studentName},      
+        &lt;/if&gt;     
+        &lt;if test=&quot;studentSex!=null and studentSex!='' &quot;&gt;     
+            STUDENT_TBL.STUDENT_SEX = #{studentSex},      
+        &lt;/if&gt;     
+        &lt;if test=&quot;studentBirthday!=null &quot;&gt;     
+            STUDENT_TBL.STUDENT_BIRTHDAY = #{studentBirthday},      
+        &lt;/if&gt;     
+        &lt;if test=&quot;classEntity!=null and classEntity.classID!=null and classEntity.classID!='' &quot;&gt;     
+            STUDENT_TBL.CLASS_ID = #{classEntity.classID}      
+        &lt;/if&gt;     
+    &lt;/trim&gt;     
+    WHERE STUDENT_TBL.STUDENT_ID = #{studentID};      
+&lt;/update&gt;     </pre><br><span style="font-family: KaiTi_GB2312; font-size: 18px;">总结：</span><p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; line-height: 25.2000007629395px;"><span style="line-height: 26px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br></span></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px;"><span style="line-height: 26px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">其实在真正应用时，我们更多的是使用查询，上面介绍了动态SQL，下面我们也来对比一下</span></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-size: 14px;"><span style="font-family: Arial;"><span style="line-height: 26px;"><br></span></span></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-size: 14px;"><span style="font-family: Arial;"><span style="line-height: 26px;"></span></span></p><pre name="code" class="html">-- 方式一
+&lt;select id=&quot;selectResouceInfoByNotNullAttributes&quot; resultMap=&quot;ExpandResultMap&quot; parameterType=&quot;bean类名&quot;&gt;    
+select * from table_name where 1=1      
+&lt;if test=&quot;resourceId != null&quot;&gt;        
+and resource_id = #{resourceId,jdbcType=INTEGER}      
+&lt;/if&gt;      
+&lt;if test=&quot;appid != null&quot;&gt;       
+and  appid = #{appid,jdbcType=TINYINT}      
+&lt;/if&gt;      
+&lt;if test=&quot;resourceUrl != null&quot;&gt;       
+and  resource_url = #{resourceUrl,jdbcType=VARCHAR}      
+&lt;/if&gt;      
+&lt;if test=&quot;resourceDesc != null&quot;&gt;       
+and  resource_desc = #{resourceDesc,jdbcType=VARCHAR}      
+&lt;/if&gt;  
+&lt;/select&gt;</pre><span style="color: rgb(51, 51, 51); line-height: 28px; text-align: justify;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">这种方式的要点在where后面的1=1，加上这个能够避免第一个if条件后面是否需要加and的选择困境。</span></span><br><p><br></p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-size: 14px;"><span style="font-family: Arial;"><span style="line-height: 26px;"></span></span></p><pre name="code" class="html">-- 方式二
+&lt;select id=&quot;selectResouceInfoByNotNullAttributes&quot; resultMap=&quot;ExpandResultMap&quot; parameterType=&quot;bean类名&quot;&gt;    
+select * from 表名    
+&lt;where&gt;      
+&lt;if test=&quot;resourceId != null&quot;&gt;        
+and resource_id = #{resourceId,jdbcType=INTEGER}      
+&lt;/if&gt;      
+&lt;if test=&quot;appid != null&quot;&gt;       
+and  appid = #{appid,jdbcType=TINYINT}      
+&lt;/if&gt;      
+&lt;if test=&quot;resourceUrl != null&quot;&gt;       
+and  resource_url = #{resourceUrl,jdbcType=VARCHAR}      
+&lt;/if&gt;      
+&lt;if test=&quot;resourceDesc != null&quot;&gt;       
+and  resource_desc = #{resourceDesc,jdbcType=VARCHAR}      
+&lt;/if&gt;    
+&lt;/where&gt;  
+&lt;/select&gt;</pre><p><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px;"><span style="line-height: 26px;"><span style="color: rgb(51, 51, 51); line-height: 28px; text-align: justify;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">这种方式比第一种多了一个where标签，而且不需要在where后面显示的加一个1=1的字段。</span></span><br></span></p><br><pre name="code" class="html">-- 方式三
+&lt;select id=&quot;selectResouceInfoByNotNullAttributes&quot; resultMap=&quot;ExpandResultMap&quot; parameterType=&quot;bean类名&quot;&gt;    
+select * from 表名    
+&lt;trim prefix = &quot;where&quot; prefixOverrides=&quot;and|or&quot;&gt;      
+&lt;if test=&quot;resourceId != null&quot;&gt;        
+and resource_id = #{resourceId,jdbcType=INTEGER}      
+&lt;/if&gt;      
+&lt;if test=&quot;appid != null&quot;&gt;       
+and  appid = #{appid,jdbcType=TINYINT}      
+&lt;/if&gt;      
+&lt;if test=&quot;resourceUrl != null&quot;&gt;       
+and  resource_url = #{resourceUrl,jdbcType=VARCHAR}      
+&lt;/if&gt;      
+&lt;if test=&quot;resourceDesc != null&quot;&gt;       
+and  resource_desc = #{resourceDesc,jdbcType=VARCHAR}      
+&lt;/if&gt;    
+&lt;/trim&gt;  
+&lt;/select&gt;</pre><span style="color: rgb(51, 51, 51); line-height: 28px; text-align: justify;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">第三种方式是最值得提倡的方式，其中的trim标签中标记该标签是以where为前缀的，即where条件的字句。后面的prefixOverrides=&quot;and|or&quot;是说如果where标签中包含的内容开头是and或者or，那么久忽略and或者or。还有另外一个：suffixOverrides=&quot;and|or&quot;,表示where字句中是and或者or结尾则忽略and或者or的意思。</span></span><br><br><p style="margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25.2000007629395px;"><span style="font-family: Arial; line-height: 26px;"><br></span></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/50195291'>原文链接</a>

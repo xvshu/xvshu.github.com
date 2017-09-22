@@ -1,0 +1,262 @@
+﻿<div style="color:blue" align=center>市委组织部项目office文档上传后预览</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">office文档上传后预览，是一个很常用的功能，在这里记录一下自己的研究成果！</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<h1><span lang="zh-CN">第一种方式：</span></h1>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN"><br>
+</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN">上传</span><span lang="en-US">word</span><span lang="zh-CN">文档，转换成</span><span lang="en-US">html</span><span lang="zh-CN">页面直接显示</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"></span></p>
+<pre code_snippet_id="145806" snippet_file_name="blog_20140107_1_4583613" name="code" class="csharp">        /// &lt;summary&gt;          
+        /// word转成html[把word文档换成同名的html文件,并返回其路径]         
+        /// &lt;/summary&gt;         
+        /// &lt;param name=&quot;wordFileName&quot;&gt;&lt;/param&gt;  
+        private string WordToHtml(object wordFileName)
+        {
+            //在此处放置用户代码以初始化页面            
+            ApplicationClass word = new ApplicationClass();
+            Type wordType = word.GetType();
+            Documents docs = word.Documents;
+            
+            //打开文件            
+            Type docsType = docs.GetType();
+            Document doc = (Document)docsType.InvokeMember(&quot;Open&quot;, System.Reflection.BindingFlags.InvokeMethod, null, docs, new Object[] { wordFileName, true, true });
+            //转换格式，另存为             
+            Type docType = doc.GetType();
+            string wordSaveFileName = wordFileName.ToString();
+            string extendName = Path.GetExtension (wordSaveFileName);
+            string strSaveFileName = null;
+            if (extendName == &quot;.docx&quot;)
+            {
+                strSaveFileName = wordSaveFileName.Substring(0, wordSaveFileName.Length - 4) + &quot;html&quot;;
+
+            }
+            else {
+                 strSaveFileName = wordSaveFileName.Substring(0, wordSaveFileName.Length - 3) + &quot;html&quot;;
+
+            }
+            object saveFileName = (object)strSaveFileName;
+
+            docType.InvokeMember(&quot;SaveAs&quot;, System.Reflection.BindingFlags.InvokeMethod, null, doc, new object[] { saveFileName, WdSaveFormat.wdFormatFilteredHTML });
+            docType.InvokeMember(&quot;Close&quot;, System.Reflection.BindingFlags.InvokeMethod, null, doc, null);
+            //退出 Word              
+            wordType.InvokeMember(&quot;Quit&quot;, System.Reflection.BindingFlags.InvokeMethod, null, word, null);
+            return saveFileName.ToString();
+
+        }</pre><pre code_snippet_id="145806" snippet_file_name="blog_20140107_2_4376652" name="code" class="csharp">        /// &lt;summary&gt;
+        /// 调用转换
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        protected void Button2_Click(object sender, EventArgs e)
+        {
+            string HtmlPath = WordToHtml(Server.MapPath(&quot;UpLoadWord/07用户操作手册.docx&quot;));
+            string rePath = HtmlPath.Substring(HtmlPath.IndexOf(&quot;UpLoadWord\\&quot;) + 11, HtmlPath.Length - HtmlPath.IndexOf(&quot;UpLoadWord\\&quot;) - 11);
+            Response.Redirect(&quot;UpLoadWord/&quot; + rePath);
+        }
+</pre><br>
+<p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">显示效果：</p>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="51046486281746" alt=""><br>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">这样的效果，使得文档没有&#26684;式，很不美观！但实现方法简单！</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<h1><span lang="zh-CN">第二种方式：</span></h1>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN"><br>
+</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN">使用flashpaper，效果比较好看，不过只支持32位操作系统，不支持64位；固实现时一直不成功，原理是使用flashpaper插件，将</span><span lang="en-US">word</span><span lang="zh-CN">转换成</span><span lang="en-US">swf。<span lang="zh-CN" style="font-family:宋体; font-size:21px">在执行</span><span lang="en-US" style="font-family:宋体; font-size:21px">cmd</span><span lang="zh-CN" style="font-family:宋体; font-size:21px">命令时一直没有任何反应也不提示错误！</span></span></p>
+<br>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"></span></p>
+<pre code_snippet_id="145806" snippet_file_name="blog_20140107_3_8455070" name="code" class="csharp">        /// &lt;summary&gt;
+        /// 上传word并转换成swf
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        protected void btnOK_Click(object sender, EventArgs e)
+        {
+            //向服务器上传图片
+            if (FileUpload1.HasFile)
+            {
+                //判断上传文件类型
+                string fileType = System.IO.Path.GetExtension(FileUpload1.FileName);
+                if (fileType == &quot;.doc&quot; || fileType == &quot;.docx&quot; || fileType == &quot;.ppt&quot; || fileType == &quot;.pptx&quot;)
+                {
+                    //try
+                    //{
+                    //指定上传文件在服务器上的保存路径 
+                    string savePath = Server.MapPath(&quot;~/UpLoadWord&quot;);
+                    //检查服务器上是否存在这个物理路径，如果不存在则创建 
+                    if (!System.IO.Directory.Exists(savePath))
+                    {
+                        //需要注意的是，需要对这个物理路径有足够的权限，否则会报错 
+                        System.IO.Directory.CreateDirectory(savePath);
+                    }
+
+                    //重新命名文件名：当前时间 + fileType（文件类型）
+                    string time = DateTime.Now.ToString(&quot;yyyyMMddHHmmssffff&quot;);
+                    string fileName = time + fileType;
+
+                    //文件上传实际物理路径
+                    savePath = savePath + &quot;\\&quot; + fileName;
+                    //上传服务器
+                    FileUpload1.PostedFile.SaveAs(savePath);
+
+                    //通过Web.config获取FlashPaper.exe路径
+                    string flashpaper = System.Configuration.ConfigurationManager.AppSettings[&quot;FlashPaper&quot;].ToString();
+                    //转化后文件名
+                    fileName = time + &quot;.swf&quot;;
+                    //转化后输出的完整路径（包括文件名）
+                    string outpath = Server.MapPath(&quot;~/flash&quot;) + &quot;\\&quot; + fileName;
+
+                    //flashpaper命令行：格式（FlashPaper.exe物理地址 原文件完整物理地址 -o 转化后输出的物理地址）
+                    string param = flashpaper + &quot; &quot; + savePath + &quot; -o &quot; + outpath;
+                    Process p = new Process();
+                    p.StartInfo.FileName = &quot;cmd.exe&quot;;
+                    p.StartInfo.UseShellExecute = false;
+                    p.StartInfo.RedirectStandardInput = true;
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.StartInfo.RedirectStandardError = true;
+                    p.StartInfo.CreateNoWindow = true;
+                    p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    try
+                    {
+                        //执行进程
+                        p.Start();
+                        string strOutput = null;
+                        p.StandardInput.WriteLine(param);
+                        p.StandardInput.WriteLine(&quot;exit&quot;);
+                        strOutput = p.StandardOutput.ReadToEnd();
+                        Console.WriteLine(strOutput);
+                        p.WaitForExit();
+                        p.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+
+                }
+
+            }
+        }
+</pre><span lang="en-US"></span><span style="font-family:宋体; font-size:21px">在web.config中：</span><span lang="zh-CN"></span>
+<p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"></span></p>
+<pre code_snippet_id="145806" snippet_file_name="blog_20140107_4_4693080" name="code" class="plain"> &lt;!--
+            FlashPrinter.exe文件在服务器硬盘上的物理地址，即把FlashPrinter安装在D盘
+    --&gt;
+    &lt;add key=&quot;FlashPaper&quot; value=&quot;D:\&quot;Program Files&quot;\FlashPaper2.2\FlashPrinter.exe&quot;/&gt;</pre>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<h1><span lang="zh-CN" style="font-family:宋体">第三种方式：</span></h1>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体">使用print2flash，效果跟flashpaper差不多；支持</span><span lang="en-US" style="font-family:Calibri">64</span><span lang="zh-CN" style="font-family:宋体">位系统。</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">具体使用如下：</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">1、下载print2flash，这里是64位，原理，通过把从客户端上传的word/Excel/ppt文件，调用print2flash官方提供的dll，转化成swf&#26684;式文件，最后浏览swf文件。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">2</span><span lang="zh-CN" style="font-family:宋体">，配置步骤：打开print2flash安装目录，64位操作系统默认在C:\ProgramFiles (x86)\Print2Flash3下，右键管理员方式运行print2flash.exe，点击option—&gt;Print2FlashService
+ Configuration,如下图：</span></p>
+&nbsp; &nbsp; &nbsp; &nbsp; <img src="50643098312044" alt=""><br>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">3</span><span lang="zh-CN" style="font-family:宋体">，在程序里引用Interop.Print2Flash3.dll，并调用如下代码，进行转换。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">4</span><span lang="zh-CN" style="font-family:宋体">，对于转换好的</span><span lang="en-US" style="font-family:宋体">swf</span><span lang="zh-CN" style="font-family:宋体">文件，直接调用预览即可！</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"><br>
+</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">
+<pre code_snippet_id="145806" snippet_file_name="blog_20140107_5_5391191" name="code" class="html"> &lt;embed id=&quot;flashContainer&quot; style=&quot;width:100%;height:100%;&quot; src=&quot;&lt;%=SwfPath %&gt;&quot; pluginspage=&quot;http://www.macromedia.com/go/getflashplayer&quot;&gt;&lt;/embed&gt;
+</pre><br>
+<pre code_snippet_id="145806" snippet_file_name="blog_20140107_6_2501252" name="code" class="csharp">        /// &lt;summary&gt;
+        /// 支持64位的word转换成swf
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        protected void btnConvert_Click(object sender, EventArgs e)
+        {
+                if (!FileUpload2.HasFile)
+                {
+                    Label1.Text = &quot;Please select a file to convert&quot;;
+                    return;
+                }
+
+                Label1.Text = &quot;&quot;;
+                // upload
+                String fs_filename = Server.MapPath(&quot;UpLoadWord/&quot;) + FileUpload2.FileName;
+                String fs_convertedfilename = Server.MapPath(&quot;flash/&quot;) + FileUpload2.FileName + &quot;.swf&quot;;
+                try
+                {
+                    FileUpload2.PostedFile.SaveAs(fs_filename);
+                }
+                catch (Exception ex)
+                {
+                    Label1.Text += &quot;File could not be uploaded. &quot; + ex.Message;
+                    return;
+                }
+                // convert
+                try
+                {
+                    int interfaceOptions = 0;
+                    for (int i = 0; i &lt; cblDocOptions.Items.Count; i++)
+                        if (cblDocOptions.Items[i].Selected)
+                            interfaceOptions |= Int32.Parse(cblDocOptions.Items[i].Value);
+
+                    Print2Flash3.Server2 p2fServer = new Print2Flash3.Server2();
+                    p2fServer.DefaultProfile.InterfaceOptions = interfaceOptions;
+                    p2fServer.DefaultProfile.ProtectionOptions = (int)Print2Flash3.PROTECTION_OPTION.PROTENAPI;
+                    p2fServer.ConvertFile(fs_filename, fs_convertedfilename, null, null, null);
+                    Label1.Text += &quot;File converted.&quot;;
+                    swfUrl = &quot;flash/&quot; + FileUpload2.FileName + &quot;.swf&quot;;
+                }
+                catch (Exception ex)
+                {
+                    Label1.Text += &quot;File could not be converted. &quot; + ex.Message;
+                    return;
+                }
+            }
+</pre>
+<p><span style="font-family:宋体; font-size:21px"><br>
+</span></p>
+<p><span style="font-family:宋体; font-size:21px">显示效果：</span></p>
+<p>&nbsp;<img src="14675129643857" alt=""></p>
+<p><br>
+</p>
+<p>
+<h1><span lang="zh-CN" style="font-family:宋体">第</span><span lang="zh-CN"><span style="font-family:Calibri">四</span></span><span lang="zh-CN" style="font-family:宋体">种方式：</span></h1>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体">将上传的</span><span lang="en-US" style="font-family:宋体">word</span><span lang="zh-CN" style="font-family:宋体">文档转换为</span><span lang="en-US" style="font-family:宋体">pdf</span><span lang="zh-CN" style="font-family:宋体">，经</span><span lang="en-US" style="font-family:宋体">pdf</span><span lang="zh-CN" style="font-family:宋体">转换成</span><span lang="en-US" style="font-family:宋体">swf</span><span lang="zh-CN" style="font-family:宋体">&#26684;式（未实现）这种方式需要使用两种插件，pdf2swf，</span><span lang="en-US" style="font-family:宋体">f</span><span lang="zh-CN" style="font-family:宋体">lexpaper</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"><br>
+</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">　　　　a.使用flashpaper将需要的文档通过简单的设置转换为SWF&#26684;式的Flash,扩展阅读：http://baike.baidu.com/view/917746.htm，flashpaper又不支持win7，放弃！</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">　　　　</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN">　　　　b.在网上发现可以使用swftools（http://www.swftools.org/谢天谢地啊，它支持win7）将pdf&#26684;式的文件转换为flash，但是不能讲office文档转换为flash，固先将</span><span lang="en-US">doc</span><span lang="zh-CN">转换成</span><span lang="en-US">pdf</span><span lang="zh-CN">后再将</span><span lang="en-US">pdf</span><span lang="zh-CN">转换成</span><span lang="en-US">swf</span></p>
+<br>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"></span></p>
+<pre code_snippet_id="145806" snippet_file_name="blog_20140107_7_7659466" name="code" class="csharp">public void PDFConvertToSWF(string sourcePath, string targetPath)
+        {
+            Process p = new Process();
+            p.StartInfo.FileName = &quot;cmd.exe &quot;;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.CreateNoWindow = true;
+            p.Start();
+            string cmd = &quot;pdf2swf.exe&quot; + &quot; &quot; + sourcePath + &quot; -o &quot; + targetPath;
+            p.StandardInput.WriteLine(cmd);
+            p.Close();
+        }
+</pre><br>
+<p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN">这种方式的转换，前两步都很成功，但从</span><span lang="en-US">pdf-swf</span><span lang="zh-CN">&#26684;式转换时调用pdf2swf.exe时，一直提示不是内部或外部命令，也不是可运行的程序。没能解决！期待高手！</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">学习博客：<br>
+<a target="_blank" target="_blank" href="http://http://www.cnblogs.com/expectszc/archive/2012/04/04/2432149.html">http://www.cnblogs.com/expectszc/archive/2012/04/04/2432149.html</a>&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/17758469'>原文链接</a>

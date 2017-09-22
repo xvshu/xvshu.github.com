@@ -1,0 +1,53 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【思想篇】工作流技术JBPM44开发入门（四）</div><div style="color:blue" align=center>【思想篇】工作流技术JBPM44开发入门（四）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 对于这个工作流的学习真的是不断深入的过程，总觉得不能理解的，不可能实现的要求，现在它就出现在你的面前，真心让你哭笑不得！</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">我们再来说说使用工作流的优势：</span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">1</span><span lang="zh-CN">，流程管理业务（切记）</span></span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">2</span><span lang="zh-CN">，能方便的应对业务的变更（业务结点和流程分离）</span></span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">3</span><span lang="zh-CN">，实现流程的复用，结点的复用</span></span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">4</span><span lang="zh-CN">，记录流程追踪过程</span></span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">5</span><span lang="zh-CN">，状态的维护等</span></span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 一直在说要用流程来管理业务（控制业务的处理流程），工作流的每个结点并不知道接下来改做什么，也不知道业务要想要做什么，而只管根据流程的顺序执行，至于做什么我无需关心。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">理解误区：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 对于</span><span lang="en-US">WF4.0</span><span lang="zh-CN">的工作流来说，每个结点由我们开发人员自己开发，简单来说就是开发业务结点，实现相应的业务功能，再抽象一步就是我们将所有的业务结点进行抽象，使得一个抽象业务结点可以被所有的业务复用。那么这个来说我们很容易理解抽象结点，然后需要使用工作流的话，将结点拖到工作流中，那么这些结点就被工作流管理起来了，我们要做的就是开发结点池，也是实现我们所说的工作流不知道要做什么，而是去控制业务流程的执行。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 那么，再过来说</span><span lang="en-US">JBPM</span><span lang="zh-CN">，做了一个</span><span lang="en-US">JBPM</span><span lang="zh-CN">的实例之后，觉得</span><span lang="en-US">jbpm</span><span lang="zh-CN">没有什么要开发的公共结点，因为我直接拖到流程中的任务，并不需要写什么代码，只需要指派到某个人，或者绑定上某些表单，这些仅仅是一些属性的设置，并不需要开发什么结点呀？所以对于要开发结点池一直很困惑。而且在实现的过程中，我们也在不断思考，工作流到底带给我们了什么？做着做着，实现的方式便成了这样（以下进行说明），大家可以看看存在什么问题！</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">实现方式：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">1</span><span lang="zh-CN">，首先，我将所有调用工作流的方法均抽象出来，供所有的业务使用（实现工作流方法复用）</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">2</span><span lang="zh-CN">，对于画好的流程图来说，工作流引擎就会给我们实现，按照流程图的方式自动执行，不需要我们再去实现什么</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">3</span><span lang="zh-CN">，针对每个流程节点配置每个结点的操作人和操作页面</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">4</span><span lang="zh-CN">，每个业务需要工作流操作时，即可调用（互用），具体的业务中掺杂着工作流的方法。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">实现功能：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">1</span><span lang="zh-CN">，针对已经应用工作流的业务来说，应对了流程图（业务）的变更。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">例如：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">流程图的顺序为：开始</span><span lang="en-US">---</span><span lang="zh-CN">申请修改课程信息</span><span lang="en-US">--</span><span lang="zh-CN">导员审批</span><span lang="en-US">--</span><span lang="zh-CN">教学秘书审批</span><span lang="en-US">--</span><span lang="zh-CN">结束</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">修改为：开始</span><span lang="en-US">--</span><span lang="zh-CN">申请修改课程信息</span><span lang="en-US">--</span><span lang="zh-CN">导员审批或班长审批</span><span lang="en-US">---</span><span lang="zh-CN">教学秘书审批</span><span lang="en-US">--</span><span lang="zh-CN">结束</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">对于这个业务的流程变更，我们并不需要重新修改代码，唯一要做的就是部署一个新的流程即可</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">因为所有的流程处理由工作流来操作和记录（表单和人员指定即可）</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">2</span><span lang="zh-CN">，记录着流程的流转记录</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">3</span><span lang="zh-CN">，针对这个业务来说，无论我怎么变更业务，工作流都可以帮我们处理（对于其他业务也同样对待）</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">就这样我们就以为大功告成了，确实是吗？当然不是，只能说我们局限了！</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">那么，还有什么地方不对呢？这些不正是我们需要的吗？问题出在哪里了？应对变化，记录流转。当做到这一步的时候，真的以为已经万事大吉了，一切都</span><span lang="en-US">OK</span><span lang="zh-CN">了，但是这时并不理解老师说的开发结点池，以及工作流并不知道我接下来要做什么的问题。这时我们</span></span><span style="font-family:KaiTi_GB2312; font-size:14pt">只看到了能应对当前业务的变更，看&#20284;实现了工作流的思想，却没有站在更高的高度去思考。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">下篇继续介绍以上问题</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/41747101'>原文链接</a>

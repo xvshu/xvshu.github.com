@@ -1,0 +1,332 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【整合篇】Activiti业务与流程整合之查询（二）</div><div style="color:blue" align=center>【整合篇】Activiti业务与流程整合之查询（二）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp;&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">继上篇博客：<a target="_blank" target="_blank" href="http://blog.csdn.net/hejingyuan6/article/details/42916211">【整合篇】JBPM4.4业务与流程整合之查询</a>&nbsp;应用第二种方式：申请实体中加入需要的相应的工作流的属性</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="606985" snippet_file_name="blog_20150223_1_611038" name="code" class="java">package com.tgb.itoo.basic.entity;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.springframework.format.annotation.DateTimeFormat;
+
+/**
+ * Entity: Leave
+ *
+ * @author hejingyuan IdEntity implements Serializable
+ */
+@Entity
+@Table(name = &quot;OA_LEAVE&quot;)
+public class Leave  extends IdEntity { 
+	
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String processInstanceId;
+    private String userId;
+    private String testId;
+    private String oldCourse;
+    private String applyCourse;
+    @Column
+    public String getApplyCourse() {
+		return applyCourse;
+	}
+
+	public void setApplyCourse(String applyCourse) {
+		this.applyCourse = applyCourse;
+	}
+
+	@Column
+    public String getOldCourse() {
+		return oldCourse;
+	}
+
+	public void setOldCourse(String oldCourse) {
+		this.oldCourse = oldCourse;
+	}
+	@Column
+	public String getNewCourse() {
+		return newCourse;
+	}
+
+	public void setNewCourse(String newCourse) {
+		this.newCourse = newCourse;
+	}
+
+	private String newCourse;
+   
+    @Column
+    public String getTestId() {
+		return testId;
+	}
+
+	public void setTestId(String testId) {
+		this.testId = testId;
+	}
+
+	@DateTimeFormat(pattern = &quot;yyyy-MM-dd HH:mm&quot;)
+    private Date startTime;
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd HH:mm&quot;)
+    private Date endTime;
+
+   /* @DateTimeFormat(pattern = &quot;yyyy-MM-dd HH:mm&quot;)
+    private Date realityStartTime;
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd HH:mm&quot;)
+    private Date realityEndTime;*/
+    private Date applyTime;
+    private String leaveType;
+    private String reason;
+
+    //-- 临时属性 --//
+
+    // 流程任务
+    private Task task;
+
+    private Map&lt;String, Object&gt; variables;
+
+    // 运行中的流程实例
+    private ProcessInstance processInstance;
+
+    // 历史的流程实例
+    private HistoricProcessInstance historicProcessInstance;
+
+    // 流程定义
+    private ProcessDefinition processDefinition;
+
+    @Column
+    public String getProcessInstanceId() {
+        return processInstanceId;
+    }
+
+    public void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
+    @Column
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = &quot;START_TIME&quot;)
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = &quot;END_TIME&quot;)
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    public Date getApplyTime() {
+        return applyTime;
+    }
+
+    public void setApplyTime(Date applyTime) {
+        this.applyTime = applyTime;
+    }
+
+    @Column
+    public String getLeaveType() {
+        return leaveType;
+    }
+
+    public void setLeaveType(String leaveType) {
+        this.leaveType = leaveType;
+    }
+
+    @Column
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+   
+    /**
+	 * 学生基础信息
+	 */
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, targetEntity = StudentCourseInfo.class)
+	@JoinColumn(name = &quot;studentCourseInfoId&quot;, nullable = true)
+	private StudentCourseInfo studentCourseInfo;
+	
+    public StudentCourseInfo getStudentCourseInfo() {
+		return studentCourseInfo;
+	}
+
+	public void setStudentCourseInfo(StudentCourseInfo studentCourseInfo) {
+		this.studentCourseInfo = studentCourseInfo;
+	}
+
+	@Transient
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
+    }
+
+    @Transient
+    public Map&lt;String, Object&gt; getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Map&lt;String, Object&gt; variables) {
+        this.variables = variables;
+    }
+
+    @Transient
+    public ProcessInstance getProcessInstance() {
+        return processInstance;
+    }
+
+    public void setProcessInstance(ProcessInstance processInstance) {
+        this.processInstance = processInstance;
+    }
+
+    @Transient
+    public HistoricProcessInstance getHistoricProcessInstance() {
+        return historicProcessInstance;
+    }
+
+    public void setHistoricProcessInstance(HistoricProcessInstance historicProcessInstance) {
+        this.historicProcessInstance = historicProcessInstance;
+    }
+
+    @Transient
+    public ProcessDefinition getProcessDefinition() {
+        return processDefinition;
+    }
+
+    public void setProcessDefinition(ProcessDefinition processDefinition) {
+        this.processDefinition = processDefinition;
+    }
+
+	
+}
+</pre><br>
+<br>
+<p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">在真正应用之前我们先来简单介绍一下在</span><span lang="en-US">Activiti</span><span lang="zh-CN">中比</span><span lang="en-US">JBPM4.4</span><span lang="zh-CN">的一处优化。</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">在</span><span lang="en-US">activiti</span><span lang="zh-CN">中，它为我们提供了一个</span><span lang="en-US">businessKey</span><span lang="zh-CN">字段。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">在启动流程时</span><span lang="zh-CN"></span><span lang="zh-CN">，流程实例中会添加一条记录，而且流程实例表中会有一个</span><span lang="en-US">businessKey</span><span lang="zh-CN">字段，</span><span lang="zh-CN">String
+ businessKey = leave.getId().toString();</span><span lang="zh-CN">这样我们的流程表中就始终拥有业务的</span><span lang="en-US">id</span><span lang="zh-CN">，当我们再次需要的时候可以重新查询。</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<span style="font-family:KaiTi_GB2312"><img src="46593449970781" alt=""><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">下面举例说明：<br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="606985" snippet_file_name="blog_20150223_2_9022407" name="code" class="java"> /**
+     * 任务列表ERROR [stderr] (http-localhost/127.0.0.1:8080-3) ScriptEngineManager providers.next(): javax.script.ScriptEngineFactory: Provider com.sun.script.javascript.RhinoScriptEngineFactory not found
+     *
+     * @param leave
+     */
+    @RequestMapping(value = &quot;list/task&quot;)
+    public ModelAndView taskList(HttpSession session, HttpServletRequest request) {
+    	List&lt;Leave&gt; results = new ArrayList&lt;Leave&gt;();
+    	String userId = UserUtil.getUserFromSession(session).getId();
+    	results=abstractTaskList(userId);    	
+    	return new ModelAndView(&quot;/oa/leave/taskList&quot;,&quot;results&quot;,results);                            
+         
+    }
+</pre><br>
+<pre code_snippet_id="606985" snippet_file_name="blog_20150223_3_9286564" name="code" class="cpp">/**
+     * 抽象出来的查看任务列表，与基本业务无关
+     *
+     * @param userId 用户id
+     * @return
+     */
+	public List&lt;Leave&gt; abstractTaskList(String userId){
+		 List&lt;Leave&gt; results = new ArrayList&lt;Leave&gt;();
+	     // 根据当前人的ID查询
+	     TaskQuery taskQuery = taskService.createTaskQuery().taskCandidateOrAssigned(userId);        
+	     List&lt;Task&gt; tasks = taskQuery.list();     
+	     int i=0;
+	     
+	     // 根据流程的业务ID查询实体并关联
+	     for (Task task : tasks) {
+	         String processInstanceId = task.getProcessInstanceId();
+	         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).active().singleResult();
+	         String businessKey = processInstance.getBusinessKey();
+	         if (businessKey == null) {
+	             continue;
+	         } 
+	         Leave leave=updateEntity(processInstance,task,businessKey);
+	         results.add(leave); 
+	         i=i+1;
+	     }
+		return results;
+	}
+</pre><br>
+<pre code_snippet_id="606985" snippet_file_name="blog_20150223_4_7042467" name="code" class="java">//更新实体 
+   	public Leave updateEntity(ProcessInstance processInstance,Task task,String businessKey){
+   		Leave leave = leaveBean.findEntityById(businessKey);
+   		leave.setProcessInstance(processInstance);
+		leave.setProcessDefinition(getProcessDefinition(processInstance.getProcessDefinitionId()));	                
+		leave.setTask(task);
+		return leave;
+   	}
+</pre><br>
+<br>
+<p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">对比：</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 之前的</span><span lang="en-US">JBPM</span><span lang="zh-CN">的操作方式，启动流程时将业务数据存储到流程变量中，在需要查询时，将数据从流程变量中取出，然后将取出的&#20540;赋给我们的组合实体即可。这样做的弊端在于数据可能会出现不同步的情况，但是应该并不多见。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 其实使用这种方式呢，即使在实体层添加了工作流的属性，但是并不需要在真正的数据库表中添加相应的字段，那么这样做的便利在哪里呢？其实这样做主要是使得我们在返回前台数据时更加方便，我们只需要返回一个实体即可。但是弊端是什么呢，就是业务的实体中需要知道一些工作流的属性。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 而且弊端不仅如此，在大型系统中，相当于实体层需要加入所有的依赖工作流的</span><span lang="en-US">jar</span><span lang="zh-CN">包，如果这个实体还需要被其他系统所依赖，那么所有的系统都会有工作流的依赖，我们曾遇到的问题就是，当我们在当前系统的实体项目中</span><span lang="en-US"></span><span lang="zh-CN">加入工作流的依赖时，由于其他系统也依赖我们本实体，导致所有的系统均瘫痪</span><span lang="en-US">jboss</span><span lang="zh-CN">不能正常启动，报不识别工作流的类。这种影响就是深远的，所以我们要实现的还是解耦。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">下篇继续</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/43850461'>原文链接</a>

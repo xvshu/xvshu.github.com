@@ -1,0 +1,68 @@
+﻿<div style="color:blue" align=center>static的认识</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">&nbsp; &nbsp; 在敲机房收费系统时</span><span lang="en-US" style="font-family:Calibri">,</span><span lang="zh-CN" style="font-family:仿宋">对</span><span lang="en-US" style="font-family:Calibri">Static</span><span lang="zh-CN" style="font-family:仿宋">静态变量一直有点疑问</span><span lang="en-US" style="font-family:Calibri">!shared</span><span lang="zh-CN" style="font-family:仿宋">与</span><span lang="en-US" style="font-family:Calibri">static</span><span lang="zh-CN" style="font-family:仿宋">应该在什么时候应用，到底有什么区别？</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h1>百度百科中的解释：</h1>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">静态全局变量有以下特点：</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">1，该变量在全局数据区分配内存；<strong>---保持内容的持久</strong></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">2，<span style="font-size:16pt">未经初始化的静态全局变量会被程序自动初始化为0（在函数体内声明的自动变量的&#20540;是随机的，除非它被显式初始化，而在函数体外被声明的自动变量也会被初始化为0）；<strong>---默认初始化为0</strong></span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">3，静态全局变量在声明它的整个文件都是可见的，而在文件之外是不可见的；---<strong>隐藏</strong></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp; &nbsp;s<span lang="zh-CN" style="font-family:仿宋; font-size:21px">tatic表示“全局”或者“静态”的意思，用来修饰成员变量和成员方法，也可以形成静态static代码块</span><span lang="en-US" style="font-family:仿宋; font-size:21px">.</span><span lang="zh-CN" style="font-size:16pt">在vb.net中不能用static来声明函数。只能用来声明过程中的静态变量，并且不能用来声明成员变量。</span><span lang="en-US" style="font-size:16pt">shared</span><span lang="zh-CN" style="font-size:16pt">既可以用来声明变量也可以用来声明函数，但是只能用来声明成员变量，这一点刚好跟</span><span lang="en-US" style="font-size:16pt">static</span><span lang="zh-CN" style="font-size:16pt">相反。</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">下面来简明介绍静态变量的作用和缺点：</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h1><span lang="en-US" style="font-family:Calibri">Static</span><span lang="zh-CN" style="font-family:仿宋">的作用</span></h1>
+<div><span lang="zh-CN" style="font-family:仿宋"><br>
+</span></div>
+<h2><span style="font-family:仿宋">（</span><span style="font-family:Calibri">1</span><span style="font-family:仿宋">）第一个作用：隐藏。</span></h2>
+<div><span style="font-family:仿宋"><br>
+</span></div>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">当我们同时编译多个文件时，所有未加</span><span lang="zh-CN" style="font-family:Calibri">static</span><span lang="zh-CN" style="font-family:仿宋">前缀的全局变量和函数都具有全局可见性。即在模块内（但在函数体外），一个被声明为静态的变量可以被模块内所用函数访问，但不能被模块外其它函数访问。它是一个本地的全局变量。而且只可被这一模块内的其他函数调用</span><span lang="en-US" style="font-family:Calibri">,</span><span lang="zh-CN" style="font-family:仿宋">也就是</span><span lang="en-US" style="font-family:Calibri">,</span><span lang="zh-CN" style="font-family:仿宋">这个函数被限制在声明它的模块的本地范围内使用</span><span lang="en-US" style="font-family:Calibri">.</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;应用：在嵌入式系统中，要时刻懂得移植的重要性，程序可能是很多程序员共同协作同时完成，在定义变量及函数的过程，可能会重名，这给系统的集成带来麻烦，因此保证不冲突的办法是显示的表示此变量或者函数是本地的，static即可。<br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><br>
+</p>
+<h2><span style="font-family:仿宋">（</span><span style="font-family:Calibri">2</span><span style="font-family:仿宋">）</span><span style="font-family:仿宋">第二个作用：保持变量内容的持久。</span></h2>
+<div><span style="font-family:仿宋"><br>
+</span></div>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:仿宋">存储在静态数据区的变量会在程序刚开始运行时就完成初始化，也是唯一的一次初始化。共有两种变量存储在静态存储区：全局变量和</span><span style="font-family:Calibri">static</span><span style="font-family:仿宋">变量，只不过和全局变量比起来，</span><span style="font-family:Calibri">static</span><span style="font-family:仿宋">可以控制变量的可见范围，说到底</span><span style="font-family:Calibri">static</span><span style="font-family:仿宋">还是用来隐藏的。即在函数体内，一个被声明为静态的变量在这一函数被调用过程中维持其&#20540;不变（该变量存放在静态变量区）。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:仿宋"><br>
+</span></p>
+<h2>（3）第三个作用：默认初始化为0。</h2>
+<div><br>
+</div>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">其实全局变量也具备这一属性，因为全局变量也存储在静态数据区。在静态数据区，内存中所有的字节默认&#20540;都是0x00，某些时候这一特点可以减少程序员的工作量。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp; 在类中的static成员变量意味着它为该类的所有实例所共享，也就是说当某个类的实例修改了该静态成员变量，其修改&#20540;为该类的其它所有实例所见；而且此时类中的static成员函数属于整个类所拥有，这个函数不接收this指针，因而只能访问类的static成员变量。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp; 被static修饰的成员变量和成员方法独立于该类的任何对象。也就是说，它不依赖类特定的实例，被类的所有实例共享。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h1><span lang="zh-CN" style="font-family:仿宋">缺点</span><span lang="en-US" style="font-family:Calibri">:</span></h1>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:仿宋">静态方法</span><span style="font-family:Calibri">/</span><span style="font-family:仿宋">变量属于类级别的，意味着不需要创建对象就可以使用，因此有下面缺点：</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:Calibri">1. </span>
+<span style="font-family:仿宋">静态方法不能调用非静态的方法和变量；（非静态方法可以任意的调用静态方法</span><span style="font-family:Calibri">/</span><span style="font-family:仿宋">变量）</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:Calibri">2.</span><span style="font-family:仿宋">不能使用</span><span style="font-family:Calibri">this</span><span style="font-family:仿宋">关键字（很明显，它属于类级别，没有创建对象怎么可以用</span><span style="font-family:Calibri">this</span><span style="font-family:仿宋">）</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">VB.net 中为Shared</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">C# C&#43;&#43;.net中为Static</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">虽然说表现形式不同，但是都是为了解决同一类问题。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">至于<span style="font-weight:bold"><a href="http://www.cnblogs.com/zhenyulu/articles/385047.html">为什么VB.net的Shared（共享）方法在C#中叫Static（静态）？</a></span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">请参考博客<a href="http://www.newsmth.net/pc/pccon.php?id=2206&amp;nid=227918">http://www.newsmth.net/pc/pccon.php?id=2206&amp;nid=227918</a></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p><br>
+</p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/8872712'>原文链接</a>

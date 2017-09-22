@@ -1,0 +1,307 @@
+﻿<div style="color:blue" align=center>SpringWebFlow入门demo（三）嵌套流程与业务结合附源码</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">上篇博客我们说</span><span lang="en-US">Spring</span><span lang="en-US"> web Flow</span><span lang="zh-CN">与业务结合的方式主要有三种，下面我们主要介绍一下第三种的应用方式</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">3</span><span lang="zh-CN">，执行到&lt;action-state&gt; 元素</span></span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">SpringWeb Flow 中的这个 &lt;action-state&gt; 是专为执行业务逻辑而设的 state 。如果某个应用的业务逻辑代码既不适合放在transition 中由客户端来触发，也不适合放在 Spring Web Flow 自定义的切入点，那么就可以考虑添加&lt;action-state&gt; 元素专用于该业务逻辑的执行。更倾向于触发某个事件来执行。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">action-state 示例：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="html">&lt;action-state id=&quot;addToCart&quot;&gt;
+&lt;evaluate expression=&quot;cart.addItem(productService.getProduct(productId))&quot;/&gt;
+&lt;transition to=&quot;productAdded&quot;/&gt;
+&lt;/action-state&gt;</pre><br><p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">添加subflow 结点</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">商品列表已经实现了，接下来操作步骤为：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><ol type="1" style="margin-left: 0.375in; direction: ltr; unicode-bidi: embed; margin-top: 0in; margin-bottom: 0in; font-size: 14pt;"> <li value="1" style="margin-top:0;margin-bottom:0;vertical-align:middle"><span style="font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">实现 Cart 和 CartItem 两个业务类</span></span></li> <li style="margin-top:0;margin-bottom:0;vertical-align:middle"><span style="font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">在 shopping.xml 中添加配置</span></span></li> <li style="margin-top:0;margin-bottom:0;vertical-align:middle"><span style="font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">在 /WEB-INF/flows 目录下添加     addToCart.xml</span></span></li> <li style="margin-top:0;margin-bottom:0;vertical-align:middle"><span style="font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">在 webflow-config.xml 中添加     addToCart.xml 的位置</span></span></li> <li style="margin-top:0;margin-bottom:0;vertical-align:middle"><span style="font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">修改 viewCart.jsp 页面</span></span></li></ol><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">具体</span><span lang="en-US">demo</span><span lang="zh-CN">实现：</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">Cart</span><span lang="zh-CN">：</span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><span style="font-family:KaiTi_GB2312;"></span><pre name="code" class="java">package samples.webflow;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+//购物车的实现类
+public class Cart implements Serializable {
+
+    private static final long serialVersionUID = 7901330827203016310L;
+    private Map&lt;Integer, CartItem&gt; map = new HashMap&lt;Integer, CartItem&gt;();
+   
+    //getItems 用于获取当前购物车里的物品
+    public List&lt;CartItem&gt; getItems() {
+	return new ArrayList&lt;CartItem&gt;(map.values());
+    }
+    
+    //addItem 用于向购物车添加商品
+    public void addItem(Product product) {
+	int id = product.getId();
+	CartItem item = map.get(id);
+	if (item != null)
+	    item.increaseQuantity();
+	else
+	    map.put(id, new CartItem(product, 1));
+    }
+
+    //getTotalPrice 用于获取购物车里所有商品的总价格
+    public int getTotalPrice() {
+	int total = 0;
+	for (CartItem item : map.values())
+	    total += item.getProduct().getPrice() * item.getQuantity();
+	return total;
+    }
+}
+</pre><br><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">Cart 是购物车的实现类，其同样要实现java.io.Serializable 接口，但它没有像 ProductService 一样成为由 Spring IoC 容器管理的 Bean，每个客户的购物车是不同的，因此不能使用 Spring IoC 容器默认的 Singleton 模式。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">CartItem：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><span style="font-family:KaiTi_GB2312;"></span><pre name="code" class="java">package samples.webflow;
+
+import java.io.Serializable;
+
+//购物车中的条目
+public class CartItem implements Serializable {
+    private static final long serialVersionUID = 8388627124326126637L;
+    private Product product;//商品
+    private int quantity;//数量
+
+    public CartItem(Product product, int quantity) {
+	this.product = product;
+	this.quantity = quantity;
+    }
+
+    //计算该条目的总价格
+    public int getTotalPrice() {
+	return this.quantity * this.product.getPrice();
+    }
+
+    //增加商品的数量
+    public void increaseQuantity() {
+	this.quantity++;
+    }
+
+    /**
+     * Return property product
+     */
+    public Product getProduct() {
+	return product;
+    }
+
+    /**
+     * Sets property product
+     */
+    public void setProduct(Product product) {
+	this.product = product;
+    }
+
+    /**
+     * Return property quantity
+     */
+    public int getQuantity() {
+	return quantity;
+    }
+
+    /**
+     * Sets property quantity
+     */
+    public void setQuantity(int quantity) {
+	this.quantity = quantity;
+    }
+
+    /*   getter  setter */
+
+}
+</pre><br><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">shopping.xml：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><span style="font-family:KaiTi_GB2312;"></span><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;flow xmlns=&quot;http://www.springframework.org/schema/webflow&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/webflow
+ http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd&quot;&gt;
+
+	&lt;!-- 在 shopping flow 开始时必须分配一个 Cart 对象，由于要调用 subflow ，
+	这个 Cart 对象应存放于 conversationScope 中。
+	同时要添加一个 subflow-state 用于执行添加商品到购物车的任务。 --&gt;
+	&lt;!-- mycart为一个服务类 --&gt;
+	&lt;var name=&quot;mycart&quot; class=&quot;samples.webflow.Cart&quot; /&gt;
+	&lt;on-start&gt;
+		&lt;set name=&quot;conversationScope.cart&quot; value=&quot;mycart&quot;&gt;&lt;/set&gt;
+	&lt;/on-start&gt;
+	&lt;!-- view-state中的view对应jsp文件夹中的jsp页面，on是触发事件，to对应state id --&gt;
+	&lt;view-state id=&quot;viewCart&quot; view=&quot;viewCart&quot;&gt;
+		&lt;!-- 在进入 view 的 render 流程之后，在 view 真正 render出来之前 --&gt;
+		&lt;on-render&gt;
+			&lt;!-- 要在 viewCart 页面中显示商品，只需在 view-state 元素的 on-render 切入点调用 productService 
+				的 getProducts 方法，并将所得结果保存到 viewScope 中即可 --&gt;
+			&lt;evaluate expression=&quot;productService.getProducts()&quot; result=&quot;viewScope.products&quot; /&gt;
+		&lt;/on-render&gt;
+		&lt;transition on=&quot;submit&quot; to=&quot;viewOrder&quot; /&gt;
+		&lt;transition on=&quot;addToCart&quot; to=&quot;addProductToCart&quot; /&gt;
+	&lt;/view-state&gt;
+	
+	&lt;subflow-state id=&quot;addProductToCart&quot; subflow=&quot;addToCart&quot;&gt;
+		&lt;transition on=&quot;productAdded&quot; to=&quot;viewCart&quot; /&gt;
+	&lt;/subflow-state&gt;
+	
+	&lt;view-state id=&quot;viewOrder&quot; view=&quot;viewOrder&quot;&gt;
+		&lt;transition on=&quot;confirm&quot; to=&quot;orderConfirmed&quot;&gt;
+		&lt;/transition&gt;
+	&lt;/view-state&gt;
+	&lt;view-state id=&quot;orderConfirmed&quot; view=&quot;orderConfirmed&quot;&gt;
+		&lt;transition on=&quot;returnToIndex&quot; to=&quot;returnToIndex&quot;&gt;
+		&lt;/transition&gt;
+	&lt;/view-state&gt;
+	
+	&lt;end-state id=&quot;returnToIndex&quot; view=&quot;externalRedirect:servletRelative:/index.jsp&quot;&gt;
+	&lt;/end-state&gt;
+&lt;/flow&gt;
+</pre><br><p style="margin: 0in; font-size: 14pt;"><p style="margin-top: 11pt; margin-bottom: 11pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">在/WEB-INF/flows 目录下添加 addToCart.xml</span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">subflow-state元素的 subflow 属性即指明了这个被调用的 flow 的 id 为“ addToCart ”，现在就要添加addToCart flow的定义。</span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">addToCart.xml：</span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;flow xmlns=&quot;http://www.springframework.org/schema/webflow&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/webflow 
+    http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd&quot;&gt;
+    
+	&lt;!-- flow 执行之前 ，productId这个字段内容从viewCart页面中获取--&gt;
+	&lt;on-start&gt;
+		&lt;set name=&quot;requestScope.productId&quot; value=&quot;requestParameters.productId&quot; /&gt;
+	&lt;/on-start&gt;
+	
+	&lt;!-- addToCart flow 主要由一个 action-state 构成，完成添加商品到购物车的功能，
+	 addToCart flow 的实现需要有输入参数，即 productId 。
+	 本示例中是通过请求参数来传递，通过 requestParameters 来获取该数值。
+	 这里还要注意到 end-state 的 id 为“ productAdded ”，
+	 与 subflow-state 中的 transition元素的on属性的名称是对应的。 --&gt;
+	
+	&lt;action-state id=&quot;addToCart&quot;&gt;
+		&lt;evaluate expression=&quot;cart.addItem(productService.getProduct(productId))&quot; /&gt;
+		&lt;transition to=&quot;productAdded&quot; /&gt;
+	&lt;/action-state&gt;
+	&lt;end-state id=&quot;productAdded&quot; /&gt;
+&lt;/flow&gt;
+</pre><br><p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">webflow-config.xml 中添加addToCart.xml 的位置</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-2.5.xsd&quot;&gt;
+	&lt;!-- 搜索 samples.webflow 包里的 @Component 注解，并将其部署到容器中 --&gt;
+	&lt;context:component-scan base-package=&quot;samples.webflow&quot; /&gt;
+	&lt;!-- 启用基于注解的配置 --&gt;
+	&lt;context:annotation-config /&gt;
+	&lt;import resource=&quot;webmvc-config.xml&quot; /&gt;
+	&lt;import resource=&quot;webflow-config.xml&quot; /&gt;
+&lt;/beans&gt;
+</pre><br><p><p style="margin: 0in; font-size: 14pt;"><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">viewCart.jsp</span><span lang="en-US">:</span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US"><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US"></span></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;%@ taglib prefix=&quot;c&quot; uri=&quot;http://java.sun.com/jsp/jstl/core&quot;%&gt;
+&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; 
+  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;title&gt;View Cart&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;h1&gt;View Cart&lt;/h1&gt;
+	&lt;h2&gt;Items in Your Cart&lt;/h2&gt;
+	&lt;c:choose&gt;
+		&lt;c:when test=&quot;${empty cart.items}&quot;&gt;
+			&lt;p&gt;Your cart is empty.&lt;/p&gt;
+		&lt;/c:when&gt;
+		&lt;c:otherwise&gt;
+			&lt;table border=&quot;1&quot; cellspacing=&quot;0&quot;&gt;
+				&lt;tr&gt;
+					&lt;th&gt;Item&lt;/th&gt;
+					&lt;th&gt;Quantity&lt;/th&gt;
+					&lt;th&gt;Unit Price&lt;/th&gt;
+					&lt;th&gt;Total&lt;/th&gt;
+				&lt;/tr&gt;
+
+				&lt;c:forEach var=&quot;item&quot; items=&quot;${cart.items}&quot;&gt;
+					&lt;tr&gt;
+						&lt;td&gt;${item.product.description}&lt;/td&gt;
+						&lt;td&gt;${item.quantity}&lt;/td&gt;
+						&lt;td&gt;${item.product.price}&lt;/td&gt;
+						&lt;td&gt;${item.totalPrice}&lt;/td&gt;
+					&lt;/tr&gt;
+				&lt;/c:forEach&gt;
+
+				&lt;tr&gt;
+					&lt;td&gt;TOTAL:&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;${cart.totalPrice}&lt;/td&gt;
+				&lt;/tr&gt;
+			&lt;/table&gt;
+		&lt;/c:otherwise&gt;
+	&lt;/c:choose&gt;
+
+	&lt;a href=&quot;${flowExecutionUrl}&amp;_eventId=submit&quot;&gt;Submit&lt;/a&gt;
+	&lt;h2&gt;Products for Your Choice&lt;/h2&gt;
+
+	&lt;table&gt;
+		&lt;c:forEach var=&quot;product&quot; items=&quot;${products}&quot;&gt;
+			&lt;tr&gt;
+				&lt;td&gt;${product.description}&lt;/td&gt;
+				&lt;td&gt;${product.price}&lt;/td&gt;
+
+
+				&lt;td&gt;&lt;a
+					href=&quot;${flowExecutionUrl}&amp;_eventId=addToCart&amp;productId=${product.id}&quot;&gt;[add
+						to cart]&lt;/a&gt;&lt;/td&gt;
+
+
+			&lt;/tr&gt;
+		&lt;/c:forEach&gt;
+
+	&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre><br><p><span lang="zh-CN" style="font-family: KaiTi_GB2312; font-size: 19px;">viewOrder.jsp</span><span lang="en-US" style="font-family: KaiTi_GB2312; font-size: 19px;">:</span></p><p><span lang="en-US" style="font-family: KaiTi_GB2312; font-size: 19px;"></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;%@ taglib prefix=&quot;c&quot; uri=&quot;http://java.sun.com/jsp/jstl/core&quot;%&gt;
+&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; 
+  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;title&gt;view order&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;h1&gt;Order&lt;/h1&gt;
+	&lt;c:choose&gt;
+		&lt;c:when test=&quot;${empty cart.items}&quot;&gt;
+			&lt;p&gt;Your cart is empty.&lt;/p&gt;
+		&lt;/c:when&gt;
+		&lt;c:otherwise&gt;
+			&lt;table border=&quot;1&quot; cellspacing=&quot;0&quot;&gt;
+				&lt;tr&gt;
+					&lt;th&gt;Item&lt;/th&gt;
+					&lt;th&gt;Quantity&lt;/th&gt;
+					&lt;th&gt;Unit Price&lt;/th&gt;
+					&lt;th&gt;Total&lt;/th&gt;
+				&lt;/tr&gt;
+
+				&lt;c:forEach var=&quot;item&quot; items=&quot;${cart.items}&quot;&gt;
+					&lt;tr&gt;
+						&lt;td&gt;${item.product.description}&lt;/td&gt;
+						&lt;td&gt;${item.quantity}&lt;/td&gt;
+						&lt;td&gt;${item.product.price}&lt;/td&gt;
+						&lt;td&gt;${item.totalPrice}&lt;/td&gt;
+					&lt;/tr&gt;
+				&lt;/c:forEach&gt;
+
+				&lt;tr&gt;
+					&lt;td&gt;TOTAL:&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;${cart.totalPrice}&lt;/td&gt;
+				&lt;/tr&gt;
+			&lt;/table&gt;
+		&lt;/c:otherwise&gt;
+	&lt;/c:choose&gt;
+	
+	&lt;a href=&quot;${flowExecutionUrl}&amp;_eventId=confirm&quot;&gt;Confirm&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre><br><br><p><p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">访问地址：</span></p><p style="margin: 0in; font-size: 14pt;"><a target="_blank" target="_blank" href="http://localhost:8080/CartApp5/spring/index"><span style="font-family:KaiTi_GB2312;">http://localhost:8080/CartApp5/spring/index</span></a></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">显示效果：</span></p><span style="font-family:KaiTi_GB2312;"><img src="3422259637115" alt=""><br></span><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><img src="243161110042144" alt=""><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">再扩展一下：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">如果我们将shopping.xml中的配置文件修改一下，改为flowScope时，我们在viewOrder页面也可以获取products数据。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="html">&lt;view-state id=&quot;viewCart&quot; view=&quot;viewCart&quot;&gt;
+		&lt;!-- 在进入 view 的 render 流程之后，在 view 真正 render出来之前 --&gt;
+		&lt;on-render&gt;
+			&lt;!-- 要在 viewCart 页面中显示商品，只需在 view-state 元素的 on-render 切入点调用 productService 
+				的 getProducts 方法，并将所得结果保存到 viewScope 中即可 --&gt;
+			&lt;evaluate expression=&quot;productService.getProducts()&quot; result=&quot;flowScope.products&quot; /&gt;
+		&lt;/on-render&gt;
+		&lt;transition on=&quot;submit&quot; to=&quot;viewOrder&quot; /&gt;
+		&lt;transition on=&quot;addToCart&quot; to=&quot;addProductToCart&quot; /&gt;
+	&lt;/view-state&gt;</pre><br><span lang="zh-CN" style="font-family: KaiTi_GB2312; font-size: 19px;">viewOrder.jsp</span><span lang="en-US" style="font-family: KaiTi_GB2312; font-size: 19px;">:</span><br><p><br></p><p style="margin: 0in; font-size: 14pt;"><pre name="code" class="html" style="font-family: KaiTi_GB2312;">&lt;h2&gt;Products for Your Choice&lt;/h2&gt;
+
+	&lt;table&gt;
+	&lt;c:forEach var=&quot;product&quot; items=&quot;${products}&quot;&gt;
+		&lt;tr&gt;
+			&lt;td&gt;${product.description}&lt;/td&gt;
+			&lt;td&gt;${product.price}&lt;/td&gt;
+		&lt;/tr&gt;			
+	&lt;/c:forEach&gt;
+	&lt;/table&gt;
+	&lt;a href=&quot;${flowExecutionUrl}&amp;_eventId=confirm&quot;&gt;Confirm&lt;/a&gt;</pre><br><span style="font-family:KaiTi_GB2312;font-size:18px;">效果图：</span><br><p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><img src="49481475804042" alt=""><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">总结：</span></p><p style="margin: 0in; font-size: 14pt;"><br></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp; &nbsp; Spring Web Flow 应用流程的方式解决了数据存取范围的问题，并在解决数据存取范围问题的同时，通过使用xml的方式来控制页面间的流转顺序以及页面间数据的传输，使得我们页面间的跳转变得更加灵活可控。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><a target="_blank" href="http://download.csdn.net/detail/hejingyuan6/8861205" target="_blank">附源码</a></span></p><p style="margin: 0in; font-size: 14pt;"><br></p><p style="margin: 0in; font-size: 14pt;"><br></p><br>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/46723021'>原文链接</a>

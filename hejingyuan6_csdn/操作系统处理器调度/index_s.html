@@ -1,0 +1,84 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 操作系统处理器调度</div><div style="color:blue" align=center>操作系统处理器调度</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">对于批处理操作系统和分时操作系统的计算机系统都属于多道程序设计系统。在这样的系统中，往往同时有多个计算问题请求处理。它们都因要使用系统资源而会发生竞争。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">问题：如何对资源进行管理和分配是操作系统中的一个重要问题。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">解决：处理器调度担负着对处理器的分配工作，它将决定谁能先占用处理器以及一次能占用处理器多长时间。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">在批处理操作系统中，作业调度与进程调度的层次关系如图：</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="515382710139921" width="300" height="350" alt=""><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">在操作系统中，把磁盘上用来存放作业信息的专用区域称为输入井。把在输入井中等待处理的作业称为后备作业</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:宋体; font-size:16.0pt">作业调度</h1>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">从输入井中选取后备作业装入主存储器的工作称为作业调度。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<h2 style="margin:0in; font-family:宋体; font-size:16.0pt">原则</h2>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">1</span><span lang="zh-CN" style="font-family:宋体">，公平性：对用户公平，不能无故或无限制地拖延一个作业的执行</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">2</span><span lang="zh-CN" style="font-family:宋体">，平衡资源使用：尽可能地使系统资源都处于忙碌</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">3</span><span lang="zh-CN" style="font-family:宋体">，极大流量：在单位时间内为尽可能多的作业服务</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<h2 style="margin:0in; font-family:宋体; font-size:16.0pt">常用算法</h2>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">必要条件：系统现有的尚未分配的资源可以满足被选作业的资源要求</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">1</span><span lang="zh-CN" style="font-family:宋体">，先来先服务：作业进入输入井的先后次序来挑选作业</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">2</span><span lang="zh-CN" style="font-family:宋体">，计算时间短优先：要求用户对自己的作业需要计算的时间预先作一个估计。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">3</span><span lang="zh-CN" style="font-family:宋体">，响应比高者优先：响应比</span><span lang="en-US" style="font-family:宋体">=</span><span lang="zh-CN" style="font-family:宋体">等待时间</span><span lang="en-US" style="font-family:宋体">/</span><span lang="zh-CN" style="font-family:宋体">计算时间。</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">注：进行作业调度的时间是在作业全部到达输入井之后开始。</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">4</span><span lang="zh-CN" style="font-family:宋体">，优先级：优先级高的作业优先被选取</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">5</span><span lang="zh-CN" style="font-family:宋体">，均衡调度算法：根据作业对资源的要求进行分类，尽可能使得使用不同资源的作业同时执行</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:宋体; font-size:16.0pt">进程调度</h1>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">作业调度选中一个作业且把它装入主存储器时，就为该作业创建一个用户进程。若有多个作业被装入主存储器，则就创建了多个用户进程。这些进程的都为初始状态“就绪态”。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">在单处理器的计算机系统中，每一时刻只能让一个进程占用处理器。但如果有多个进程都要竞争处理器，就必须按照一定的规则从就绪进程中选取一个进程，让它占用处理器。这项从就绪进程中选取一个进程，让它占用处理器的工作称为进程调度。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<h2 style="margin:0in; font-family:宋体; font-size:16.0pt">切换</h2>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">一个进程让出处理器由另一个进程占用处理器的过程。进程的切换是由进程的状态变化引起的。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="11883848550980" alt=""></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<h2 style="margin:0in; font-family:宋体; font-size:16.0pt">常用算法</h2>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">1</span><span lang="zh-CN" style="font-family:宋体">，先来先服务</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">2</span><span lang="zh-CN" style="font-family:宋体">，最高优先级</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">3</span><span lang="zh-CN" style="font-family:宋体">，时间片轮转</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">时间片是指允许进程一次占用处理器的最长时间。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:宋体; font-size:16.0pt">总结：</h1>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体">&nbsp;</span><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:宋体">作业从进入系统到最后完成，要经历两级调度：作业调度和进程调度。作业调度是高级调度，它的主要功能是根据一定的算法，从输入井中选中若干个作业，分配必要的资源，如主存、外设等，为它们建立初始状态为就绪的作业进程。进程调度是低级调度，它的主要功能是根据一定的算法将CPU分派给就绪队列中的一个进程。</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">与生活联系：</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">&nbsp;<img src="49417177205318" alt=""></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">邮局的例子，我们将写好的信封放入信箱，等待邮局的人来取，这个过程是作业调度（每家都有一个信箱，邮局的人取哪些信箱的信）。对于在邮局的信，什么时候送出，送出哪些这个过程为进程调度。</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">其实这个过程和我们计算机中的分层思想如出一辙，每层负责各自的功能，使复杂的问题简单化！</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/24286353'>原文链接</a>

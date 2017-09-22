@@ -1,0 +1,171 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; SpringWebFlow入门demo（一）简单页面跳转附源码</div><div style="color:blue" align=center>SpringWebFlow入门demo（一）简单页面跳转附源码</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">Spring Web Flow (SWF)是Spring Framework的一个脱离模块。这个模块是Spring Web应用开发模块栈的一部分，Spring Web包含Spring MVC。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">Spring Web Flow的目标是成为管理Web应用页面流程的最佳方案。当你的应用需要复杂的导航控制，例如向导，在一个比较大的事务过程中去指导用户经过一连串的步骤的时候，SWF将会是一个功能强大的控制器。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">下面我们还是从一个简单的</span><span lang="en-US">demo</span><span lang="zh-CN">开始了解它：</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">这个例子是结合</span><span lang="en-US">Springmvc</span><span lang="zh-CN">来实现，项目结构：</span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><img src="48748727686669" alt=""><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">Web</span><span lang="en-US">.xml</span><span lang="zh-CN">配置：</span></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; xmlns:web=&quot;http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; id=&quot;WebApp_ID&quot; version=&quot;2.5&quot;&gt;
+  &lt;display-name&gt;CartApp&lt;/display-name&gt;
+
+&lt;!-- 配置springmvc需要的servlet --&gt;
+
+&lt;servlet&gt;
+  &lt;servlet-name&gt;CartServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;
+  org.springframework.web.servlet.DispatcherServlet
+  &lt;/servlet-class&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt; 
+    &lt;param-value&gt; 
+	/WEB-INF/config/web-application-config.xml 
+	&lt;/param-value&gt; 
+  &lt;/init-param&gt; 
+  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
+
+	&lt;servlet-mapping&gt;
+		&lt;servlet-name&gt;CartServlet&lt;/servlet-name&gt;
+		&lt;url-pattern&gt;/spring/*&lt;/url-pattern&gt;
+	&lt;/servlet-mapping&gt;
+ 
+  &lt;welcome-file-list&gt;  
+    &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
+&lt;/web-app&gt;</pre><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">对应的</span><span lang="en-US">Spring</span><span lang="en-US">MVC</span><span lang="zh-CN">的配置文件：web-application-config.xml</span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><br></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-2.5.xsd&quot;&gt;
+	
+	&lt;!-- SpringMVC的配置文件-2015年6月14日15:45:54 --&gt;
+	&lt;!-- 搜索 samples.webflow 包里的 @Component 注解，并将其部署到容器中 --&gt;
+	&lt;context:component-scan base-package=&quot;samples.webflow&quot; /&gt;
+	&lt;!-- 启用基于注解的配置 --&gt;
+	&lt;context:annotation-config /&gt;
+	&lt;import resource=&quot;webmvc-config.xml&quot; /&gt;
+	&lt;import resource=&quot;webflow-config.xml&quot; /&gt;
+&lt;/beans&gt;
+</pre><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">其中引入的两个配置文件：webmvc-config.xml</span></p><p style="margin: 0in; font-size: 14pt;"><br></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;
+    
+    &lt;!-- SpringMVC的配置文件-2015年6月14日15:45:54 --&gt;
+    
+    &lt;!-- 对转向页面的路径解析。prefix：前缀， suffix：后缀 --&gt;   
+	&lt;bean id=&quot;viewResolver&quot;
+		class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;
+		&lt;property name=&quot;viewClass&quot;
+			value=&quot;org.springframework.web.servlet.view.JstlView&quot;&gt;
+		&lt;/property&gt;
+		&lt;property name=&quot;prefix&quot; value=&quot;/WEB-INF/jsp/&quot;&gt;
+		&lt;/property&gt;
+		&lt;property name=&quot;suffix&quot; value=&quot;.jsp&quot;&gt;
+		&lt;/property&gt;
+	&lt;/bean&gt;
+	&lt;!--  如何根据http请求选择合适的controller是MVC中一项十分关键的功能，在Spring MVC中，HandlerMapping接口是这一活动的抽象 --&gt;
+	&lt;!-- SimpleUrlHandlerMapping  通过配置文件，把一个URL映射到Controller --&gt;
+	&lt;bean id=&quot;viewMappings&quot;
+		class=&quot;org.springframework.web.servlet.handler.SimpleUrlHandlerMapping&quot;&gt;
+		&lt;!-- /shopping.do 请求由 flowController 来处理 --&gt;
+		&lt;!-- 不管设成 /shopping.do 还是设成 /shopping ，或者 /shopping.htm ，效果都是一样的， flowController 都会去找 id 为 shopping的flow来执行 --&gt;
+		&lt;property name=&quot;mappings&quot;&gt;
+			&lt;value&gt; /shopping.do=flowController &lt;/value&gt;
+		&lt;/property&gt;
+		 &lt;property name=&quot;defaultHandler&quot;&gt;
+			&lt;!-- UrlFilenameViewController 会将 &quot;/index&quot; 这样的请求映射成名为 &quot;index&quot; 的视图 --&gt;
+			&lt;bean class=&quot;org.springframework.web.servlet.mvc.UrlFilenameViewController&quot; /&gt;
+		&lt;/property&gt; 
+	&lt;/bean&gt;
+	&lt;!-- 我们只要明白 FlowController 可根据客户端请求的结尾部分，找出相应的 flow 来执行。配置 FlowController只需指定FlowExecutor即可 --&gt;
+	&lt;bean id=&quot;flowController&quot; class=&quot;org.springframework.webflow.mvc.servlet.FlowController&quot;&gt;
+		&lt;property name=&quot;flowExecutor&quot; ref=&quot;flowExecutor&quot; /&gt;
+	&lt;/bean&gt;
+&lt;/beans&gt;</pre><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">对于UrlFilenameViewController类，此处理解为由于我们并不是通过访问</span><span lang="en-US">controller</span><span lang="zh-CN">来返回页面的形式，那么我们如何可以访问</span><span lang="en-US">Web</span><span lang="en-US">-INF</span><span lang="zh-CN">下的保护类资源呢，就是通过这个类的作用来实现。此处的理解有什么偏差还请各位提出宝贵意见！</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">webflow-config.xml：</span></p><p style="margin: 0in; font-size: 14pt;"><br></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:webflow=&quot;http://www.springframework.org/schema/webflow-config&quot;
+	xsi:schemaLocation=&quot; http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+    http://www.springframework.org/schema/webflow-config 
+    http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd&quot;&gt;
+    
+    &lt;!-- 流程的配置文件-2015年6月14日15:45:46 --&gt;
+    
+    &lt;!-- FlowExecutor 是 Spring Web Flow 的一个核心接口，启动某个 flow ，都要通过这个接口来进行。
+    	从配置角度来说，只要保证有个 FlowExecutor 就可以了， Spring Web Flow 的默认行为已经足够 --&gt;
+    &lt;!-- FlowExecutor 就是通过 id 来找出要执行的 flow 。至于这个 id ，则是要由用户来指定的。
+    	在默认配置情况下，如果客户端发送了如下URL请求：http://localhost:8080/CartApp/spring/shopping。
+    	则从 Spring Web Flow 的角度来看，这个 URL 就表示客户想要执行一个 id 为“ shopping ”的 flow ，
+    	于是就会在 FlowRegistry 中查找名为“ shopping ”的 flow，由FlowExecutor负责执行。 --&gt;
+	&lt;webflow:flow-executor id=&quot;flowExecutor&quot; /&gt;
+	
+	&lt;!-- 所有 flow的定义文件它的位置在这里进行配置， flow-builder-services 用于配置 flow 的特性 --&gt;
+	&lt;!-- FlowRegistry 是存放 flow 的仓库，每个定义 flow 的 XML 文档被解析后，都会被分配一个唯一的 id ，并以 FlowDefinition 对象的形式存放在 FlowResigtry 中 --&gt;
+	&lt;!-- 每个 flow 都必须要有 id 来标识，如果在配置中省略，那么该 flow 默认的 id 将是该定义文件（xml文件）的文件名去掉后缀所得的字符串
+	（例如本例中如果去掉id=&quot;shopping&quot;，那么flow的id就是shopping.xml去掉后缀名.xml后的shopping作为id） --&gt;
+	
+	&lt;!--  flow-builder-services 属性的配置指明了在这个 flow-registry “仓库”里的 flow 的一些基本特性，
+		例如，是用 Unified EL 还是 OGNL 、 model （模型）对象中的数据在显示之前是否需要先作转换，等等 --&gt;
+		
+	&lt;webflow:flow-registry id=&quot;flowRegistry&quot; flow-builder-services=&quot;flowBuilderServices&quot;&gt;
+		&lt;webflow:flow-location path=&quot;/WEB-INF/flows/shopping.xml&quot; id=&quot;shopping&quot; /&gt;
+		&lt;webflow:flow-location path=&quot;/WEB-INF/flows/addToCart.xml&quot; id=&quot;addToCart&quot; /&gt;
+	&lt;/webflow:flow-registry&gt;
+	
+	&lt;!--Web Flow 中的视图通过 MVC 框架的视图技术来呈现 --&gt;
+	
+	&lt;webflow:flow-builder-services id=&quot;flowBuilderServices&quot; view-factory-creator=&quot;mvcViewFactoryCreator&quot; /&gt;
+	
+	&lt;!-- 指明 MVC 框架的 view resolver ，用于通过 view 名查找资源 --&gt;
+	&lt;bean id=&quot;mvcViewFactoryCreator&quot; class=&quot;org.springframework.webflow.mvc.builder.MvcViewFactoryCreator&quot;&gt;
+		&lt;property name=&quot;viewResolvers&quot; ref=&quot;viewResolver&quot; /&gt;
+	&lt;/bean&gt;
+&lt;/beans&gt;</pre><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">使用的流程文件：shopping.xml</span></p><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;flow xmlns=&quot;http://www.springframework.org/schema/webflow&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/webflow
+ http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd&quot;&gt;
+ &lt;!-- view-state中的view对应jsp文件夹中的jsp页面，on是触发事件，to对应state id --&gt;
+	&lt;!-- 流程文件-2015年6月14日15:51:56 --&gt;
+	&lt;!-- 根据排在第一位的顺序来执行 --&gt;
+	&lt;view-state id=&quot;viewCart&quot; view=&quot;viewCart&quot;&gt;
+		&lt;transition on=&quot;submit&quot; to=&quot;viewOrder&quot;&gt;
+		&lt;/transition&gt;
+	&lt;/view-state&gt;
+	&lt;view-state id=&quot;viewOrder&quot; view=&quot;viewOrder&quot;&gt;
+		&lt;transition on=&quot;confirm&quot; to=&quot;orderConfirmed&quot;&gt;
+		&lt;/transition&gt;
+	&lt;/view-state&gt;
+	&lt;view-state id=&quot;orderConfirmed&quot; view=&quot;orderConfirmed&quot;&gt;
+		&lt;transition on=&quot;returnToIndex&quot; to=&quot;returnToIndex&quot;&gt;
+		&lt;/transition&gt;
+	&lt;/view-state&gt;
+	&lt;end-state id=&quot;returnToIndex&quot; view=&quot;externalRedirect:servletRelative:/index.jsp&quot;&gt;
+	&lt;/end-state&gt;
+&lt;/flow&gt;
+</pre><p><br></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">对应的页面：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family: KaiTi_GB2312; font-size: 14pt;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family: KaiTi_GB2312;">index.jsp</span></p><p style="margin: 0in; font-size: 14pt;"><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; 
+  &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;title&gt;Cart Application&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;h1&gt;Hello!&lt;/h1&gt;
+	&lt;br /&gt;
+	&lt;a href=&quot;shopping.do&quot;&gt;View Cart&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;<span style="font-family: Arial, Helvetica, sans-serif; background-color: rgb(255, 255, 255);">&nbsp;</span></pre><p style="margin: 0in; font-size: 14pt;"><span style="font-family: KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family: KaiTi_GB2312;">viewCart.jsp</span></p><br><pre name="code" class="html">&lt;body&gt;
+	&lt;h1&gt;View Cart&lt;/h1&gt;
+	&lt;a href=&quot;${flowExecutionUrl}&amp;_eventId=submit&quot;&gt;Submit&lt;/a&gt;
+&lt;/body&gt;</pre><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;">viewOrder.jsp<br></span></span></p><p style="margin:0in;font-size:14.0pt"><br></p><pre name="code" class="html">&lt;body&gt;
+	&lt;h1&gt;Order&lt;/h1&gt;
+	&lt;a href=&quot;${flowExecutionUrl}&amp;_eventId=confirm&quot;&gt;Confirm&lt;/a&gt;
+
+&lt;/body&gt;</pre><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">orderConfirmed.jsp</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><pre name="code" class="html">&lt;body&gt;
+	&lt;h1&gt;Order Confirmed&lt;/h1&gt;
+	&lt;a href=&quot;${flowExecutionUrl}&amp;_eventId=returnToIndex&quot;&gt;Return to
+		index&lt;/a&gt;
+&lt;/body&gt;
+</pre><p style="margin-top: 7pt; margin-bottom: 7pt;"><span style="font-family:KaiTi_GB2312;font-size:18px;">这几个页面都使用了变量 flowExecutionUrl ，表示 flow 执行到当前状态时的 URL 。<strong> flowExecutionUrl 的值已经由 Spring Web Flow 2.0 框架的代码进行赋值，并放入相应的 model 中供 view 访问</strong>。 flowExecutionUrl 的值包含 flow 在执行过程中会为每一状态生成的唯一的 key ，因此不可用其他手段来获取。<strong>请求参数中 _eventId 的值与shoppting.xml中 transition 元素的 on 属性的值是对应的，在接收到_eventId参数后，相应transition会被执行。</strong></span></p><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">测试使用方式：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">访问地址：http://localhost:8080/CartApp3/spring/index.jsp</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">总的来说，为什么要配置这么多内容呢？原因如下：</span></p><p style="margin-top: 11pt; margin-bottom: 11pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">SpringWeb Flow 如何与 Spring Web MVC 整合在一起？</span></p><p style="margin-top:11pt;margin-bottom:11pt;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">客户端发送的请求，先会由 servlet 容器（Tomcat）接收， servlet容器会找到相应的应用程序（CartApp</span><span lang="en-US">3</span><span lang="zh-CN">），再根据 web.xml 的配置找到出符合映射条件的 servlet 来处理。Spring Web MVC 中处理请求的 servlet 是 DispatcherServlet ，如果请求的路径满足 DispatcherServlet的映射条件，则 DispatcherServlet 会找出 Spring IoC 容器中所有的 HandlerMapping ，根据这些HandlerMapping 中匹配最好的 handler （一般情况下都是 controller ，即控制器）来处理请求。当 Controller处理完毕，一般都会返回一个 view （视图）的名字，DispatcherServlet再根据这个view的名字找到相应的视图资源返回给客户端。</span></span></p><p style="margin-top: 11pt; margin-bottom: 11pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">弄清楚Spring Web MVC 处理请求的流程后，基本上就可以明白要整合 Spring Web MVC 与 Spring Web Flow所需要的配置了。为了让客户端的请求变成执行某个 flow 的请求，要解决以下几个问题：</span></p><ol type="1" style="margin-left: 0.375in; direction: ltr; unicode-bidi: embed; margin-top: 0in; margin-bottom: 0in; font-size: 14pt;"> <li value="1" style="margin-top:0;margin-bottom:0;vertical-align:middle"><span style="font-family:KaiTi_GB2312;"><span style="font-size: 14pt;" lang="zh-CN">需要在某个 HandlerMapping 中配置负责处理     flow 请求的 handler （或 controller ）</span><span style="font-size: 14pt;" lang="en-US">--</span><span style="font-size: 14pt;" lang="zh-CN">配置</span><span style="font-size: 14pt;" lang="en-US">controller</span><span style="font-size: 14pt;" lang="zh-CN">（flowController）</span></span></li> <li style="margin-top:0;margin-bottom:0;vertical-align:middle"><span style="font-family:KaiTi_GB2312;"><span style="font-size: 14pt;" lang="zh-CN">该handler （或 controller     ）要负责启动指定的 flow</span><span style="font-size: 14pt;" lang="en-US">--</span><span style="font-size: 14pt;" lang="zh-CN">该</span><span style="font-size: 14pt;" lang="en-US">controller</span><span style="font-size: 14pt;" lang="zh-CN">负责启动</span><span style="font-size: 14pt;" lang="en-US">flow</span><span style="font-size: 14pt;" lang="zh-CN">（flowExecutor）</span></span></li> <li style="margin-top:0;margin-bottom:0;vertical-align:middle"><span style="font-family:KaiTi_GB2312;"><span style="font-size: 14pt;" lang="zh-CN">flow     执行过程中以及执行完成后所涉及的视图应呈现给客户端</span><span style="font-size: 14pt;" lang="en-US">--</span><span style="font-size: 14pt;" lang="zh-CN">配置解析返回视图方式（viewResolvers）</span></span></li></ol><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">所有这些配置的目的无非是两个：一是要让客户端的请求转变成flow 的执行，二是要让 flow 执行过程中、或执行结束后得到的视图能返还给客户端。</span></p><p style="margin: 0in; font-size: 14pt;">&nbsp;</p><p style="margin: 0in; font-size: 14pt;"><a target="_blank" target="_blank" href="http://download.csdn.net/detail/hejingyuan6/8809997">&nbsp;源码下载</a></p><br><p style="margin:0in;font-size:14.0pt"><span style="font-family:宋体" lang="zh-CN"><br></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:宋体" lang="zh-CN"><br></span></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/46508821'>原文链接</a>

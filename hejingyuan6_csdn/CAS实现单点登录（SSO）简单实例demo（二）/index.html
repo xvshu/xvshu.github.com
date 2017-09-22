@@ -1,0 +1,246 @@
+﻿<div style="color:blue" align=center>CAS实现单点登录（SSO）简单实例demo（二）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">本文目的很明确，并不是要逐步讲清楚每一步的操作，具体的步骤网上有很多，那么整理本文的目的只是要梳理一下自己的知识点，帮助自己加深理解。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h1 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">小知识点积累：</span></h1>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">域名地址的修改：</span></h2>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">根据演示需求，用修改hosts文件的方法添加域名最简单方便（这个非常重要），在文件 C:\Windows\System32\drivers\etc\hosts 文件中添加三条</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">127.0.0.1&nbsp;&nbsp;&nbsp; demo.micmiu.com</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">127.0.0.1&nbsp;&nbsp;&nbsp; app1.micmiu.com</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">127.0.0.1&nbsp;&nbsp;&nbsp; app2.micmiu.com</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">•demo.micmiu.com&nbsp; =&gt;&gt; 对应部署cas server的tomcat，这个虚拟域名还用于证书生成</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">•app1.micmiu.com&nbsp; =&gt;&gt;&nbsp;对应部署app1 的tomcat</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">•app2.micmiu.com&nbsp;&nbsp; =&gt;&gt; 对应部署app2 的tomcat</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">注：可选配置</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">端口号的修改：</span></h2>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">修改tomcat的启动端口（共计5处），在文件conf/server.xml文件找到如下内容：</span></p>
+<p style="margin:0in; font-family:宋体; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-size:14pt">
+<pre name="code" class="html" style="font-family: 宋体;">&lt;Server port=&quot;8005&quot; shutdown=&quot;SHUTDOWN&quot;&gt;
+&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot; 
+   connectionTimeout=&quot;20000&quot; 
+   redirectPort=&quot;8443&quot; /&gt;
+
+&lt;Connector port=&quot;8009&quot; protocol=&quot;AJP/1.3&quot; redirectPort=&quot;8443&quot; /&gt;</pre><br>
+<p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">修改成：</span></p>
+<p style="font-family:宋体; margin:0in; font-size:14pt"><br>
+</p>
+<pre code_snippet_id="637871" snippet_file_name="blog_20150407_2_9771281" name="code" class="html" style="font-family: 宋体;">&lt;Server port=&quot;18005&quot; shutdown=&quot;SHUTDOWN&quot;&gt;
+&lt;Connector port=&quot;18080&quot; protocol=&quot;HTTP/1.1&quot; 
+   connectionTimeout=&quot;20000&quot; 
+   redirectPort=&quot;18443&quot; /&gt;
+
+&lt;Connector port=&quot;18009&quot; protocol=&quot;AJP/1.3&quot; redirectPort=&quot;18443&quot; /&gt;</pre><br>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">注：由于需要在同一个机器上演示，故需要修改端口号</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">安全证书配置：</span></h2>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">CAS默认使用的是HTTPS协议，如果对安全要求不高，可使用HTTP协议。<span style="font-size:14pt">&nbsp;</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">修改deployerConfigContext.xml (cas/WEB-INF)增加参数p:requireSecure=&quot;false&quot;，是否需要安全验证，即HTTPS，false为不采用。</span></span></p>
+<br>
+<p style="margin:0in; font-size:14pt"><span style="font-family:宋体"></span></p>
+<pre code_snippet_id="637871" snippet_file_name="blog_20150407_3_7234934" name="code" class="html">&lt;bean class=&quot;org.jasig.cas.authentication.handler.support.HttpBasedServiceCredentialsAuthenticationHandler&quot; p:httpClient-ref=&quot;httpClient&quot; 
+p:requireSecure=&quot;false&quot; /&gt;</pre><br>
+<span style="font-size:18px">&nbsp;<span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 修改 ticketGrantingTicketCookieGenerator.xml(cas/WEB-INF/spring-configuration/ticketGrantingTicketCookieGenerator.xml) 中ticketGrantingTicketCookieGenerator p:cookieSecure 属性修改为 false。</span></span><br>
+<p>
+<p style="margin:0in; font-family:宋体; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-size:14pt">
+<pre code_snippet_id="637871" snippet_file_name="blog_20150407_4_7206842" name="code" class="html" style="font-family: 宋体;"> &lt;bean id=&quot;ticketGrantingTicketCookieGenerator&quot; class=&quot;org.jasig.cas.web.support.CookieRetrievingCookieGenerator&quot;
+p:cookieSecure=&quot;false&quot; p:cookieMaxAge=&quot;-1&quot; p:cookieName=&quot;CASTGC&quot; p:cookiePath=&quot;/cas&quot; /&gt;
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">这里以Http为例进行演示</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h1 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">步入正题：</span></h1>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">配置服务端</span></h2>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">CAS-Server下载地址：http://www.jasig.org/cas/download</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">我们以cas-server-3.4.11-release.zip为例，解压提取cas-server-3.4.11/modules/cas-server-webapp-3.4.11.war文件，把该文件copy到G:\sso\tomcat-cas\webapps\ 目录下，并重命名为：cas.war.</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">启动tomcat-cas，在浏览器地址栏输入：https://demo.micmiu.com:8080/cas/login，回车</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><img src="14159228737656" alt=""><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">CAS-server的默认验证规则：只要用户名和密码相同就认证通过（仅仅用于测试，生成环境需要根据实际情况修改），输入admin/admin点击登录，就可以看到登录成功的页面：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">输入用户名admin和密码admin登录则会出现</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><img src="34800745323078" alt="">&nbsp;
+ &nbsp; &nbsp; &nbsp;<br>
+</span></p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">看到上述页面表示CAS-Server已经部署成功。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">配置客户端</span></h2>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">Cas-Client 下载</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">CAS-Client下载地址：http://downloads.jasig.org/cas-clients/</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">以cas-client-3.2.1-release.zip为例，解压提取cas-client-3.2.1/modules/cas-client-core-3.2.1.jar</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">借以tomcat默认自带的webapps\examples 作为演示的简单web项目</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">启动tomcat-app1，浏览器输入<a target="_blank" target="_blank" href="http://app1.micmiu.com:18080/examples/servlets/">http://app1.micmiu.com:18080/examples/servlets/</a>回车：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">注：端口号修改</span></p>
+<br>
+<p style="margin:0in; font-size:14pt">
+<pre code_snippet_id="637871" snippet_file_name="blog_20150407_5_8225526" name="code" class="html" style="font-family: 宋体;">&lt;Connector port=&quot;18080&quot; protocol=&quot;HTTP/1.1&quot;
+               connectionTimeout=&quot;20000&quot;
+               redirectPort=&quot;18443&quot; /&gt;
+&lt;Connector port=&quot;18009&quot; protocol=&quot;AJP/1.3&quot; redirectPort=&quot;18443&quot; /&gt;</pre>
+<p><br>
+</p>
+<p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp;&nbsp;<img src="48897198443154" alt=""><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">看到上述界面表示tomcat-app1的基本安装配置已经成功。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">接下来复制client的lib包cas-client-core-3.2.1.jar和commons-logging-1.1.jar到tomcat-app1\webapps\examples\WEB-INF\lib\目录下，在tomcat-app1\webapps\examples\WEB-INF\web.xml文件中增加如下内容：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span><pre name="code" class="plain">&lt;!-- 用于单点退出，该过滤器用于实现单点登出功能，可选配置--&gt;
+		&lt;listener&gt;
+			&lt;listener-class&gt;org.jasig.cas.client.session.SingleSignOutHttpSessionListener&lt;/listener-class&gt;
+		&lt;/listener&gt;
+ 
+		&lt;!-- 该过滤器用于实现单点登出功能，可选配置。 --&gt;
+		&lt;filter&gt;
+			&lt;filter-name&gt;CAS Single Sign Out Filter&lt;/filter-name&gt;
+			&lt;filter-class&gt;org.jasig.cas.client.session.SingleSignOutFilter&lt;/filter-class&gt;
+		&lt;/filter&gt;
+		&lt;filter-mapping&gt;
+			&lt;filter-name&gt;CAS Single Sign Out Filter&lt;/filter-name&gt;
+			&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+		&lt;/filter-mapping&gt;
+             &lt;!-- 该过滤器负责用户的认证工作，必须启用它 --&gt;
+		&lt;filter&gt;
+			&lt;filter-name&gt;CAS Filter&lt;/filter-name&gt;
+			&lt;filter-class&gt;org.jasig.cas.client.authentication.AuthenticationFilter&lt;/filter-class&gt;
+			&lt;init-param&gt;
+				&lt;param-name&gt;casServerLoginUrl&lt;/param-name&gt;
+				&lt;param-value&gt;https://demo.micmiu.com:8080/cas/login&lt;/param-value&gt;
+				&lt;!--这里的server是服务端的IP --&gt;
+				
+			&lt;/init-param&gt;
+			&lt;init-param&gt;
+				&lt;param-name&gt;serverName&lt;/param-name&gt;
+				&lt;param-value&gt;http://app1.micmiu.com:18080&lt;/param-value&gt;
+			&lt;/init-param&gt;
+		&lt;/filter&gt;
+		&lt;filter-mapping&gt;
+			&lt;filter-name&gt;CAS Filter&lt;/filter-name&gt;
+			&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+		&lt;/filter-mapping&gt;
+		&lt;!-- 该过滤器负责对Ticket的校验工作，必须启用它 --&gt;
+		&lt;filter&gt;
+			&lt;filter-name&gt;CAS Validation Filter&lt;/filter-name&gt;
+			&lt;filter-class&gt;
+				org.jasig.cas.client.validation.Cas20ProxyReceivingTicketValidationFilter&lt;/filter-class&gt;
+			&lt;init-param&gt;
+				&lt;param-name&gt;casServerUrlPrefix&lt;/param-name&gt;
+				&lt;param-value&gt;https://demo.micmiu.com:8080/cas&lt;/param-value&gt;
+			&lt;/init-param&gt;
+			&lt;init-param&gt;
+				&lt;param-name&gt;serverName&lt;/param-name&gt;
+				&lt;param-value&gt;http://app1.micmiu.com:18080&lt;/param-value&gt;
+			&lt;/init-param&gt;
+		&lt;/filter&gt;
+		&lt;filter-mapping&gt;
+			&lt;filter-name&gt;CAS Validation Filter&lt;/filter-name&gt;
+			&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+		&lt;/filter-mapping&gt;
+ 
+		&lt;!--
+			该过滤器负责实现HttpServletRequest请求的包裹，
+			比如允许开发者通过HttpServletRequest的getRemoteUser()方法获得SSO登录用户的登录名，可选配置。
+		--&gt;
+		&lt;filter&gt;
+			&lt;filter-name&gt;CAS HttpServletRequest Wrapper Filter&lt;/filter-name&gt;
+			&lt;filter-class&gt;
+				org.jasig.cas.client.util.HttpServletRequestWrapperFilter&lt;/filter-class&gt;
+		&lt;/filter&gt;
+		&lt;filter-mapping&gt;
+			&lt;filter-name&gt;CAS HttpServletRequest Wrapper Filter&lt;/filter-name&gt;
+			&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+		&lt;/filter-mapping&gt;
+ 
+             &lt;!--
+		该过滤器使得开发者可以通过org.jasig.cas.client.util.AssertionHolder来获取用户的登录名。
+		比如AssertionHolder.getAssertion().getPrincipal().getName()。
+		--&gt;
+		&lt;filter&gt;
+			&lt;filter-name&gt;CAS Assertion Thread Local Filter&lt;/filter-name&gt;
+			&lt;filter-class&gt;org.jasig.cas.client.util.AssertionThreadLocalFilter&lt;/filter-class&gt;
+		&lt;/filter&gt;
+		&lt;filter-mapping&gt;
+			&lt;filter-name&gt;CAS Assertion Thread Local Filter&lt;/filter-name&gt;
+			&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+		&lt;/filter-mapping&gt;
+ 
+		&lt;!-- ======================== 单点登录结束 ======================== --&gt;</pre><br>
+<br>
+</p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">第二个</span><span lang="en-US">examples</span><span lang="zh-CN">类&#20284;配置。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">启动之前配置好的三个tomcat分别为：tomcat-cas、tomcat-app1、tomcat-app2.</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h2 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">基本的测试</span></h2>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">预期流程： 打开app1 url —-&gt;跳转cas server 验证 —-&gt; 显示app1的应用 —-&gt; 打开app2 url —-&gt; 显示app2应用 —-&gt; 注销casserver —-&gt; 打开app1/app2 url —-&gt; 重新跳转到cas server 验证.</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">打开浏览器地址栏中输入：http://app1.micmiu.com:18080/examples/servlets/servlet/HelloWorldExample，回车：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="24042126488008" alt=""> &nbsp; &nbsp; &nbsp;&nbsp;<br>
+</span>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">验证通过后显示如下：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="2736809093383" alt=""><br>
+</span>
+<p style="margin:0in; font-size:14pt">
+<h1 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">总结：</span></h1>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">以上只是简单介绍了</span><span lang="en-US">CAS</span><span lang="zh-CN">的配置过程，也是对第一篇</span><span lang="en-US">CAS</span><span lang="zh-CN">原理的一个补充学习，希望通过原理的学习和结合实践的配置能让我们对</span><span lang="en-US">CAS</span><span lang="zh-CN">的理解更加深刻。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">详细的学习教程：</span></p>
+<p style="margin:0in; font-size:14pt"><a target="_blank" target="_blank" href="http://www.micmiu.com/enterprise-app/sso/sso-cas-sample/#viewSource"><span style="font-family:KaiTi_GB2312">http://www.micmiu.com/enterprise-app/sso/sso-cas-sample/#viewSource</span></a></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-family:宋体; font-size:14.0pt"><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/44921257'>原文链接</a>

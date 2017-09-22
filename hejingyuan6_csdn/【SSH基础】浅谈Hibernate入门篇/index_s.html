@@ -1,0 +1,200 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【SSH基础】浅谈Hibernate入门篇</div><div style="color:blue" align=center>【SSH基础】浅谈Hibernate入门篇</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><br>
+</p>
+<p><span style="white-space:pre"></span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">Hibernate是什么</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp; Hibernate是一个轻量级的ORMapping框架</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp; ORMapping原理（Object Relational Mapping）就是把对象里面的数据和数据库里面的数据，按照一定的规则进行映射的过程。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span style="white-space:pre"></span>&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="13408918562680" alt=""></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">ORMapping基本对应规则：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">1：类跟表相对应</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">2：类的属性跟表的字段相对应</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">3：类的实例与表中具体的一条记录相对应</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">Hibernate</span><span lang="zh-CN" style="font-family:华文中宋">的实现方式</span></p>
+<br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="43413915357721" alt=""><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">Hibernate解决的问题：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><span lang="zh-CN">&nbsp;&nbsp;&nbsp; 通过上图我们也能发现，</span><span lang="en-US">H</span><span lang="zh-CN">ibernate主要用来实现Java对象和表之间的映射，除此之外还提供数据查询和获取数据的方法，可以大幅度减少开发时人工使用SQL和JDBC处理数据的时间。</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">Hibernate的目标是对于开发者通常的数据持久化相关的编程任务中解放出来。&nbsp;&nbsp;&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">Hibernate可以帮助你消除或者包装那些针对特定厂商的SQL代码，并且帮你把结果集从表&#26684;式的表示形式转换到一系列的对象去。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="2009977705435" alt=""><br>
+</p>
+<br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">hibernate优点：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">1、封装了jdbc，简化了很多重复性代码。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">2、简化了DAO层编码工作，使开发更<span style="color:#E84C22">对象化</span>了。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">3、移植性好，支持各种数据库，如果换个数据库只要在配置文件中变换配置就可以了，不用改变hibernate代码。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">4、支持透明持久化，因为hibernate操作的是纯粹的（pojo）java类，没有实现任何接口，没有侵入性。所以说它是一个轻量级框架。</p>
+<br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">下面结合应用实例帮助大家理解：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">实体类：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<pre code_snippet_id="438591" snippet_file_name="blog_20140730_1_7710819" name="code" class="java">import java.util.Date;
+public class User {
+
+	private String id;
+	private String username;
+	private String userpassword;
+	private String createTime;
+	private String expireTime;
+
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String name) {
+		this.username = name;
+	}
+	public String getUserpassword() {
+		return userpassword;
+	}
+	public void setUserpassword(String password) {
+		this.userpassword = password;
+	}
+	public String getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+	public String getExpireTime() {
+		return expireTime;
+	}
+	public void setExpireTime(String expireTime) {
+		this.expireTime = expireTime;
+	}
+}</pre>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">创建</span><span lang="en-US" style="font-family:Calibri">hibernate</span><span lang="zh-CN" style="font-family:华文中宋">映射文件</span><span lang="en-US" style="font-family:Calibri"></span><span lang="zh-CN" style="font-family:华文中宋">User.hbm.xml</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">映射文件告诉Hibernate它应该访问数据库里面的哪个表（table）和应该使用表里面的哪些字段（column）。</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">因为这里只有一个Class ---</span><span lang="en-US" style="font-family:Calibri">User</span><span lang="zh-CN" style="font-family:华文中宋">和一个Table --- t_</span><span lang="en-US" style="font-family:华文中宋">user</span><span lang="zh-CN" style="font-family:华文中宋">，你只需要建立一个映射文件---</span><span lang="en-US" style="font-family:Calibri">User</span><span lang="zh-CN" style="font-family:华文中宋">.hbm.xml，来对应</span><span lang="en-US" style="font-family:Calibri">User</span><span lang="zh-CN" style="font-family:华文中宋">类和t_</span><span lang="en-US" style="font-family:华文中宋">user</span><span lang="zh-CN" style="font-family:华文中宋">表之间的关系。</span></p>
+<br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<pre code_snippet_id="438591" snippet_file_name="blog_20140730_2_7634372" name="code" class="html">&lt;hibernate-mapping package=&quot;com.bjpowernode.hibernate&quot;&gt;
+	&lt;class name=&quot;User&quot; table=&quot;t_user&quot;&gt;
+		&lt;id name=&quot;id&quot;&gt;
+			&lt;generator class=&quot;uuid&quot;&gt;&lt;/generator&gt;
+		&lt;/id&gt;
+		&lt;property name=&quot;username&quot;&gt;&lt;/property&gt;
+		&lt;property name=&quot;userpassword&quot;&gt;&lt;/property&gt;
+		&lt;property name=&quot;createTime&quot;&gt;&lt;/property&gt;
+		&lt;property name=&quot;expireTime&quot;&gt;&lt;/property&gt;
+	&lt;/class&gt;
+	
+&lt;/hibernate-mapping&gt;</pre>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">配置</span><span lang="zh-CN" style="font-family:Calibri">Hibernate</span><span lang="zh-CN" style="font-family:华文中宋">描述文件</span><span lang="en-US" style="font-family:Calibri"></span><span lang="zh-CN" style="font-family:华文中宋">hibernate.cfg.xml</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">Hibernate描述文件可以是一个properties或xml文件，其中最重要的是定义数据库的连接。我这里列出的是一个XML&#26684;式的hibernate.cfg.xml描述文件。</p>
+<br>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<pre code_snippet_id="438591" snippet_file_name="blog_20140730_3_6412873" name="code" class="html">&lt;hibernate-configuration&gt;
+	&lt;session-factory &gt;
+		&lt;property name=&quot;hibernate.connection.driver_class&quot;&gt;com.mysql.jdbc.Driver&lt;/property&gt;
+		&lt;property name=&quot;hibernate.connection.url&quot;&gt;jdbc:mysql://localhost:3306/hibernate_first&lt;/property&gt;
+		&lt;property name=&quot;hibernate.connection.username&quot;&gt;root&lt;/property&gt;
+		&lt;property name=&quot;hibernate.connection.password&quot;&gt;hejingyuan&lt;/property&gt;
+		&lt;!-- 方言 --&gt;
+		&lt;property name=&quot;hibernate.dialect&quot;&gt;org.hibernate.dialect.MySQLDialect&lt;/property&gt;
+		&lt;property name=&quot;hibernate.show.sql&quot;&gt;true&lt;/property&gt;
+		&lt;property name=&quot;hibernate.show.format_sql&quot;&gt;true&lt;/property&gt;
+		&lt;!-- 指定User的映射文件 --&gt;
+		&lt;mapping resource=&quot;com/bjpowernode/hibernate/User.hbm.xml&quot;/&gt;
+	&lt;/session-factory&gt;
+&lt;/hibernate-configuration&gt;</pre>
+<p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">生成表方法</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<pre code_snippet_id="438591" snippet_file_name="blog_20140730_4_5540038" name="code" class="java">/**
+ * 将hbm生成ddl
+ * @author Administrator
+ *
+ */
+public class ExportDB {
+
+	public static void main(String[] args) {
+		//默认读取hibernate.cfg.xml文件
+		Configuration cfg = new Configuration().configure();
+		SchemaExport export = new SchemaExport(cfg);
+		export.create(true, true);
+	}
+}</pre>
+<p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">添加用户</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">
+<pre code_snippet_id="438591" snippet_file_name="blog_20140730_5_2018028" name="code" class="java">public static void main(String[] args) {
+		//读取hibernate.cfg.xml文件--缺省默认文件，如果只new的话，会读取porperties
+		Configuration cfg=new Configuration().configure();
+		
+		//建立SessionFactory，线程安全的，最好一个数据库创建一次
+		SessionFactory factory=cfg.buildSessionFactory();
+		
+		//取得Session，真正要用的时候才去关联connection，这个connection与我们之前学的不同，称为持久化管理器
+		Session session=null;
+		try{
+			session=factory.openSession();
+			//开启事务
+			session.beginTransaction();
+			User user=new User();
+			user.setUsername(&quot;张三&quot;);
+			user.setUserpassword(&quot;123&quot;);
+			user.setCreateTime(new Date().toString());
+			user.setExpireTime(new Date().toString());
+			
+			//保存User对象
+			session.save(user);
+			//提交事务
+			session.getTransaction().commit();
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			//回滚事务
+			session.getTransaction().rollback();
+		}finally{
+			if(session != null){
+				if(session.isOpen()){
+					//关闭session
+					session.close();
+				}
+			}
+		}
+		
+	}
+</pre><br>
+<p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">总结：</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><span style="white-space:pre"></span>&nbsp; &nbsp; &nbsp; 千里之行始于足下，这篇文章仅是迈向Hibernate大道的一个起点。以上只是简单介绍了</span><span lang="en-US" style="font-family:Calibri">Hibernate</span><span lang="zh-CN" style="font-family:华文中宋">解决的问题，其实</span><span lang="en-US" style="font-family:Calibri">Hibernate</span><span lang="zh-CN" style="font-family:华文中宋">就是一个转换器，完成对象实例与数据库表的转换，对</span><span lang="en-US" style="font-family:Calibri">JDBC</span><span lang="zh-CN" style="font-family:华文中宋">访问数据库的代码进行封装，简化了数据访问层繁琐的重复性代码。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt">下篇继续！</p>
+<p style="margin:0in; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-size:14.0pt"><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/38300383'>原文链接</a>

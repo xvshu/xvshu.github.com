@@ -1,0 +1,92 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 数据结构概述（1）</div><div style="color:blue" align=center>数据结构概述（1）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; 数据结构是计算机存储、组织数据的方式。数据结构是指相互之间存在一种或多种特定关系的数据元素的集合。通常情况下，精心选择的数据结构可以带来更高的运行或者存储效率。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="16549826100118" alt=""></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">数据的逻辑结构：指反映数据元素之间的逻辑关系的数据结构，其中的逻辑关系是指数据元素之间的前后件关系，而与他们在计算机中的存储位置无关。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">通常有下列四类基本的结构：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">⑴集合结构。该结构的数据元素间的关系是“属于同一个集合”。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">⑵线性结构。该结构的数据元素之间存在着一对一的关系。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">⑶树型结构。该结构的数据元素之间存在着一对多的关系。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">⑷图形结构。该结构的数据元素之间存在着多对多的关系，也称网状结构。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">从上面所介绍的数据结构的概念中可以知道，一个数据结构有两个要素。一个是数据元素的集合，另一个是关系的集合。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">对于线性结构，树型结构和图形结构的关系，如图：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="403037410012333" alt=""></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">数据的存储结构（物理结构）：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">数据的存储结构是指数据的逻辑结构在计算机中的表示。有四种基本的存储映像方法：顺序、链接、索引、散列。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">1.顺序存储</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">主要用于线性的数据结构，它把逻辑上相邻的结点存储在物理上相邻的存储单元里，结点之间的关系由存储单元的邻接关系体现。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">如图：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="24202529882725" alt=""></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">2.链式存储</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">就是给结点附加上指针字段。即，将结点所占的存储单元分为两部分：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">（1）数据项&nbsp; 存放结点本身的信息。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">（2）指针项&nbsp; 存放此结点的后继结点所对应的存储单元的地址。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">指针项可以包括一个或多个指针，以指向结点的一个或多个后继，或记录其他信息。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">如图：</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="28948158123103" alt=""></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">顺序与链式对比：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">1、比顺序存储结构的存储密度小(每个节点都由数据域和指针域组成，所以相同空间内假设全存满的话顺序比链式存储更多)。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">2、逻辑上相邻的节点物理上不必相邻。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">3、插入、删除灵活(不必移动节点，只要改变节点中的指针)。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">4、查找结点时链式存储要比顺序存储慢。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">5、每个结点是由数据域和指针域组成。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">3.索引存储</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">在线性结构中，结点可以排成一个序列：p1，p2，…，pn，每个结点pi在序列里都有对应的位置I，这个位置数就可以作为结点的索引。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">索引的存储结构：是用结点的索引号i来确定结点的存储地址。有2种实现方法：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">（1）建立附加的索引表，索引表里第i项的&#20540;就是第i个结点的存储地址。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">（2）当每个结点所占单元个数都相等时，可用位置数的线性函数的&#20540;来指出结点对应的存储地址，即第i个结点pi的地址是LOC(pi)=(i-1)*p&#43;q。其中，p为结点所占的单元个数，q为开始结点p1对应的存储地址。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">4.散列存储</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">散列存储，又称hash存储，是一种力图将数据元素的存储位置与关键码之间建立确定对应关系的查找技术。散列法存储的基本思想是：由节点的关键码&#20540;决定节点的存储地址。散列技术除了可以用于查找外，还可以用于存储。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">总结：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">对于数据结构的逻辑结构和物理结构的简单解释：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">逻辑结构：数据元素之间的逻辑关系，即人对数据的理解，而进行抽象的模型。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">物理结构：数据元素在计算机中的存储方法，即计算机对数据的理解，逻辑结构在计算机语言中的映射。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">以上所述只是为了让大家对数据结构这个概念有一个全局的认识，便于我们对知识的理解，这样我们就不需要记忆知识，而是利用简单的结点去扩展整个知识网络！</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/25646331'>原文链接</a>

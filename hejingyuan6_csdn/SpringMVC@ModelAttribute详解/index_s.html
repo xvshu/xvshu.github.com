@@ -1,0 +1,121 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; SpringMVC@ModelAttribute详解</div><div style="color:blue" align=center>SpringMVC@ModelAttribute详解</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><span style="font-family:KaiTi_GB2312;font-size:18px;"><span id="Label3">1.@ModelAttribute注释void返回值的方法</span></span></p><p><span id="Label3"><br></span></p><p><span id="Label3"></span></p><pre name="code" class="java">@Controller
+public class HelloModelController {
+    
+    @ModelAttribute 
+    public void populateModel(@RequestParam String abc, Model model) {  
+       model.addAttribute(&quot;attributeName&quot;, abc);  
+    }  
+
+    @RequestMapping(value = &quot;/helloWorld&quot;)  
+    public String helloWorld() {  
+       return &quot;helloWorld.jsp&quot;;  
+    }  
+
+}
+
+</pre><span id="Label3"></span><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">在这个代码中，访问控制器方法helloWorld时，会首先调用populateModel方法，将页面参数abc(/helloWorld.ht?abc=text)放到model的attributeName属性中，在视图中可以直接访问。</span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">jsp页面页面如下：</span></p><pre name="code" class="html">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=utf-8&quot;
+    pageEncoding=&quot;utf-8&quot;%&gt;
+&lt;%@taglib prefix=&quot;c&quot; uri=&quot;http://java.sun.com/jsp/jstl/core&quot;%&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;c:out value=&quot;${attributeName}&quot;&gt;&lt;/c:out&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+</pre><br><span style="font-family:KaiTi_GB2312;font-size:18px;"><span id="Label3">2.@ModelAttribute注释返回具体类的方法</span></span><p><br><span id="Label3"><span id="Label3"></span></span></p><pre name="code" class="java">@Controller
+public class Hello2ModelController {
+    
+    @ModelAttribute 
+    public User populateModel() {  
+       User user=new User();
+       user.setAccount(&quot;ray&quot;);
+       return user;
+    }  
+    @RequestMapping(value = &quot;/helloWorld2&quot;)  
+    public String helloWorld() {  
+       return &quot;helloWorld.jsp&quot;;  
+    }  
+}
+
+</pre><br><span id="Label3"></span><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">当用户请求 http://localhost:8080/test/helloWorld2.html时，首先访问populateModel方法，返回User对象，model属性的名称没有指定，它由返回类型隐含表示，如这个方法返回User类型，那么这个model属性的名称是user。  <br>这个例子中model属性名称有返回对象类型隐含表示，model属性对象就是方法的返回值。它无须要特定的参数。</span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">jsp 中如下访问：</span><br><span id="Label3"></span></p><pre name="code" class="html">&lt;c:out value=&quot;${user.account}&quot;&gt;&lt;/c:out&gt;
+
+</pre><br><span style="font-family:KaiTi_GB2312;font-size:18px;"><span id="Label3">也可以指定属性名称</span></span><br><span id="Label3"></span><pre name="code" class="java">@Controller
+public class Hello2ModelController {
+    
+    @ModelAttribute(value=&quot;myUser&quot;)
+    public User populateModel() {  
+       User user=new User();
+       user.setAccount(&quot;ray&quot;);
+       return user;
+    }  
+    @RequestMapping(value = &quot;/helloWorld2&quot;)  
+    public String helloWorld(Model map) {  
+       return &quot;helloWorld.jsp&quot;;  
+    }  
+}
+
+</pre><br><span style="font-family:KaiTi_GB2312;font-size:18px;"><span id="Label3">jsp中如下访问：</span></span><br><span id="Label3"></span><pre name="code" class="html">&lt;c:out value=&quot;${myUser.account}&quot;&gt;&lt;/c:out&gt;
+
+</pre><p><p><span id="Label3"><span style="font-size:18px;"><span id="Label3"><br></span></span></span></p><p><span style="font-family:KaiTi_GB2312;"><span id="Label3"><span style="font-size:18px;"><span id="Label3">对象合并:</span></span></span></span></p><pre name="code" class="java">@Controller
+public class Hello2ModelController {
+    
+    @ModelAttribute
+    public User populateModel() {  
+       User user=new User();
+       user.setAccount(&quot;ray&quot;);
+       return user;
+    }  
+    
+    @RequestMapping(value = &quot;/helloWorld2&quot;)  
+    public String helloWorld(User user) {
+        user.setName(&quot;老王&quot;);
+       return &quot;helloWorld.jsp&quot;;  
+    }  
+}
+
+</pre><span id="Label3"></span><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">&nbsp;</span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">对象合并指定对象名称：</span></p><pre name="code" class="java">@Controller
+public class Hello2ModelController {
+    
+    @ModelAttribute(&quot;myUser&quot;)
+    public User populateModel() {  
+       User user=new User();
+       user.setAccount(&quot;ray&quot;);
+       return user;
+    }  
+    
+    @RequestMapping(value = &quot;/helloWorld2&quot;)  
+    public String helloWorld(@ModelAttribute(&quot;myUser&quot;) User user) {
+        user.setName(&quot;老王&quot;);
+       return &quot;helloWorld.jsp&quot;;  
+    }  
+}
+
+</pre><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><span id="Label3"><span id="Label3">这样在jsp中可以使用如下方式访问</span></span></span></p><p><br><span id="Label3"></span></p><pre name="code" class="html">&lt;c:out value=&quot;${myUser.name}&quot;&gt;&lt;/c:out&gt;
+&lt;c:out value=&quot;${myUser.account}&quot;&gt;&lt;/c:out&gt;
+
+</pre><br><span id="Label3"></span><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">3.通过此特性控制权限.</span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">我们可以在基类方法中控制写此注解，需要控制权限的控制器，继承控制器就可以了。</span></p><p><br><span id="Label3"></span></p><pre name="code" class="java">public class BaseController {
+    
+    @ModelAttribute
+    public void populateModel() throws Exception {  
+       SysUser user=ContextUtil.getCurrentUser();
+       if(user.getAccount().equals(&quot;admin&quot;)){
+           throw new Exception(&quot;没有权限&quot;);
+       }
+    }  
+}
+
+</pre><br><span style="font-family:KaiTi_GB2312;font-size:18px;"><span id="Label3">需要控制权限的类继承BaseController</span></span><p><p><pre name="code" class="java">@Controller
+public class Hello2ModelController extends BaseController {
+    
+    @RequestMapping(value = &quot;/helloWorld2&quot;)  
+    public String helloWorld(@ModelAttribute(&quot;myUser&quot;) User user) {
+        user.setName(&quot;老王&quot;);
+       return &quot;helloWorld.jsp&quot;;  
+    }  
+}
+
+</pre><br><span style="font-family:KaiTi_GB2312;font-size:18px;"><span id="Label3">这样就可以控制权限了，当然控制权限的方法有很多，比如通过过滤器等。这里只是提供一种思路。</span></span><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">总结：</span></p><p><br></p><p><p style="font-size: 14px;"><span style="font-family:KaiTi_GB2312;font-size:18px;">@ModelAttribute具有如下三个作用：</span></p><p style="font-size: 14px;"><span style="font-family:KaiTi_GB2312;font-size:18px;">①绑定请求参数到命令对象：放在功能处理方法的入参上时，<span style="color:#CC0000;">用于将多个请求参数绑定到一个命令对象，从而简化绑定流程，而且自动暴露为模型数据用于视图页面展示时使用</span>。其实@ModelAttribute此处对于供视图页面展示来说与<span>model.addAttribute(<span class="string">&quot;attributeName&quot;</span><span>,&nbsp;abc);</span></span>功能类似。</span></p><p style="font-size: 14px;"><span><span></span></span></p><pre name="code" class="java">public String test(@ModelAttribute(&quot;user&quot;) UserModel user) </pre><br><p><p style="font-size: 14px;"><span style="font-family:KaiTi_GB2312;font-size:18px;">此处多了一个注解@ModelAttribute(&quot;user&quot;)，它的作用是将该绑定的命令对象以“user”为名称添加到模型对象中供视图页面展示使用。我们此时可以在视图页面使用${user.username}来获取绑定的命令对象的属性。</span></p><p style="font-size: 14px;"><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p style="font-size: 14px;"><span style="font-family:KaiTi_GB2312;font-size:18px;">②暴露@RequestMapping 方法返回值为模型数据：放在功能处理方法的返回值上时，是暴露功能处理方法的返回值为模型数据，用于视图页面展示时使用。</span></p><p style="font-size: 14px;"><span style="font-family:KaiTi_GB2312;font-size:18px;"></span></p><pre name="code" class="java">public @ModelAttribute(&quot;user2&quot;) UserModel test3(@ModelAttribute(&quot;user2&quot;) UserModel user)</pre><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">大家可以看到返回值类型是命令对象类型，而且通过@ModelAttribute(&quot;user2&quot;)注解，此时会暴露返回值到模型数据（ 名字为user2 ） 中供视图展示使用</span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">@ModelAttribute 注解的返回值会覆盖@RequestMapping 注解方法中的@ModelAttribute 注解的同名命令对象</span></p><br><br><span style="font-family:KaiTi_GB2312;font-size:18px;">③暴露表单引用对象为模型数据：放在处理器的一般方法（非功能处理方法）上时，是为表单准备要展示的表单引用对象，如注册时需要选择的所在城市等，而且在执行功能处理方法（@RequestMapping 注解的方法）之前，自动添加到模型对象中，用于视图页面展示时使用；</span><br><p><br><span id="Label3"></span></p><p><span id="Label3"><br></span></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/49995987'>原文链接</a>

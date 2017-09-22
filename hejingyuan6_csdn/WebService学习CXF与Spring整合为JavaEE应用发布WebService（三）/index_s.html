@@ -1,0 +1,253 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; WebService学习CXF与Spring整合为JavaEE应用发布WebService（三）</div><div style="color:blue" align=center>WebService学习CXF与Spring整合为JavaEE应用发布WebService（三）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">CXF</span><span lang="zh-CN">与</span><span lang="en-US">Spring</span><span lang="zh-CN">整合，分两个方面给大家介绍：</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">1</span><span lang="zh-CN">，在传统</span><span lang="en-US">ssh</span><span lang="zh-CN">项目基础上添加</span><span lang="en-US">Web Service</span></span></p><p style="margin:0in;margin-left:.375in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">赋值</span><span lang="en-US">CXF</span><span lang="zh-CN">的</span><span lang="en-US">jar</span><span lang="zh-CN">包</span></span></p><p style="margin:0in;margin-left:.375in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">在</span><span lang="en-US">web.xml</span><span lang="zh-CN">配置文件中导入</span><span lang="en-US">CXF</span><span lang="zh-CN">的核心控制器：</span><span lang="en-US">CXFServlet</span></span></p><p style="margin:0in;margin-left:.375in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">在</span><span lang="en-US">Spring</span><span lang="zh-CN">配置文件中导入</span><span lang="en-US">CXF</span><span lang="zh-CN">提供</span><span lang="en-US">Schema</span><span lang="zh-CN">，</span><span lang="en-US">xml</span><span lang="zh-CN">配置文件</span></span></p><p style="margin:0in;margin-left:.375in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">在</span><span lang="en-US">Spring</span><span lang="zh-CN">配置文件中使用jaxws:endpoint元素来暴露</span><span lang="en-US">Web Service</span></span></p><p style="margin: 0in 0in 0in 0.375in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">如果要添加拦截器，在jaxws:endpoint元素里添加</span></p><p style="margin: 0in 0in 0in 0.75in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">inInterceptors，outInterceptors子元素</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">2</span><span lang="zh-CN">，远程调用</span><span lang="en-US">Web Service</span><span lang="zh-CN">服务（让</span><span lang="en-US">Action</span><span lang="zh-CN">依赖远程</span><span lang="en-US">Web Service</span><span lang="zh-CN">的接口）</span></span></p><p style="margin:0in;margin-left:.375in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">复制</span><span lang="en-US">CXF</span><span lang="zh-CN">的</span><span lang="en-US">jar</span><span lang="zh-CN">包</span></span></p><p style="margin:0in;margin-left:.375in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">在</span><span lang="en-US">Spring</span><span lang="zh-CN">配置文件中导入</span><span lang="en-US">CXF</span><span lang="zh-CN">提供</span><span lang="en-US">Schema</span><span lang="zh-CN">，</span><span lang="en-US">xml</span><span lang="zh-CN">配置文件</span></span></p><p style="margin:0in;margin-left:.375in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">在</span><span lang="en-US">Spring</span><span lang="zh-CN">配置文件中使用</span><span lang="en-US">jaxws</span><span lang="en-US">:client</span><span lang="zh-CN">元素来配置远程</span><span lang="en-US">Web Service</span><span lang="zh-CN">代理</span></span></p><p style="margin:0in;margin-left:.375in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">如果要添加拦截器。在</span><span lang="en-US">jaxws</span><span lang="en-US">:client</span><span lang="zh-CN">元素里添加</span></span></p><p style="margin: 0in 0in 0in 0.75in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">inInterceptors，outInterceptors子元素</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><h1 style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">第一个方面：提供</span><span lang="en-US">Web</span><span lang="en-US"> Service</span><span lang="zh-CN">的服务</span></span></h1><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><h2 style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">服务端：</span></h2><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">项目结构：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><img src="300003510087207" alt=""><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">在相应的</span><span lang="en-US">SSH</span><span lang="zh-CN">项目中添加</span><span lang="en-US">CXF</span><span lang="zh-CN">的相关</span><span lang="en-US">jar</span><span lang="zh-CN">包：</span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><span style="font-family:KaiTi_GB2312;"><img src="48938838813417" alt=""><br></span><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><p style="margin:0in;font-size:14.0pt" lang="en-US"><span style="font-family:KaiTi_GB2312;">Web.xml</span></p><p style="margin:0in;font-size:14.0pt" lang="en-US"><span style="font-family:KaiTi_GB2312;"><br></span></p><span style="font-family:KaiTi_GB2312;"></span><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+	xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot;
+	version=&quot;2.5&quot;&gt;
+	&lt;listener&gt;  
+        &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;  
+    &lt;/listener&gt;  
+  
+    &lt;context-param&gt;  
+        &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;  
+        &lt;param-value&gt;/WEB-INF/applicationContext-common.xml&lt;/param-value&gt;  
+    &lt;/context-param&gt;  
+      &lt;!--所有来自/*的请求，都交由 CXFServlet来处理--&gt;
+    &lt;servlet&gt;  
+        &lt;servlet-name&gt;HelloWorldService&lt;/servlet-name&gt;  
+        &lt;servlet-class&gt;org.apache.cxf.transport.servlet.CXFServlet&lt;/servlet-class&gt;  
+        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;  
+    &lt;/servlet&gt;  
+    &lt;servlet-mapping&gt;  
+        &lt;servlet-name&gt;HelloWorldService&lt;/servlet-name&gt;  
+        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;  
+    &lt;/servlet-mapping&gt;  
+   
+&lt;/web-app&gt;
+</pre><br><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">applicationContext-common.xml：<br></span></p><p style="margin: 0in; font-size: 14pt;"><br></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;  
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;  
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; 
+    xmlns:jaxws=&quot;http://cxf.apache.org/jaxws&quot;  
+    xsi:schemaLocation=&quot;  
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd  
+		http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd&quot;&gt;  
+
+	&lt;import resource=&quot;classpath:META-INF/cxf/cxf.xml&quot; /&gt;  
+    &lt;import resource=&quot;classpath:META-INF/cxf/cxf-extension-soap.xml&quot; /&gt;  
+    &lt;import resource=&quot;classpath:META-INF/cxf/cxf-servlet.xml&quot; /&gt;  
+  
+    &lt;bean id=&quot;helloWorld&quot; class=&quot;com.tgb.service.impl.HelloWorldImpl&quot;&gt;
+    	&lt;property name=&quot;userService&quot; ref=&quot;userService&quot;&gt;&lt;/property&gt;
+    &lt;/bean&gt;  
+  
+  &lt;!-- 用户的Service --&gt;    
+    &lt;bean id=&quot;userService&quot; class=&quot;com.tgb.service.impl.UserServiceImpl&quot;&gt;       
+    &lt;/bean&gt;
+	&lt;!-- implementor指定webservice的服务提供者 --&gt;
+	&lt;!-- address为wsdl的访问地址 --&gt;
+    &lt;jaxws:endpoint id=&quot;hello&quot; implementor=&quot;#helloWorld&quot; address=&quot;/hjy&quot; &gt;
+		&lt;!-- 添加了2个In拦截器，如果不添加拦截器可直接注释掉如下代码 --&gt;
+		&lt;jaxws:inInterceptors&gt;
+			&lt;bean class=&quot;org.apache.cxf.interceptor.LoggingInInterceptor&quot;/&gt;
+			&lt;bean class=&quot;com.tgb.auth.AuthInterceptor&quot;/&gt;
+		&lt;/jaxws:inInterceptors&gt;
+		&lt;!-- 如果要配置Out拦截器，使用outInterceptors --&gt;
+	&lt;/jaxws:endpoint&gt;
+&lt;/beans&gt;				
+</pre><br><p><p style="margin: 0in; font-size: 14pt;"><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">以上配置已经完成，对于接口和相应的实现参考之前的博客即可，实现中对于</span><span lang="en-US">new</span><span lang="zh-CN">的内容使用</span><span lang="en-US">spring</span><span lang="zh-CN">管理起来</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">HelloWorldImpl：</span></p><span style="font-family:KaiTi_GB2312;"></span><pre name="code" class="java">package com.tgb.service.impl;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.jws.WebService;
+
+import com.tgb.domain.Cat;
+import com.tgb.domain.User;
+import com.tgb.service.HelloWorld;
+import com.tgb.service.UserService;
+
+@WebService(endpointInterface=&quot;com.tgb.service.HelloWorld&quot;,serviceName=&quot;HelloWorldImpl&quot;)
+public class HelloWorldImpl implements HelloWorld{
+
+	private UserService userService;
+	
+	public UserService getUserService() {
+		return userService;
+	}
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+
+	public String sayHi(String name) {
+			
+		return name+&quot;您好！现在时间为：&quot;+new Date();
+	}
+	
+	@Override
+	public List&lt;Cat&gt; getCatsByUser(User user) {
+		//在实际项目中，web service组件自己并不会去实现业务功能
+		//它只是调用业务逻辑组件的方法来暴露web service
+//		UserService us=new UserServiceImpl();
+		
+		return userService.getCatsByUser(user);
+	}
+
+	@Override
+	public Map&lt;String, Cat&gt; getAllCats() {
+//		UserService us=new UserServiceImpl();
+		return userService.getAllCats();
+	}
+
+	
+}</pre><br><p style="margin: 0in; font-size: 14pt;"><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">启动</span><span lang="en-US">tomcat</span><span lang="zh-CN">服务器：</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">访问如下地址：http://192.168.24.215:8080/CXF_Spring_Server</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><span style="font-family:KaiTi_GB2312;"><img src="31515708021881" alt=""><br></span><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><img src="33045636455586" alt=""><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><h2 style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">新建客户端项目CXF_Spring_Client，生成客户端代码：</span></h2><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><img src="191766910157571" alt=""><br></span></p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">注意：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">有些版本拷贝后，类中的super()会出错，要加上-frontendjaxws21，参看如上截图</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">客户端调用：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><span style="font-family:KaiTi_GB2312;"></span><pre name="code" class="java">package com.tgb.client;
+
+import java.util.List;
+
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
+
+import com.tgb.auth.AddHeaderInterceptor;
+import com.tgb.service.Cat;
+import com.tgb.service.HelloWorld;
+import com.tgb.service.User;
+import com.tgb.service.impl.HelloWorldImpl;
+
+public class client {
+
+	public static void main(String[] args){
+		HelloWorldImpl factory=new HelloWorldImpl();
+		//此处返回的只是远程Web Service的代理
+		HelloWorld hw=factory.getHelloWorldImplPort();
+		
+		/**
+		 * 添加的拦截器
+		 */
+		Client client=ClientProxy.getClient(hw);
+		//参数为输入的用户名，密码
+		client.getOutInterceptors().add(new AddHeaderInterceptor(&quot;hejingyuan&quot;,&quot;hjy&quot;));
+		
+		
+		System.out.println(hw.sayHi(&quot;hejingyuan&quot;));		
+		System.out.println(&quot;--------------------------&quot;);
+		
+		User user=new User();
+		user.setId(20);
+		user.setName(&quot;孙悟空&quot;);
+		user.setPass(&quot;111&quot;);
+		user.setAddress(&quot;花果山&quot;);
+		
+		List&lt;Cat&gt; cats=hw.getCatsByUser(user);
+		for(Cat cat:cats){
+			System.out.println(cat.getName());
+		}
+		
+		System.out.println(&quot;--------------------------&quot;);
+		
+		System.out.println(hw.getAllCats().getEntry().get(0).getKey());
+		System.out.println(hw.getAllCats().getEntry().get(0).getValue().getName());
+		
+	}
+}
+</pre><br><img src="1031788093437" alt=""><br><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">由于我们在服务端添加了拦截器，故客户端必须要添加相应的拦截器给服务端提供参数，否则客户端调用失败</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><span style="font-family:KaiTi_GB2312;"><img src="25225118746134" alt=""><br></span><p style="margin: 0in; font-size: 14pt;"><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><h1 style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">另一个方面：调用远程的</span><span lang="en-US">Web</span><span lang="en-US"> Service</span><span lang="zh-CN">服务</span></span></h1><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">新建客户端项目CXF_Spring_Web_Client，生成客户端代码</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><span style="font-family:KaiTi_GB2312;"><img src="3869148643932" alt=""><br></span><p style="margin: 0in; font-size: 14pt;"><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US"><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">web.xml</span><span lang="zh-CN">：</span></span></p><span style="font-family:KaiTi_GB2312;"></span><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app version=&quot;2.5&quot; xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot;&gt;
+	
+	&lt;context-param&gt;
+		&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+		&lt;param-value&gt;/WEB-INF/applicationContext.xml&lt;/param-value&gt;
+	&lt;/context-param&gt;
+	&lt;listener&gt;
+		&lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+	&lt;/listener&gt;
+	
+	&lt;filter&gt;
+		&lt;filter-name&gt;struts2&lt;/filter-name&gt;
+		&lt;filter-class&gt;
+			org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter&lt;/filter-class&gt;
+	&lt;/filter&gt;
+	&lt;filter-mapping&gt;
+		&lt;filter-name&gt;struts2&lt;/filter-name&gt;
+		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+	&lt;/filter-mapping&gt;
+	    
+&lt;/web-app&gt;</pre><br><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">applicationContext.xml：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;  
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;  
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; 
+    xmlns:jaxws=&quot;http://cxf.apache.org/jaxws&quot;  
+    xsi:schemaLocation=&quot;  
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd  
+		http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd&quot;&gt; 
+    
+	&lt;import resource=&quot;classpath:META-INF/cxf/cxf.xml&quot; /&gt;
+	&lt;import resource=&quot;classpath:META-INF/cxf/cxf-extension-soap.xml&quot; /&gt;
+	&lt;import resource=&quot;classpath:META-INF/cxf/cxf-servlet.xml&quot; /&gt;
+	
+	&lt;bean id=&quot;listCatsAction&quot; class=&quot;com.tgb.action.ListCatsAction&quot;&gt;
+		&lt;property name=&quot;helloWorld&quot; ref=&quot;helloWorld&quot;&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	  
+	&lt;!-- 配置远程webservice代理 --&gt;
+	&lt;!-- id=&quot;helloWorld&quot;对应 action setHelloWorld() --&gt;
+	&lt;jaxws:client id=&quot;helloWorld&quot;
+		serviceClass=&quot;com.tgb.service.HelloWorld&quot;
+		address=&quot;http://localhost:8080/CXF_Spring_Server/hjy&quot;&gt;
+		&lt;jaxws:outInterceptors&gt;
+		&lt;!-- 配置输出拦截器  --&gt; 
+			&lt;bean class=&quot;com.tgb.auth.AddHeaderInterceptor&quot; &gt;
+				&lt;constructor-arg value=&quot;hejingyuan&quot;/&gt;
+				&lt;constructor-arg value=&quot;hjy&quot;/&gt;
+			&lt;/bean&gt;
+		&lt;/jaxws:outInterceptors&gt;
+	&lt;/jaxws:client&gt;
+	
+&lt;/beans&gt;</pre><p><p style="margin: 0in; font-size: 14pt;"><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">Struts.xml</span><span lang="zh-CN">：</span></span></p><span style="font-family:KaiTi_GB2312;"><br></span><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.1//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.1.dtd&quot;&gt;
+&lt;struts&gt;
+
+	&lt;package name=&quot;default&quot; namespace=&quot;/&quot; extends=&quot;struts-default&quot;&gt;
+		&lt;action name=&quot;listCats&quot; class=&quot;com.tgb.action.ListCatsAction&quot; &gt;
+			&lt;result name=&quot;SUCCESS&quot;&gt;/WEB-INF/page/listcats.jsp&lt;/result&gt;
+		&lt;/action&gt;
+	&lt;/package&gt;
+&lt;/struts&gt;    
+</pre><br><p><span style="font-family:KaiTi_GB2312;font-size:18px;">调用代码：</span></p><p><pre name="code" class="java">package com.tgb.action;
+
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
+
+import com.opensymphony.xwork2.ActionSupport;
+import com.tgb.auth.AddHeaderInterceptor;
+import com.tgb.service.HelloWorld;
+
+
+public class ListCatsAction extends ActionSupport{
+
+	
+	private HelloWorld helloWorld;
+		
+	public HelloWorld getHelloWorld() {
+		return helloWorld;
+	}
+
+	public void setHelloWorld(HelloWorld helloWorld) {
+		this.helloWorld = helloWorld;
+	}
+
+	@Override
+	public String execute() throws Exception {
+		/**
+		 * 添加的拦截器
+		 */
+		Client client=ClientProxy.getClient(helloWorld);
+		//参数为输入的用户名，密码
+		client.getOutInterceptors().add(new AddHeaderInterceptor(&quot;hejingyuan&quot;,&quot;hjy&quot;));
+		helloWorld.sayHi(&quot;hejingyuan&quot;);				
+		return &quot;SUCCESS&quot;;
+	}
+	
+}</pre><p><p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">最终的项目结构：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><span style="font-family:KaiTi_GB2312;"><img src="11268025594299" alt=""><br></span><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><img src="25736058272230" alt=""><br></span></p><h1 style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">总结：</span></h1><span style="font-family:KaiTi_GB2312;"><br></span><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">&nbsp; &nbsp; &nbsp;以上与</span><span lang="en-US">Spring</span><span lang="zh-CN">的整合，概括的说，在应用</span><span lang="en-US">Spring</span><span lang="zh-CN">的框架过程中，一种是我们如何对外提供服务，另一种是我们如何获取已经提供好的服务。在整个过程中，只有几个关键点，很简单，但是要注意</span><span lang="en-US">jar</span><span lang="zh-CN">包的版本问题。</span></span><br></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><a target="_blank" target="_blank" href="http://download.csdn.net/detail/hejingyuan6/8948227">源码下载</a></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/47152237'>原文链接</a>

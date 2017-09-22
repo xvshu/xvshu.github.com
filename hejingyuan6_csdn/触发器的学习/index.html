@@ -1,0 +1,98 @@
+﻿<div style="color:blue" align=center>触发器的学习</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in">
+<p><span style="font-size:24px; font-family:KaiTi_GB2312">&nbsp; &nbsp; </span><span style="font-family:KaiTi_GB2312; font-size:24px">触发器是一种特殊的存储过程﹐它不能被显式地调用﹐而是在往表中插入记录﹑更新记录或者删除记录时被自动地激活。所以触发器可以用来实现对表实施复杂的完整性约束。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">&nbsp; &nbsp; 常见的触发器有三种</span><span lang="en-US">(</span><span lang="zh-CN">FOR | AFTER | INSTEAD OF</span><span lang="en-US">)</span><span lang="zh-CN">：分别应用于Insert ,Update
+ , Delete 事件。</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;&nbsp;&nbsp;</span></span></p>
+<p style="margin:0in; color:rgb(51,51,51)"><span style="background:#F1FEDD"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:24px">FOR | AFTER</span></h1>
+<div><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></div>
+<span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; AFTER 指定触发器仅在触发 SQL 语句中指定的所有操作都已成功执行时才被触发。所有的引用级联操作和约束检查也必须在激发此触发器之前成功完成。<br>
+如果仅指定 FOR 关键字，则 AFTER 为默认&#20540;。<br>
+</span>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">不能对视图定义 AFTER 触发器。</span></p>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">After触发器的工作原理（是在Insert，update和delete操作完成后才激活的）：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 在记录变更之后才被激活，若要删除记录，当sqlserver接到一个要执行删除操作的SQL语句时，Sql server先将要删除的记录存放在删除表里，然后把数据表里的记录删除，再激活After触发器，执行after触发器里的SQL语句，执行完毕后，删除内存中的删除表，退出整个操作。</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p style="margin:0pt 0pt 7pt; line-height:18pt; color:rgb(51,51,51)"><span style="background-color:rgb(241,254,221)"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></span></p>
+<p style="margin:0pt 0pt 7pt; line-height:18pt; color:rgb(51,51,51)">
+<h1><span style="font-family:KaiTi_GB2312; font-size:24px">INSTEAD OF</span></h1>
+<div><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></div>
+<span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 指定执行 DML 触发器而不是触发 SQL 语句，因此，其优先级高于触发语句的操作。执行触发器语句，但不执行触发触发器的SQL 语句，比如试图删除一条记录时，将执行触发器指定的语句，此时不再执行 delete 语句。<br>
+</span>
+<p>
+<p style="margin:0pt 0pt 7pt; line-height:18pt; color:rgb(51,51,51)">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; INSTEAD OF触发器被用于更新那些没有办法通过正常方式更新的视图。例如，通常不能在一个基于连接的视图上进行DELETE操作。然而，可以编写一个INSTEAD OF DELETE触发器来实现删除。上述触发器可以访问那些如果视图是一个真正的表时已经被删除的数据行。将被删除的行存储在一个名为deleted的工作表中，就像AFTER触发器一样。相&#20284;地，在UPDATE
+ INSTEAD OF触发器或者INSERT INSTEAD OF触发器中，你可以访问inserted表中的新行。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></span></p>
+<h1><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">区别：</span></span></h1>
+<div><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></span></div>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;&nbsp; &nbsp; Instead Of触发器与After触发器的工作流程是不一样的。After触发器是在SQL Server服务器接到执行SQL语句请求之后，先建立临时的Inserted表和Deleted表，然后实际更改数据，最后才激活触发器的。而Instead Of触发器看起来就简单多了，在SQL Server服务器接到执行SQL语句请求后，先建立临时的Inserted表和Deleted表，然后就触发了Instead
+ Of触发器，至于那个SQL语句是插入数据、更新数据还是删除数据，就一概不管了，把执行权全权交给了Instead Of触发器，由它去完成之后的操作。</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;</span></span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:24px">举个简单的例子，对比一下：</span></h1>
+<div><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></div>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 新建两个表，两个表的关系如图：test_main为测试主表，test_sub为测试子表</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="42640976889712" alt=""><br>
+</span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">创建For触发器：</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"></span></p>
+<pre name="code" class="sql" style="font-size: 16pt; font-family: 仿宋; ">-- 创建 FOR 触发器.
+CREATE TRIGGER InsertTest
+ON test_sub
+FOR INSERT
+AS
+BEGIN
+PRINT('INSERT test_sub!');
+END;
+Go</pre><span style="font-family:KaiTi_GB2312; font-size:24px">执行语句</span>
+<p>
+<p style="margin:0in"><span lang="zh-CN"></span></p>
+<pre name="code" class="sql" style="font-family: 仿宋; font-size: 16pt; ">INSERT INTO test_sub VALUES( 100,100,'100');
+</pre><br>
+<span style="font-family:KaiTi_GB2312; font-size:24px">执行结果：</span>
+<p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px"><span style="color:#ff0000">消息 547，级别 16，状态 0，第 1 行<br>
+INSERT 语句与 FOREIGN KEY 约束&quot;FK_test_sub_test_main&quot;冲突。该冲突发生于数据库&quot;test&quot;，表&quot;dbo.test_main&quot;, column 'id'。</span><br>
+语句已终止。<br>
+<br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">将For关键字改为AFTER结果也是一样。将关键字修改为INSTEAD OF<span style="background:#F1FEDD"></span></span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">执行结果：INSERT test_sub!</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">从上面的结果看到，触发器被执行了。<br>
+但是 test_sub 中并没有 100,100,'100' 的数据。<br>
+原因在于：INSTEAD OF 指定执行 DML 触发器而不是触发 SQL 语句<br>
+<br>
+也就是说 当你的触发器是 INSTEAD OF INSERT 的时候<br>
+你的 INSERT 语句，将直接执行这个触发器<br>
+而不是等你 INSERT 语句执行完了，数据写到表里面了以后，才触发。<br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"></span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:24px">Instead Of触发器的使用范围 </span>
+</h1>
+<div><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></div>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">InsteadOf触发器可以同时在数据表和视图中使用，通常在以下几种情况下，建议使用Instead Of触发器：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;1，数据库里的数据禁止修改：例如电信部门的通话记录是不能修改的，一旦修改，则通话费用的计数将不正确。在这个时候，就可以用InsteadOf触发器来跳过Update修改记录的SQL语句。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;2，有可能要回滚修改的SQL语句：用After触发器并不是一个最好的方法，如果用InsteadOf触发器，在判断折扣大于0.6时，就中止了更新操作，避免在修改数据之后再回滚操作，减少服务器负担。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;3，在视图中使用触发器：因为After触发器不能在视图中使用，如果想在视图中使用触发器，就只能用Instead Of触发器。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;4，用自己的方式去修改数据：如不满意SQL直接的修改数据的方式，可用Instead Of触发器来控制数据的修改方式和流程。</span></p>
+<br>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/8901520'>原文链接</a>

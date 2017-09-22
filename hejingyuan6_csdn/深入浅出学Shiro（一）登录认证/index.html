@@ -1,0 +1,294 @@
+﻿<div style="color:blue" align=center>深入浅出学Shiro（一）登录认证</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">ApacheShiro是一个强大易用的Java安全框架，提供了认证、授权、加密和会话管理等功能：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><strong>Shiro为解决下列问题，提供了保护应用的API：</strong></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">　　认证 - 用户身份识别，常被称为用户“登录”；</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">　　授权 - 访问控制；</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">　　密码加密 - 保护或隐藏数据防止被偷窥；</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">　　会话管理 - 每用户相关的时间敏感的状态。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">对于任何一个应用程序，Shiro都可以提供全面的安全管理服务。并且相对于其他安全框架，Shiro要简单的多。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">核心概念：Subject，SecurityManager和Realms</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><img src="50028209676862" alt=""><br>
+</span></p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><strong>Subject</strong></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">　　</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">“当前操作用户”。但是，在Shiro中，Subject这一概念并不仅仅指人，也可以是第三方进程、后台帐户（DaemonAccount）或其他类&#20284;事物。它仅仅意味着“当前跟软件交互的东西”。但考虑到大多数目的和用途，你可以把它认为是Shiro的“用户”概念。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">Subject代表了当前用户的安全操作，SecurityManager则管理所有用户的安全操作。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><strong>SecurityManager</strong></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">　　它是Shiro框架的核心，典型的Facade模式，Shiro通过SecurityManager来管理内部组件实例，并通过它来提供安全管理的各种服务。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><strong>Realms</strong></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">　</span><span lang="en-US">&nbsp;&nbsp;</span><span lang="zh-CN">Realm充当了Shiro与应用安全数据间的“桥梁”或者“连接器”。也就是说，当切实与像用户帐户这类安全相关数据进行交互，执行认证(登录)和授权(访问控制)时，Shiro会从应用配置的Realm中查找很多内容。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">　　从这个意义上讲，Realm实质上是一个安全相关的DAO：它封装了数据源的连接细节，并在需要时将相关数据提供给Shiro。当配置Shiro时，你必须至少指定一个Realm，用于认证和(或)授权。配置多个Realm是可以的，但是至少需要一个。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><strong>认证流程：</strong></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312"><img src="23843686332151" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; line-height:19pt; font-size:13.5pt; color:#362E2B"><span style="font-family:KaiTi_GB2312"><span style="">1</span><span style="">、应用程序构建了一个终端用户认证信息的</span><span style="">AuthenticationToken</span><span style="">实例后，调用</span><span style="">Subject.login</span><span style="">方法。</span></span></p>
+<p style="margin:0in; line-height:19pt; font-size:13.5pt; color:#362E2B"><span style="font-family:KaiTi_GB2312"><span style="">&nbsp;</span></span></p>
+<p style="margin:0in; line-height:19pt; font-size:13.5pt; color:#362E2B"><span style="font-family:KaiTi_GB2312"><span style="">2</span><span style="">、</span><span style="">Sbuject</span><span style="">会委托应用程序设置的</span><span style="">securityManager</span><span style="">实例调用</span><span style="">securityManager.login(token)</span><span style="">方法。&nbsp;</span></span></p>
+<p style="margin:0in; line-height:19pt; font-size:13.5pt; color:#362E2B"><span style="font-family:KaiTi_GB2312"><span style=""><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">3、SecurityManager接受到token(令牌)信息后会委托内置的Authenticator的实例（通常都是ModularRealmAuthenticator类的实例）调用authenticator.authenticate(token).ModularRealmAuthenticator在认证过程中会对设置的一个或多个Realm实例进行适配，它实际上为Shiro提供了一个可拔插的认证机制。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">4、如果在应用程序中配置了多个Realm，ModularRealmAuthenticator会根据配置的AuthenticationStrategy(认证策略)来进行多Realm的认证过程。在Realm被调用后，AuthenticationStrategy将对每一个Realm的结果作出响应。&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">注：如果应用程序中仅配置了一个Realm，Realm将被直接调用而无需再配置认证策略。&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">5、Realm将调用getAuthenticationInfo(token);getAuthenticationInfo方法就是实际认证处理，我们通过覆盖Realm的doGetAuthenticationInfo方法来编写我们自定义的认证处理。&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><strong><span lang="zh-CN">下面结合一个实例来理解以上这些概念（结合</span><span lang="en-US">Spring</span><span lang="en-US">MVC</span><span lang="zh-CN">）：</span></strong></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">Web</span><span lang="en-US">.xml</span><span lang="zh-CN">中添加 Shiro Filter</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="657554" snippet_file_name="blog_20150502_1_7264380" name="code" class="html">	&lt;context-param&gt;
+		&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+		&lt;param-value&gt;classpath:applicationContext.xml,classpath:spring-shiro.xml&lt;/param-value&gt;
+	&lt;/context-param&gt;
+	&lt;!-- apache shiro权限 --&gt;
+	&lt;!-- Shiro主过滤器本身功能十分强大,其强大之处就在于它支持任何基于URL路径表达式的、自定义的过滤器的执行--&gt;  
+	&lt;!-- Shiro Filter --&gt;  
+	&lt;filter&gt;
+		&lt;filter-name&gt;shiroFilter&lt;/filter-name&gt;
+		&lt;filter-class&gt;org.springframework.web.filter.DelegatingFilterProxy&lt;/filter-class&gt;
+		&lt;init-param&gt;
+			&lt;param-name&gt;targetFilterLifecycle&lt;/param-name&gt;
+			&lt;param-value&gt;true&lt;/param-value&gt;
+		&lt;/init-param&gt;
+	&lt;/filter&gt;
+
+	&lt;filter-mapping&gt;
+		&lt;filter-name&gt;shiroFilter&lt;/filter-name&gt;
+		&lt;url-pattern&gt;*.do&lt;/url-pattern&gt;
+	&lt;/filter-mapping&gt;
+	&lt;filter-mapping&gt;
+		&lt;filter-name&gt;shiroFilter&lt;/filter-name&gt;
+		&lt;url-pattern&gt;*.jsp&lt;/url-pattern&gt;
+	&lt;/filter-mapping&gt;
+</pre><br>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">spring-mvc.xml</span></p>
+<span style="font-family:KaiTi_GB2312"></span><pre code_snippet_id="657554" snippet_file_name="blog_20150502_2_3978205" name="code" class="html">&lt;!-- 开启Shiro的注解，实现对Controller的方法级权限检查(如@RequiresRoles,@RequiresPermissions),需借助SpringAOP扫描使用Shiro注解的类,并在必要时进行安全逻辑验证 --&gt;  
+    &lt;!-- 配置以下两个bean即可实现此功能, 应该放在spring-mvc.xml中 --&gt;  
+    &lt;!-- Enable Shiro Annotations for Spring-configured beans. Only run after the lifecycleBeanProcessor has run --&gt;  
+	&lt;bean
+		class=&quot;org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator&quot;
+		depends-on=&quot;lifecycleBeanPostProcessor&quot; &gt; 
+		&lt;property name=&quot;proxyTargetClass&quot; value=&quot;true&quot; /&gt;
+	&lt;/bean&gt;
+	&lt;bean
+		class=&quot;org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor&quot;&gt;
+		&lt;property name=&quot;securityManager&quot; ref=&quot;securityManager&quot; /&gt;
+
+&lt;/bean&gt;</pre><br>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">spring-shiro.xml</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="657554" snippet_file_name="blog_20150502_3_5010427" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:util=&quot;http://www.springframework.org/schema/util&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd   
+    http://www.springframework.org/schema/util 
+    http://www.springframework.org/schema/util/spring-util-3.0.xsd&quot;&gt;
+    &lt;description&gt;Shiro 配置&lt;/description&gt;
+    
+   	&lt;bean id=&quot;securityManager&quot; class=&quot;org.apache.shiro.web.mgt.DefaultWebSecurityManager&quot;&gt;
+		&lt;!--设置自定义realm --&gt;
+		&lt;property name=&quot;realm&quot; ref=&quot;monitorRealm&quot; /&gt;
+	&lt;/bean&gt;
+	&lt;!--继承自AuthorizingRealm的自定义Realm,即指定Shiro验证用户的认证和授权 --&gt; 
+	&lt;!--自定义Realm 继承自AuthorizingRealm --&gt;
+	&lt;bean id=&quot;monitorRealm&quot; class=&quot;com.shiro.service.MonitorRealm&quot;&gt;&lt;/bean&gt;
+	
+	&lt;!-- Shiro主过滤器本身功能十分强大,其强大之处就在于它支持任何基于URL路径表达式的、自定义的过滤器的执行 --&gt; 
+	&lt;bean id=&quot;shiroFilter&quot; class=&quot;org.apache.shiro.spring.web.ShiroFilterFactoryBean&quot;&gt;
+		&lt;!-- Shiro的核心安全接口,这个属性是必须的 --&gt;  
+		&lt;property name=&quot;securityManager&quot; ref=&quot;securityManager&quot; /&gt;
+		&lt;!-- 要求登录时的链接,非必须的属性,默认会自动寻找Web工程根目录下的&quot;/login.jsp&quot;页面 --&gt;  
+		&lt;property name=&quot;loginUrl&quot; value=&quot;/login.jsp&quot; /&gt;
+		&lt;!-- 用户访问未对其授权的资源时,所显示的连接 --&gt;
+		&lt;property name=&quot;unauthorizedUrl&quot; value=&quot;/error/noperms.jsp&quot; /&gt;
+		&lt;property name=&quot;filterChainDefinitions&quot;&gt;
+			&lt;value&gt;
+			 &lt;!-- Shiro 过滤链的定义--&gt;   
+      &lt;!-- 
+					Anon：不指定过滤器 
+					Authc:验证，这些页面必须验证后才能访问，也就是我们说的登录后才能访问。
+					--&gt;
+					 &lt;!--下面value值的第一个&#39;/&#39;代表的路径是相对于HttpServletRequest.getContextPath()的值来的 --&gt;   
+					&lt;!--anon：它对应的过滤器里面是空的,什么都没做,这里.do和.jsp后面的*表示参数,比方说login.jsp?main这种 --&gt;   
+        &lt;!--authc：该过滤器下的页面必须验证后才能访问,它是Shiro内置的一个拦截器org.apache.shiro.web.filter.authc.FormAuthenticationFilter--&gt;   
+				
+				/login.jsp* = anon
+				/login.do* = anon
+				/index.jsp*= anon
+				/error/noperms.jsp*= anon
+				/*.jsp* = authc
+				/*.do* = authc
+			&lt;/value&gt;
+		&lt;/property&gt;
+	&lt;/bean&gt;
+	
+		&lt;!-- 保证实现了Shiro内部lifecycle函数的bean执行 --&gt;
+	&lt;bean id=&quot;lifecycleBeanPostProcessor&quot;
+		class=&quot;org.apache.shiro.spring.LifecycleBeanPostProcessor&quot; /&gt;
+		
+&lt;/beans&gt;
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">自定义</span><span lang="en-US">Realm</span><span lang="en-US"></span><span lang="zh-CN">MonitorRealm</span><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<pre code_snippet_id="657554" snippet_file_name="blog_20150502_4_2105936" name="code" class="java">@Service(&quot;monitorRealm&quot;)
+public class MonitorRealm extends AuthorizingRealm {
+
+	//获取身份验证相关信息 
+	@Override
+	protected AuthenticationInfo doGetAuthenticationInfo(
+			AuthenticationToken authcToken) throws AuthenticationException {
+		/* 这里编写登陆认证代码 */
+//		UsernamePasswordToken token = (UsernamePasswordToken) authcToken;
+//		User user = userService.get(token.getUsername());
+		User user = new User();
+		user.setUserName(&quot;admin&quot;);
+		user.setPassword(EncryptUtils.encryptMD5(&quot;admin&quot;));
+		
+		
+		return new SimpleAuthenticationInfo(user.getUserName(),
+			user.getPassword(), getName());
+		
+		/* //令牌——基于用户名和密码的令牌  
+        UsernamePasswordToken token = (UsernamePasswordToken) authcToken;  
+        //令牌中可以取出用户名密码  
+        String accountName = token.getUsername();  
+          
+      // 此处无需比对，比对的逻辑Shiro会做，我们只需返回一个和令牌相关的正确的验证信息，因此在随后的登录页面上只有admin/admin123才能通过验证  
+        return new SimpleAuthenticationInfo(&quot;admin&quot;,&quot;admin123&quot;,getName());  */
+	}</pre>
+<p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">LoginController</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span><pre name="code" class="java">@Controller
+@RequestMapping(value = &quot;login&quot;)
+public class LoginController {
+	/**
+	 * 用户登录
+	 * 
+	 * @param user
+	   *           　登录用户
+	 * @return
+	 */
+	@RequestMapping(params = &quot;main&quot;)
+	public ModelAndView login(User user,HttpSession session, HttpServletRequest request) {
+
+		ModelAndView modelView = new ModelAndView();
+		/*就是代表当前的用户。*/
+		Subject currentUser = SecurityUtils.getSubject();
+		//获取基于用户名和密码的令牌 
+		//这里的token大家叫他令牌，也就相当于一张表格，你要去验证，你就得填个表，里面写好用户名密码，交给公安局的同志给你验证。
+		UsernamePasswordToken token = new UsernamePasswordToken(
+				user.getUserName(), EncryptUtils.encryptMD5(user.getPassword()));
+		/*UsernamePasswordToken token = new UsernamePasswordToken(
+				user.getUserName(), user.getPassword());*/
+//		但是，“已记住”和“已认证”是有区别的： 
+//		已记住的用户仅仅是非匿名用户，你可以通过subject.getPrincipals()获取用户信息。但是它并非是完全认证通过的用户，当你访问需要认证用户的功能时，你仍然需要重新提交认证信息。 
+//		这一区别可以参考亚马逊网站，网站会默认记住登录的用户，再次访问网站时，对于非敏感的页面功能，页面上会显示记住的用户信息，但是当你访问网站账户信息时仍然需要再次进行登录认证。 
+		token.setRememberMe(true); 
+		
+		try {
+			//这句是提交申请，验证能不能通过，也就是交给公安局同志了。这里会回调reaml里的一个方法
+			// 回调doGetAuthenticationInfo，进行认证
+			currentUser.login(token);
+		} catch (AuthenticationException e) {
+			modelView.addObject(&quot;message&quot;, &quot;login errors&quot;);
+			modelView.setViewName(&quot;/login&quot;);
+			e.printStackTrace();
+			return modelView;
+		}
+		//验证是否通过 
+		if(currentUser.isAuthenticated()){
+			user.setUserName(&quot;张三&quot;);
+			session.setAttribute(&quot;userinfo&quot;, user);
+			modelView.setViewName(&quot;/main&quot;);
+		}else{
+			modelView.addObject(&quot;message&quot;, &quot;login errors&quot;);
+			modelView.setViewName(&quot;/login&quot;);
+		}
+		return modelView;
+	}
+</pre><br>
+<br>
+</p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">附：currentUser.login(token);的方法调用，调用到Subjectsubject = securityManager.login(this, token);方法后，则跳转到自定义</span><span lang="en-US">Realm</span><span lang="zh-CN">中</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<pre code_snippet_id="657554" snippet_file_name="blog_20150502_6_3298330" name="code" class="java">public void login(AuthenticationToken token) throws AuthenticationException {
+        clearRunAsIdentitiesInternal();
+        Subject subject = securityManager.login(this, token);
+
+        PrincipalCollection principals;
+
+        String host = null;
+
+        if (subject instanceof DelegatingSubject) {
+            DelegatingSubject delegating = (DelegatingSubject) subject;
+            //we have to do this in case there are assumed identities - we don&#39;t want to lose the &#39;real&#39; principals:
+            principals = delegating.principals;
+            host = delegating.host;
+        } else {
+            principals = subject.getPrincipals();
+        }
+
+        if (principals == null || principals.isEmpty()) {
+            String msg = &quot;Principals returned from securityManager.login( token ) returned a null or &quot; +
+                    &quot;empty value.  This value must be non null and populated with one or more elements.&quot;;
+            throw new IllegalStateException(msg);
+        }
+        this.principals = principals;
+        this.authenticated = true;
+        if (token instanceof HostAuthenticationToken) {
+            host = ((HostAuthenticationToken) token).getHost();
+        }
+        if (host != null) {
+            this.host = host;
+        }
+        Session session = subject.getSession(false);
+        if (session != null) {
+            this.session = decorate(session);
+        } else {
+            this.session = null;
+        }
+    }
+</pre><br>
+<br>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">总结：</span></p>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">以上是一个简单的</span><span lang="en-US">Shiro</span><span lang="zh-CN">的登录认证过程，其实这部分功能也就是帮助我们验证此用户是否能登录本系统，和我们普通的登录完成的是同样的功能，</span><span lang="en-US">Shiro</span><span lang="zh-CN">是帮我们封装了这部分内容，让我们无需将登录的验证均写到程序中，而是使用配置的方式，更加灵活的应对变化，符合我们所说的</span><span lang="en-US">OCP</span><span lang="zh-CN">原则。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/45441707'>原文链接</a>

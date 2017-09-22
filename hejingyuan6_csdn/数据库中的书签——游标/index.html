@@ -1,0 +1,73 @@
+﻿<div style="color:blue" align=center>数据库中的书签——游标</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="color:#C0504D"><span style="font-size:18px">游标的引入</span></span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;为解决在多条结果集的情况下，要逐一读取每一条记录所带来的麻烦。游标为我们提供了一种较好的解决方案。</span></p>
+<p><span style="color:#C0504D"><span style="font-size:18px">游标的组成</span></span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;每一个游标必须有四个组成部分。且必须符合下面的顺序。</span></p>
+<p><span style="font-size:18px">1，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;declare游标（用来声明游标）</span></p>
+<p><span style="font-size:18px">2，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;open游标</span></p>
+<p><span style="font-size:18px">3，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;从一个游标中fetch信息</span></p>
+<p><span style="font-size:18px">4，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Close或deallocate游标</span></p>
+<p><span style="color:#C0504D"><span style="font-size:18px">游标的声明</span></span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;声明游标主要包含以下内容：游标名字，数据来源表和列，选取条件，属性仅读或可修改</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;其语法&#26684;式如下：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;Declare 游标名称 cursor</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;[local|glocal] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span style="color:#548DD4">指定游标的作用域是局部的还是全局的</span></span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;[forward_only|scroll]&nbsp;&nbsp;&nbsp; <span style="color:#548DD4">
+选择</span><span style="color:#548DD4">forward_only</span><span style="color:#548DD4">则游标只能从第一行滚动到最后一行。</span><span style="color:#548DD4">Scroll</span><span style="color:#548DD4">表明所有的提取操作都可用，如果不使用该保留字则只能进行</span><span style="color:#548DD4">next</span><span style="color:#548DD4">操作。</span></span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;[read_only] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color:#548DD4">表明不允许游标内的数据被更新</span></span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;For 选择语句 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span style="color:#548DD4">是定义结果集的</span><span style="color:#548DD4">select</span><span style="color:#548DD4">语句，应该注意的是在游标中不能使用</span><span style="color:#548DD4">compute</span><span style="color:#548DD4">等语句。</span></span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;[for[update[of 字段名称1，字段名称2…]]]&nbsp;&nbsp;&nbsp;<span style="color:#548DD4">定义在游标中可被修改的列</span></span></p>
+<p><span style="color:#C0504D"><span style="font-size:18px">打开游标</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;游标声明以后，如果要从游标中读取数据，必须打开游标，使用</span><span style="color:black">open</span><span style="color:black">命令，语法&#26684;式如下：</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">Open </span><span style="color:black">游标名称</span></span></p>
+<p><span style="font-size:18px"><span style="color:#C0504D">读取游标中的数据——</span><span style="color:#C0504D">fetch</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;Fetch</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;[[next|prior|first|last|</span><span style="color:#ff6600">absolute{n|@nvar}|relative{n|@nvar}</span><span style="color:black">]from]cursor_name</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;[into&nbsp; </span>@variable_name1,@variable_name2…]</span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;Next:</span><span style="color:black">返回结果集中当前行的下一行，并增加当前行数为返回行行数，如果</span><span style="color:black">fetchnext</span><span style="color:black">是第一次读取游标中数据则返回结果集中的是第一行而不是第二行</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;Prior</span><span style="color:black">：返回结果集中当前行的前一行并减少当前行数为返回行行数。如果</span><span style="color:black">fetchprior</span><span style="color:black">是第一次读取游标中数据则无数据记录返回并把游标位置设为第一行。</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;First</span><span style="color:black">：返回游标中第一行</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;Last</span><span style="color:black">：返回游标中的最后一行</span></span></p>
+<p><span style="font-size:18px"><span style="color:#FFC000">&nbsp; &nbsp; &nbsp; </span><span style="color:#ff6600">&nbsp;Absolute{n|@nvar}</span><span style="color:black">:</span><span style="color:black">如果</span><span style="color:black">n</span><span style="color:black">或者</span><span style="color:black">@nvar</span><span style="color:black">为正数，则表示从游标中返回的数据行数。如果</span><span style="color:black">n</span><span style="color:black">货</span><span style="color:black">@nvar</span><span style="color:black">为负数，则返回游标内从最后一行数据算起的第</span><span style="color:black">n</span><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">行数据。</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">若</span><span style="color:black">n</span><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">超过游标的数据子集范畴，则</span><span style="color:black">@@fetch_stars</span><span style="color:black">返回</span><span style="color:black">-1</span><span style="color:black">。在该情况下，如果</span><span style="color:black">n</span><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">为负数，则执行</span><span style="color:black">fetchnext</span><span style="color:black">命令会得到第一行数据，如果为正&#20540;，执行</span><span style="color:black">fetch
+ prior</span><span style="color:black">命令则会得到最后一行数据。</span><span style="color:black">n</span><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">可以是一固定&#20540;，也可以是一</span><span style="color:black">smallint,tinyint</span><span style="color:black">或</span><span style="color:black">int</span><span style="color:black">类型的变量。</span></span></p>
+<p><span style="font-size:18px"><span style="color:#FFC000">&nbsp; &nbsp; &nbsp; &nbsp;</span><span style="color:#ff6600">Relative {n|@nvar}</span><span style="color:black">:</span><span style="color:black">若</span><span style="color:black">n</span><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">为正数，则读取游标当前位置起向后的第</span><span style="color:black">n</span><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">行数据。如果为负数，</span><a href="mailto:%E5%88%99%E8%AF%BB%E5%8F%96%E6%B8%B8%E6%A0%87%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E8%B5%B7%E5%90%91%E5%89%8D%E7%9A%84%E7%AC%ACn%E6%88%96@nvar%E8%A1%8C%E6%95%B0%E6%8D%AE%E3%80%82%E8%8B%A5n"><span style="color:#000000">则读取游标当前位置起向前的第n或@nvar行数据。若n</span></a><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">超过游标的数据子集范畴，则</span><span style="color:black">@@fetch_stars</span><span style="color:black">返回</span><span style="color:black">-1.</span><span style="color:black">在该情况下，如果</span><span style="color:black">n</span><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">为负数，则执行</span><span style="color:black">fetchnext</span><span style="color:black">命令则会得到第一行数据，如果为正&#20540;，执行</span><span style="color:black">fetch
+ prior</span><span style="color:black">命令则会得到最后一行数据。</span><span style="color:black">n</span><span style="color:black">或</span><span style="color:black">@nvar</span><span style="color:black">可以是一固定&#20540;，也可以是一</span><span style="color:black">smallint,tinyint</span><span style="color:black">或</span><span style="color:black">int</span><span style="color:black">类型的变量。</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;Into@variable_name[,…n]:</span><span style="color:black">允许将使用</span><span style="color:black">fetch</span><span style="color:black">命令读取的数据存放在多个变量中，在变量行中的每个变量必须与游标结果集中相应的列相对应，每一变量的数据类型也要与游标中数据列的数据类型相匹配。</span></span></p>
+<p><span style="color:#C0504D"><span style="font-size:18px">检查游标状态</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;@@fetch_status:</span><span style="color:black">全局变量，返回上次执行</span><span style="color:black">fetch</span><span style="color:black">命令的状态。在每次用</span><span style="color:black">fetch</span><span style="color:black">从游标中读取数据时，都应检查该变量以确定上次</span><span style="color:black">fetch</span><span style="color:black">操作是否成功，来决定如何进行下一步处理。</span><span style="color:black">@@fetch_status</span><span style="color:black">变量有三种不同的返回&#20540;。</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">0</span><span style="color:black">：表示成功取出了一行。</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">-1</span><span style="color:black">：表示未取到数据，因为所要求游标位置超出了结果集</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">-2</span><span style="color:black">：表示返回的行已经不再是结果集的一个成员。这种情况只有在游标不是</span><span style="color:black">insensitive</span><span style="color:black">的情况下出现，即其他进程已删除了行或改变了游标打开的关键&#20540;</span></span></p>
+<p><span style="color:#C0504D"><span style="font-size:18px">编辑当前游标行</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;进行定位修改或删除游标中数据的语法规则为：</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">Update table_name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color:#558ED5">是</span><span style="color:#558ED5">update</span><span style="color:#558ED5">或</span><span style="color:#558ED5">delete</span><span style="color:#558ED5">的表名</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">Set column_name1={expression1|null(select_statement)}</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">[,column_name2={expression2|null(select_statement)}]&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:#558ED5">&nbsp;</span><span style="color:#9999ff">update</span><span style="color:#558ED5">的列名</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">Where current of cursor_name</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">Delete from table_name</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">Where current of cursor_name&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:#558ED5">游标名</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">举例：更新</span><span style="color:black">authors</span><span style="color:black">表中的</span><span style="color:black">au_lname</span><span style="color:black">和</span><span style="color:black">au_fname</span><span style="color:black">列</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 首先声明一个游标</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Declare authors_cur scroll cursor</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; For</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Select*from authors</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; for update of au_lname,au_fname</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; 更新</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Update authors</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Set au_lname=’china’,au_fname=’asia’</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Where current of authors_cur</span></span></p>
+<p><span style="color:#C0504D"><span style="font-size:18px">关闭游标</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;使用</span><span style="color:black">close</span><span style="color:black">命令关闭游标，在处理完游标中数据之后，必须关闭游标来释放数据结果集合定位于数据记录上的锁，</span><span style="color:black">close</span><span style="color:black">语句关闭游标但不释放游标占用的数据结构。语法规则为：</span><span style="color:black">close</span><span style="color:black">游标名称</span></span></p>
+<p><span style="color:#C0504D"><span style="font-size:18px">释放游标</span></span></p>
+<p><span style="font-size:18px"><span style="color:black">&nbsp; &nbsp; &nbsp; &nbsp;在使用游标时，各种针对游标的操作或者引用游标名或者引用指向游标的游标变量，当</span><span style="color:black">close</span><span style="color:black">命令关闭游标时并没有释放游标占用的数据结构，因此常使用</span><span style="color:black">deallocate</span><span style="color:black">命令删除掉游标的游标名或游标变量之间的联系，并且释放游标占用的所用系统资源。语法：</span><span style="color:black">deallocate</span><span style="color:black">游标名称</span></span></p>
+<p><span style="color:black"><span style="font-size:18px">注：当若真的完成释放游标的操作，再次使用时，则需重新声明</span></span></p>
+<p><span style="color:black"><span style="font-size:18px"><br>
+</span></span></p>
+<p><span style="color:black"><span style="font-size:18px"><br>
+</span></span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/7706842'>原文链接</a>

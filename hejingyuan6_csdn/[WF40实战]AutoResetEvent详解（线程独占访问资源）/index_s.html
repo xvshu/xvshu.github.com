@@ -1,0 +1,178 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; [WF40实战]AutoResetEvent详解（线程独占访问资源）</div><div style="color:blue" align=center>[WF40实战]AutoResetEvent详解（线程独占访问资源）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<h1 style="margin:0in; font-family:SimSun; font-size:14.0pt">由来：</h1>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp; &nbsp; 在学习工作流的过程中，宿主程序中会出现这么一段代码：</p>
+<p style="margin:0in; font-family:Calibri; font-size:14.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;staticAutoResetEvent instanceUnloaded = new AutoResetEvent(false);</p>
+<p style="margin:0in; font-family:Calibri; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp; &nbsp; 然后就是在方法中这样使用：</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;instanceUnloaded.Set();</span><span lang="en-US" style="font-family:Calibri">//</span><span lang="zh-CN" style="font-family:SimSun">将事件状态设置为终止状态，允许一个或多个等待线程继续</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;instanceUnloaded.WaitOne();</span><span lang="en-US" style="font-family:Calibri">//</span><span lang="zh-CN" style="font-family:SimSun">对于</span><span lang="en-US" style="font-family:Calibri">WaitOne</span><span lang="zh-CN" style="font-family:SimSun">方法为阻止当前线程，直到收到信号！</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:SimSun">对于这部分内容当时不是很理解，下面我们先介绍一下</span><span style="font-family:Calibri">AutoResetEvent</span><span style="font-family:SimSun">的作用，然后结合工作流分析这些代码的意图！</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:SimSun; font-size:14.0pt">举个例子：</h1>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp; &nbsp; 我去书店买书，当我选中一本书后我会去收费处付钱，付好钱后再去仓库取书。这个顺序不能颠倒，我作为主线程，付钱和取书做两个辅助线程</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">代码如下：</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">
+<pre name="code" class="csharp">using System;
+using System.Linq;
+using System.Activities;
+using System.Activities.Statements;
+using System.Threading;
+&#160;
+namespace CaryAREDemo
+{
+&#160; &#160; class Me
+&#160; &#160; {
+&#160; &#160; &#160; &#160; const int numIterations = 550;
+&#160; &#160; &#160; &#160; static AutoResetEvent myResetEvent = new AutoResetEvent(false);
+&#160; &#160; &#160; &#160; static AutoResetEvent ChangeEvent = new AutoResetEvent(false);
+&#160; &#160; &#160; &#160;&#160;static int number; //这是关键资源
+&#160;
+	//主线程 
+&#160; &#160; &#160; &#160; static void Main()
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; Thread payMoneyThread = new Thread(new ThreadStart(PayMoneyProc));
+&#160; &#160; &#160; &#160; &#160; &#160; payMoneyThread.Name = &quot;付钱线程&quot;;
+&#160; &#160; &#160; &#160; &#160; &#160; Thread getBookThread = new Thread(new ThreadStart(GetBookProc));
+&#160; &#160; &#160; &#160; &#160; &#160; getBookThread.Name = &quot;取书线程&quot;;
+	    //启动线程
+&#160; &#160; &#160; &#160; &#160; &#160; payMoneyThread.Start();
+&#160; &#160; &#160; &#160; &#160; &#160; getBookThread.Start();
+&#160;
+&#160; &#160; &#160; &#160; &#160; &#160; for (int i = 1; i &lt;= numIterations; i++)
+&#160; &#160; &#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; Console.WriteLine(&quot;买书线程：数量{0}&quot;, i);
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; number = i;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; //Signal that a value has been written.
+                //允许线程继续
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; myResetEvent.Set();
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; ChangeEvent.Set();
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; Thread.Sleep(0);
+&#160; &#160; &#160; &#160; &#160; &#160; }
+&#160; &#160; &#160; &#160; &#160; &#160; payMoneyThread.Abort();
+&#160; &#160; &#160; &#160; &#160; &#160; getBookThread.Abort();
+&#160; &#160; &#160; &#160; }
+&#160;
+&#160; &#160; &#160; &#160; static void PayMoneyProc()
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; while (true)
+&#160; &#160; &#160; &#160; &#160; &#160; {
+	        //等待满足条件
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; myResetEvent.WaitOne();
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; Console.WriteLine(&quot;{0}：数量{1}&quot;, Thread.CurrentThread.Name, number);
+&#160; &#160; &#160; &#160; &#160; &#160; }
+&#160; &#160; &#160; &#160; }
+&#160; &#160; &#160; &#160; static void GetBookProc()
+&#160; &#160; &#160; &#160; {
+&#160; &#160; &#160; &#160; &#160; &#160; while (true)
+&#160; &#160; &#160; &#160; &#160; &#160; {
+		//等待满足条件
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; ChangeEvent.WaitOne();&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;&#160;
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; Console.WriteLine(&quot;{0}：数量{1}&quot;, Thread.CurrentThread.Name, number);
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; Console.WriteLine(&quot;------------------------------------------&quot;);
+&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; Thread.Sleep(0);
+&#160; &#160; &#160; &#160; &#160; &#160; }
+&#160; &#160; &#160; &#160; }
+&#160; &#160; }
+}</pre>
+<p><span style="font-family:SimSun"><span style="font-size:19px"><br>
+</span></span></p>
+<p><span style="font-family:SimSun"><span style="font-size:19px">运行结果：</span></span></p>
+<p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="35724448677874" alt=""><br>
+</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">说明：</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp; &nbsp; AutoResetEvent允许线程通过发信号互相通信。通常，此通信涉及线程需要独占访问的资源。</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1</span><span lang="zh-CN" style="font-family:SimSun">，通过将一个布尔&#20540;传递给构造函数来控制AutoResetEvent的初始状态，如果初始状态为终止状态，则为 true即该线程阻塞，并等待当前控制资源的线程；否则为 false。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2</span><span lang="zh-CN" style="font-family:SimSun">，线程也可以通过调用AutoResetEvent 上的 WaitOne 来等待信号。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;3</span><span lang="zh-CN" style="font-family:SimSun">，通过调用 Set发出资源可用的信号，以释放等待线程。</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><span style="color:#cc0000">&nbsp; &nbsp; 通俗的来讲只有等myResetEven.Set()成功运行后,myResetEven.WaitOne()才能够获得运行机会;Set是发信号，WaitOne是等待信号，只有发了信号，等待的才会执行。如果不发的话，WaitOne后面的程序就永远不会执行。</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:SimSun; font-size:14.0pt">结合工作流的宿主程序：</h1>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">创建工作流：</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<pre name="code" class="csharp">static AutoResetEvent instanceUnloaded = new AutoResetEvent(false);
+ public static Guid CreateAndRun(RequestInfo.RequestInfo Request)
+        {
+            SqlWorkflowInstanceStore instanceStore = new SqlWorkflowInstanceStore(&quot;server=.;database=aspnetdb;uid=sa;pwd=123456&quot;);
+
+            InstanceView view = instanceStore.Execute(instanceStore.CreateInstanceHandle(), new CreateWorkflowOwnerCommand(), TimeSpan.FromSeconds(30));
+
+            instanceStore.DefaultInstanceOwner = view.InstanceOwner;
+
+            IDictionary&lt;string, object&gt; input = new Dictionary&lt;string, object&gt; 
+            {
+                { &quot;Request&quot; , Request }
+            };
+
+            WorkflowApplication application = new WorkflowApplication(new ApplyBlogFlow(), input);
+
+            application.InstanceStore = instanceStore;
+
+            //获取或设置当前工作流实例处于空闲状态并可被保留时调用的 ActivityFunc
+            application.PersistableIdle = (e) =&gt;
+            {
+                instanceUnloaded.Set();
+                return PersistableIdleAction.Unload;
+
+            };
+            //获取或设置卸载当前工作流
+            application.Unloaded = (e) =&gt;
+            {
+
+                instanceUnloaded.Set();
+
+            };
+            //获取或设置当前工作流实例遇到未处理的异常时
+            application.OnUnhandledException = (ex) =&gt;
+            {
+                Console.Write(&quot;Exception&quot;);
+                return UnhandledExceptionAction.Terminate;
+            };
+
+            Guid id = application.Id;
+
+            application.Run();
+            //阻止当前线程，直到当前waithand收到信号
+            instanceUnloaded.WaitOne();
+
+            return id;
+
+        }
+</pre><br>
+<p style="margin:0in; font-size:14.0pt"><span style="color:#cc0000"><span lang="zh-CN" style="font-family:SimSun">&nbsp; &nbsp; 仔细看这段代码，在初始时将</span><span lang="zh-CN" style="font-family:Calibri">AutoResetEvent(false)</span><span lang="zh-CN" style="font-family:SimSun">，即非终止状态，但是当</span><span lang="zh-CN" style="font-family:Calibri">application.Run();</span><span lang="zh-CN" style="font-family:SimSun">之后就</span><span lang="en-US" style="font-family:Calibri">Wait</span><span lang="en-US" style="font-family:SimSun">One</span><span lang="zh-CN" style="font-family:SimSun">，说明此时将</span><span lang="zh-CN" style="font-family:Calibri">AutoResetEvent</span><span lang="zh-CN" style="font-family:SimSun">设置成了终止状态，即阻塞当前线程。为什么要这样呢？目的很简单，因为这个执行过程为异步，如果当调用启动工作流的方法后，不去阻止当前方法的执行，那么这个方法就这样执行结果，返回我们创建成功，可是问题就是，这个时候很可能工作流还没有执行完成，而结果却先告诉我们了，这样显然不合理。</span></span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt; color:#C00000">&nbsp;</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">如果大家对于上述的解释还不理解，可以参考下调用流程：</p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;CreateAndRun</span><span lang="zh-CN" style="font-family:SimSun">开始</span><span lang="en-US" style="font-family:Calibri">---</span><span lang="zh-CN" style="font-family:SimSun">》</span><span lang="en-US" style="font-family:Calibri">WaitOne---</span><span lang="zh-CN" style="font-family:SimSun">》当前线程被阻止，即不再往下执行</span><span lang="en-US" style="font-family:Calibri">---</span><span lang="zh-CN" style="font-family:SimSun">》真正启动工作流</span><span lang="en-US" style="font-family:Calibri">---</span><span lang="zh-CN" style="font-family:SimSun">》工作流执行完等待流后会被设置为空闲状态</span><span lang="en-US" style="font-family:Calibri">---</span><span lang="zh-CN" style="font-family:SimSun">》</span><span lang="zh-CN" style="font-family:Calibri">PersistableIdle</span><span lang="en-US" style="font-family:Calibri">---</span><span lang="zh-CN" style="font-family:SimSun">》</span><span lang="zh-CN" style="font-family:Calibri">instanceUnloaded.Set();</span><span lang="en-US" style="font-family:Calibri">---</span><span lang="zh-CN" style="font-family:SimSun">》</span><span lang="zh-CN" style="font-family:Calibri">AutoResetEvent</span><span lang="zh-CN" style="font-family:SimSun">可以继续</span><span lang="en-US" style="font-family:Calibri">---</span><span lang="zh-CN" style="font-family:SimSun">》</span><span lang="zh-CN" style="font-family:Calibri">
+ return id;</span><span lang="en-US" style="font-family:Calibri">---</span><span lang="zh-CN" style="font-family:SimSun">》整个方法执行完成</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<h1 style="margin:0in; font-family:SimSun; font-size:14.0pt">总结：</h1>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:SimSun">用</span><span lang="en-US" style="font-family:SimSun">AutoResetEvent实现同步</span><span lang="zh-CN" style="font-family:SimSun">，只是众多方法中之一，记得当时在考试系统的教师判分处应用了锁，当时使用的是数据库锁，保证某个表同一时间只能有一个用户在操作，这也是一个实现同步的方式，而且我们在学习</span><span lang="en-US" style="font-family:SimSun">java</span><span lang="zh-CN" style="font-family:SimSun">时也知道synchronized实现方法同步等方式。无论是数据库锁，synchronized，还是</span><span lang="en-US" style="font-family:SimSun">AutoResetEvent</span><span lang="zh-CN" style="font-family:SimSun">的方式只是它们的侧重不同，针对的对象不同，但是目的都是在控制操作的同步进行。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span><span lang="zh-CN" style="font-family:SimSun">其实对于多线程的同步问题就是在程序的执行时多了一步验证（一个门一次只能通过一个即</span><span lang="en-US" style="font-family:Calibri">n=</span><span lang="en-US" style="font-family:SimSun">1</span><span lang="zh-CN" style="font-family:SimSun">的情况），是可以执行，还是需要等待而已，对于不同的同步技术只是对不同的对象设置验证，如数据库锁是对表的操作进行限制。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:SimSun"><br>
+</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp; &nbsp; 通过整理发现，其实<span style="font-family:SimSun; font-size:19px">AutoResetEvent只是实现同步的一种方式，并没有当时想的那么深奥，关键还是在于对于不懂的知识的学习与整理，<span style="">了解到它是解决同步的方式后，再结合我们之前使用过的一些同步方法，这些知识就又简单了，所以我们面对学也就开心了！</span></span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><span style="font-family:SimSun; font-size:19px"><br>
+</span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt">&nbsp;</p>
+<br>
+&nbsp;&nbsp;
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/39700499'>原文链接</a>

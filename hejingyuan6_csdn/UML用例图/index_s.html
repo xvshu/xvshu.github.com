@@ -1,0 +1,57 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; UML用例图</div><div style="color:blue" align=center>UML用例图</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; <span style="color:rgb(51,51,51)">
+用例图</span>主要用来描述客户的需求，即用户希望系统具备的完成一定功能的动作，通俗地理解用例就是软件的功能模块，所以是设计系统分析阶段的起点，设计人员根据客户的需求来创建和解释用例图，用来描述软件应具备哪些功能模块以及这些模块之间的调用关系，用例图包含了用例和参与者，用例之间用关联来连接以求把系统的整个结构和功能反映给非技术人员（通常是软件的用户），对应的是软件的结构和功能分解。<br>
+&nbsp; &nbsp; 用例之间可以抽象出包含(include)、扩展(extend)和泛化(generalization)几种关系。<br>
+&nbsp; &nbsp; 共性：都是从现有的用例中抽取出公共的那部分信息，作为一个单独的用例，然后通后过不同的方法来重用这个公共的用例，以减少模型维护的工作量。<br>
+</span>
+<p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">用例间的关系</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">1,Extend</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp; &nbsp; &nbsp; 个人理解&nbsp;</span><span lang="zh-CN" style="color:red">即丰富这个用例的功能</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">例如，系统中允许用户对查询的结果进行导出、打印。对于查询而言，能不能导出、打印查询都是一样的，导出、打印是不可见的。导入、打印和查询相对独立，而且为查询添加了新行为。因此可以采用扩展关系来描述：</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;<span style="white-space:pre"><img src="44005389152912.png" alt=""></span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><img src="" alt=""><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;</span>&nbsp;</span></p>
+<p lang="en-US" style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in">
+<span style="font-family:KaiTi_GB2312; font-size:24px">2，Include</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">include</span><span lang="zh-CN">有三种情况</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp; &nbsp;<span style="white-space:pre"></span>a,</span><span lang="zh-CN">两个用例之间执行谁之前要执行谁</span><span lang="en-US">,</span><span lang="zh-CN" style="color:red">即用例间的先后关系</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span style="white-space:pre"></span></span><span lang="zh-CN">销户：因为销户必需先进行账户结算，所以这里用include</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><span style="white-space:pre"><img src="39173199490092.png" alt=""></span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><img src="" alt=""><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp; &nbsp;b,</span><span lang="zh-CN">抽象出一个具体地功能</span><span lang="en-US">,</span><span lang="zh-CN">其他用例包含这个功能</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space:pre"></span></span><span lang="zh-CN">由于业务开通、重保、割接及其它跨省的业务都需要用到数据分发用例，我们可以将数据分发用例单独抽出来，供各业务使用，这里用include就比较合适</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span lang="en-US" style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;c,</span><span lang="zh-CN" style="font-family:KaiTi_GB2312; font-size:24px">简化用例的描述</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space:pre"></span></span><span lang="zh-CN">业务中，总是存在着维护某某信息的功能，如果将它作为一个用例，那新建、编辑以及修改都要在用例详述中描述，过于复杂；如果分成新建用例、编辑用例和删除用例，则划分太细。这时包含关系可以用来理清关系。</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><span style="white-space:pre"><span style="white-space:pre"></span><img src="32646146771929.png" alt=""></span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><img src="" alt=""><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">3,</span><span lang="zh-CN">泛化</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0.375in">
+<span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">泛化即继承即抽象关系</span><span lang="en-US">.</span><span lang="zh-CN">与包含关系的第二类不同的是子类中有父类的属性和方法</span><span lang="en-US">,</span><span lang="zh-CN">但包含中是将这部分内容抽象出来了</span><span lang="en-US">.</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0.375in">
+<span style="white-space:pre"></span><img src="35490816727975.png" alt="" style="font-family:KaiTi_GB2312; font-size:24px"><span style="font-family:KaiTi_GB2312; font-size:24px"><img src="" alt=""></span></p>
+<p style="margin:0in; margin-left:.375in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">注</span><span lang="en-US">:</span><span lang="zh-CN">包含是功能的一部分被整个功能包含</span><span lang="en-US">,</span><span lang="zh-CN">泛化是对整个功能的抽象</span><span lang="en-US">,</span><span lang="zh-CN">没有部分</span><span lang="en-US">,</span><span lang="zh-CN">扩展就是对功能的丰富</span><span lang="en-US">,</span><span lang="zh-CN">有与无无所谓</span><span lang="en-US">.</span></span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp;对于机房收费系统来说：</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="12848516335675.png" alt=""><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin-top:0in; margin-right:0in; margin-bottom:0in; margin-left:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;&nbsp;</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/8235799'>原文链接</a>

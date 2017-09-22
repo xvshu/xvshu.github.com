@@ -1,0 +1,106 @@
+﻿<div style="color:blue" align=center>SqlDataAdapter与DataSet</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<div class="card-summary-content">
+<p><br>
+</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp;DataSet是<a href="http://baike.baidu.com/view/159519.htm" target="_blank" style="color:rgb(51,102,153); text-decoration:none">ADO.NET</a>的中心概念。可以把DataSet当成内存中的数据库，DataSet是不依赖于数据库的独立数据集合。所谓独立，就是说，即使断开数据链路，或者关闭数据库，DataSet依然是可用的，DataSet在内部是用XML来描述数据的，由于XML是一种与平台无关、与语言无关的<a href="http://baike.baidu.com/view/1106703.htm" target="_blank" style="color:rgb(51,102,153); text-decoration:none">数据描述语言</a>，而且可以描述复杂关系的数据，比如父子关系的数据，所以DataSet实际上可以容纳具有复杂关系的数据，而且不再依赖于数据库链路。</p>
+</div>
+<p>&nbsp;</p>
+<p>DataSet 是 ADO. NET 结构的主要组件，它是从数据源中检索到的数据在内存中的缓存。DataSet 由一组 DataTable 对象组成：</p>
+<p>dataset所有数据都加载在内存上执行的,可以提高数据访问速度,提高硬盘数据的安全性。极大的改善了程序运行的速度和稳定性。</p>
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+因为DataSet可以看做是内存中的数据库，也因此可以说DataSet是数据表的集合，它可以包含任意多个数据表（DataTable），而且每一 DataSet中的数据表（DataTable)对应一个数据源中的数据表（Table）或是数据视图（View）。数据表实质是由行（DataRow）和 列（DataColumn）组成的集合为了保护内存中数据记录的正确性，避免并发访问时的读写冲突，DataSet对象中的DataTable负责维护每一条记录，分别保存记录的初始状态和当前状态。从这里可以看出DataSet是与只能存放单张数据表的Recordset是截然不同的概念。</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<span class="headline-content"><span style="font-size:24px; color:rgb(204,0,0)">DataSet对象的三大特性</span></span></div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<span class="headline-content">（1） 独立性。DataSet独立于各种数据源。</span></div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　（2） 离线（断开）和连接。</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　（3） DataSet对象是一个可以用XML形式表示的数据视图，是一种数据关系视图。</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<span class="headline-content"><span style="font-size:18px; color:rgb(204,0,0)">DataSet使用方法</span></span></div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<span class="headline-content">（1） 把数据库中的数据通过DataAdapter对象填充DataSet。</span></div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　（2） 通过DataAdapter对象操作DataSet实现更新数据库。</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　（3） 把XML数据流或文本加载到DataSet</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;
+<div class="card-summary-content">
+<p>&nbsp;</p>
+<p><span style="font-size:18px; color:rgb(0,102,0)">SqlDataAdapter</span>是 DataSet和 SQL Server之间的<a href="http://baike.baidu.com/view/197495.htm" target="_blank" style="color:rgb(51,102,153); text-decoration:none">桥接</a>器，用于检索和保存数据。SqlDataAdapter通过对数据源使用适当的<a href="http://baike.baidu.com/view/861870.htm" target="_blank" style="color:rgb(51,102,153); text-decoration:none">Transact-SQL</a>语句映射
+ Fill（它可更改DataSet中的数据以匹配数据源中的数据）和 Update（它可更改数据源中的数据以匹配 DataSet中的数据）来提供这一桥接。当SqlDataAdapter填充 DataSet时，它为返回的数据创建必需的表和列（如果这些表和列尚不存在）。</p>
+</div>
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+问：什么是DataAdapter？</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+答：DataAdapter对象在DataSet与数据之间起桥梁作用</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<span class="headline-content"><strong><span style="font-size:24px">提示</span></strong></span></div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+<span class="headline-content"><strong><span style="font-size:18px"></span></strong></span>&nbsp;</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　你如果只需要执行SQL，就没必要用到DataAdapter</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　直接cmd.ExecuteNoQuery()就OK了</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;&nbsp; 　sqlDataadapter的作用是实现Dataset和DB之间的桥梁</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　比如将对DataSet的修改更新到数据库</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　如果只是执行一句SQL或SP，用SqlCommand的Execute系列方法就可以了</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　<span style="font-size:18px; color:rgb(153,0,0)">SqlDataAdapter的UpdateCommand的执行机制是</span></div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　当调用SqlDataAdapter.Update()时，检查DataSet中的所有行，然后对每一个修改过的Row执行SqlDataAdapter.UpdateCommand</div>
+<div class="spctrl" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+　　以就是说如果未修改DataSet重的数据，SqlDataAdapter.UpdateCommand是不可能执行的</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;</div>
+<div class="card-summary-content" style="color:rgb(51,51,51); font-family:Arial; font-size:14px; line-height:26px">
+&nbsp;</div>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/8606491'>原文链接</a>

@@ -1,0 +1,171 @@
+﻿<div style="color:blue" align=center>【SSH基础】SSH框架struts深入详解（二）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">继上篇博客</span><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">既然我们知道了不使用</span><span lang="en-US" style="font-family:Calibri">struts</span><span lang="zh-CN" style="font-family:华文中宋">给我们带来这么多弊端，那么下面我们来看看</span><span lang="en-US" style="font-family:Calibri">struts</span><span lang="zh-CN" style="font-family:华文中宋">是如何封装的，怎么解决我们出现的问题的？</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">先来说一下</span><span lang="en-US" style="font-family:Calibri">struts</span><span lang="zh-CN" style="font-family:华文中宋">的基本流程，帮助大家理解下面的代码：</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">&nbsp;</span><span lang="en-US" style="font-family:Helvetica">Struts</span><span lang="zh-CN" style="font-family:华文中宋">基本简要流程如下：</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp;1、客户端浏览器发出HTTP请求。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp;2、根据web.xml配置，该请求被FilterDispatcher接收。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp;3、根据struts.xml配置，找到需要调用的Action类和方法， 并通过IoC方式，将&#20540;注入给Aciton。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp;4、Action调用业务逻辑组件处理业务逻辑，这一步包含表单验证。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp;5、Action执行完毕，根据struts.xml中的配置找到对应的返回结果result，并跳转到相应页面。</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp; &nbsp; &nbsp;6、返回HTTP响应到客户端浏览器。</p>
+<p lang="en-US" style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">示例分析（使用</span><span lang="en-US" style="font-family:Calibri">struts</span><span lang="zh-CN" style="font-family:华文中宋">）</span></p>
+<p lang="en-US" style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">配置文件</span><span lang="en-US" style="font-family:Calibri">web.xml</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"></span></p>
+<pre code_snippet_id="452842" snippet_file_name="blog_20140818_1_7689008" name="code" class="html">&lt;filter&gt;
+        &lt;filter-name&gt;struts2&lt;/filter-name&gt;
+        &lt;filter-class&gt;org.apache.struts2.dispatcher.FilterDispatcher&lt;/filter-class&gt;
+    &lt;/filter&gt;
+    &lt;filter-mapping&gt;
+        &lt;filter-name&gt;struts2&lt;/filter-name&gt;
+        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+    &lt;/filter-mapping&gt;	
+</pre><br>
+<p>
+<p lang="en-US" style="margin:0in; font-family:华文中宋; font-size:14.0pt">add.jsp</p>
+<pre code_snippet_id="452842" snippet_file_name="blog_20140818_2_3829524" name="code" class="html">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=GB2312&quot;%&gt;
+&lt;%@ taglib prefix=&quot;s&quot; uri=&quot;/struts-tags&quot;%&gt;
+&lt;html&gt;
+	&lt;head&gt;
+		&lt;title&gt;添加页面&lt;/title&gt;
+	&lt;/head&gt;
+	&lt;body&gt;
+		&lt;center&gt;
+			&lt;s:form action=&quot;grade&quot;&gt;
+				&lt;s:textfield name=&quot;grade.USERID&quot; label=&quot;用户编号&quot; /&gt;
+				&lt;s:textfield name=&quot;grade.USERNAME&quot; label=&quot;用户姓名&quot; /&gt;
+				&lt;s:textfield name=&quot;grade.CHINESE&quot; label=&quot;语文成绩&quot; /&gt;
+				&lt;s:textfield name=&quot;grade.MATHS&quot; label=&quot;数学成绩&quot; /&gt;
+				&lt;s:textfield name=&quot;grade.ENGLISH&quot; label=&quot;英语成绩&quot; /&gt;
+				&lt;s:submit value=&quot;确定&quot; /&gt;
+				&lt;s:reset value=&quot;重置&quot; /&gt;
+			&lt;/s:form&gt;
+		&lt;/center&gt;
+	&lt;/body&gt;
+&lt;/html&gt;
+</pre><br>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:14.0pt">Struts.xml</p>
+<br>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"></span></p>
+<pre code_snippet_id="452842" snippet_file_name="blog_20140818_3_3459030" name="code" class="html">&lt;package name=&quot;book&quot; extends=&quot;struts-default&quot;&gt;
+		&lt;action name=&quot;grade&quot; class=&quot;action.GradeAction&quot;&gt;
+			&lt;result name=&quot;show&quot;&gt;show.jsp&lt;/result&gt;			
+		&lt;/action&gt;
+		&lt;action name=&quot;login&quot; class=&quot;action.UserAction&quot;&gt;
+			&lt;result name=&quot;success&quot;&gt;success.jsp&lt;/result&gt;
+			&lt;result name=&quot;error&quot;&gt;error.jsp&lt;/result&gt;
+		&lt;/action&gt;
+&lt;/package&gt;
+ 
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">GradeAction</span><span lang="en-US" style="font-family:Calibri">.java</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"></span></p>
+<pre code_snippet_id="452842" snippet_file_name="blog_20140818_4_4506589" name="code" class="java">public class GradeAction {
+	private Grade grade;
+	private List&lt;Grade&gt; gradeList;
+	public Grade getGrade() {
+		return grade;
+	}
+	public void setGrade(Grade grade) {
+		this.grade = grade;
+	}
+	public List&lt;Grade&gt; getGradeList() {
+		return gradeList;
+	}
+	public void setGradeList(List&lt;Grade&gt; gradeList) {
+		this.gradeList = gradeList;
+	}
+	public String execute() throws Exception{
+		GradeDao gradeDao=new GradeDao();
+		gradeDao.insertGrade(grade);
+		ArrayList&lt;Grade&gt; gradeList = (ArrayList) gradeDao.listGrade();
+		this.setGradeList(gradeList);
+		return &quot;show&quot;;
+	}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">单纯的看，这两套代码（结合上篇博客来看），从代码量上来看，都是完成同样的添加功能，使用</span><span lang="en-US" style="font-family:Calibri">struts</span><span lang="zh-CN" style="font-family:华文中宋">后，明显代码量减少了许多，而且每个操作完成后的跳转页都配置到了配置文件中，这样给我们系统的维护带来了极大的便利。它相当于从界面到</span><span lang="en-US" style="font-family:Calibri">action</span><span lang="zh-CN" style="font-family:华文中宋">传递的过程中，是以对象的方式传递的，就不需要我们像之前的操作那样一个字段一个字段的去获取。</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">当然还有一点，就是</span><span lang="en-US" style="font-family:Calibri">struts</span><span lang="zh-CN" style="font-family:华文中宋">是如何解决</span><span lang="en-US" style="font-family:Calibri">servlet</span><span lang="zh-CN" style="font-family:华文中宋">过多的问题的？</span></p>
+<br>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"></span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:14.0pt">Struts.xml</p>
+<br>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"></span></p>
+<pre code_snippet_id="452842" snippet_file_name="blog_20140818_5_6219239" name="code" class="html"> &lt;package name=&quot;testlogin2&quot; namespace=&quot;/user&quot; extends=&quot;struts-default&quot;&gt;
+   
+   		&lt;action name=&quot;login&quot; class=&quot;com.action.LoginAction2&quot; method=&quot;doFun&quot;&gt;
+   			&lt;result name=&quot;success&quot;&gt;/success.jsp&lt;/result&gt;
+   			&lt;result name=&quot;error&quot; type=&quot;redirect&quot;&gt;/error.jsp&lt;/result&gt;
+   			
+   		&lt;/action&gt;
+   		&lt;!-- 第三种方式 :一个action处理多个请求 如：user/modifyUser
+   		&lt;action name=&quot;*User_*&quot; class=&quot;com.action.UserManagerAction&quot; method=&quot;{1}User&quot;&gt;
+    		&lt;result name=&quot;success&quot;&gt;/{2}.jsp&lt;/result&gt;
+    		&lt;result name=&quot;error&quot;&gt;/error.jsp&lt;/result&gt;
+    	&lt;/action&gt;--&gt;
+   		
+   		&lt;action name=&quot;*User&quot; class=&quot;com.action.UserManagerAction&quot; method=&quot;{1}User&quot;&gt;
+    		&lt;result name=&quot;success&quot;&gt;/success.jsp&lt;/result&gt;
+    		&lt;result name=&quot;error&quot;&gt;/error.jsp&lt;/result&gt;
+    	&lt;/action&gt;
+   		
+   		
+   &lt;/package&gt;
+</pre><br>
+<pre code_snippet_id="452842" snippet_file_name="blog_20140818_6_5979258" name="code" class="java">public class UserManagerAction extends ActionSupport {
+	
+	private User user;
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
+	public String addUser(){
+		System.out.println(&quot;---------AddUser()-------&quot;);
+		return &quot;success&quot;;
+	}
+	public String modifyUser(){
+		System.out.println(&quot;---------ModifyUser()-------&quot;);
+		return &quot;success&quot;;
+	}
+	public String delUser(){
+		System.out.println(&quot;---------DelUser()-------&quot;);
+		return &quot;success&quot;;
+	}
+}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">与</span><span lang="en-US" style="font-family:Calibri">servlet</span><span lang="zh-CN" style="font-family:华文中宋">的关系</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:华文中宋">前面我们说对于</span><span lang="en-US" style="font-family:Calibri">Model 2</span><span lang="zh-CN" style="font-family:华文中宋">模型来说，</span><span lang="en-US" style="font-family:华文中宋">Servlet</span><span lang="zh-CN" style="font-family:华文中宋">过多，转向频繁，流程，配置等不易集中管理，那么</span><span lang="en-US" style="font-family:华文中宋">struts</span><span lang="zh-CN" style="font-family:华文中宋">与</span><span lang="en-US" style="font-family:华文中宋">Servlet</span><span lang="zh-CN" style="font-family:华文中宋">有什么关系？它怎么就能解决</span><span lang="en-US" style="font-family:Calibri">Servlet</span><span lang="zh-CN" style="font-family:华文中宋">的这些问题呢？</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:华文中宋">可以说</span><span lang="zh-CN" style="font-family:Calibri">Struts2</span><span lang="zh-CN" style="font-family:华文中宋">本质还是一个</span><span lang="zh-CN" style="font-family:Calibri">Servlet</span><span lang="zh-CN" style="font-family:华文中宋">，只是对</span><span lang="zh-CN" style="font-family:Calibri">Servlet</span><span lang="zh-CN" style="font-family:华文中宋">进一步的封装罢了</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:14.0pt">&nbsp;&nbsp;&nbsp; </p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:华文中宋">对于解决问题来说：</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:华文中宋">打个比方：做Web项目，好比建房子。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:华文中宋">Servlet好比木材，用一根根的木材搭，也可盖起房子，只是速度慢而已；</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:华文中宋">Struts2好比是用木材做好的一个房子大概结构，要建房子时，只需把它拿过来，再往其里面添砖加瓦，修修补补，就能很快盖好房子，这要比直接使用Servlet要快得多</span></p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN" style="font-family:华文中宋">以上只是我对</span><span lang="en-US" style="font-family:Calibri">struts</span><span lang="zh-CN" style="font-family:华文中宋">的简单理解，用一句话概括，</span><span lang="en-US" style="font-family:Calibri">struts</span><span lang="zh-CN" style="font-family:华文中宋">就是将某些功能进行提取，然后做了一个封装，能让我们更好的使用（框架）。当然对于它的优势还需要我们在以后做项目的过程中慢慢体会！</span></p>
+<br>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/38656485'>原文链接</a>

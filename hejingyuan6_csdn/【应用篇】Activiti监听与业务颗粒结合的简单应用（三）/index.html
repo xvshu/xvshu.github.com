@@ -1,0 +1,271 @@
+﻿<div style="color:blue" align=center>【应用篇】Activiti监听与业务颗粒结合的简单应用（三）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">Activiti</span><span lang="zh-CN">的简单应用，应用监听来实现简单的业务颗粒与工作流程结合，让流程带动业务颗粒执行的过程，此次的流程图应用多分支结构，并将流程中的判断值设为参数，由前台传递过去。</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">新建普通</span><span lang="en-US">java</span><span lang="zh-CN">类：</span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></p><pre name="code" class="java">package com.tgb.itoo.activiti.controller;
+
+public class xs {
+
+	public static void SayHello(){
+		System.out.println(&quot;88xvshu&quot;);
+	}
+	
+	
+}</pre><p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">新建</span><span lang="en-US">activiti</span><span lang="zh-CN">监听类：</span><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></span></p><pre code_snippet_id="681618" snippet_file_name="blog_20150602_2_1598365" name="code" class="java">package com.tgb.itoo.activiti.controller;
+
+import org.activiti.engine.delegate.DelegateTask;
+import org.activiti.engine.delegate.TaskListener;
+
+public class xvshuDelegate implements TaskListener{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Override
+	public void notify(DelegateTask delegateTask) {		
+		xs.SayHello();
+	}
+		
+}</pre><p><span style="font-family: KaiTi_GB2312; font-size: 14pt;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">类似的</span><span lang="en-US">Java</span><span lang="zh-CN">类和监听类需要再创建</span><span lang="en-US">3</span><span lang="zh-CN">个</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">业务流程图</span><span lang="en-US"> </span><span lang="zh-CN">如图：</span></span></p><img src="101166610137130" alt=""><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><br></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">流程变量的属性设置（jingyuan</span><span lang="en-US">-</span><span lang="zh-CN">${result==flowjingyuan}，</span><span lang="en-US">milaoshi-</span><span lang="zh-CN">${result==flowmilaoshi}）</span><span lang="en-US"> </span><span lang="zh-CN">如图：</span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><br></span></p><p style="margin: 0in; font-size: 14pt;"><img src="29876918420396" alt="">&nbsp;</p><p style="margin: 0in; font-size: 14pt;"><br></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">最终生成的配置文件</span><span lang="en-US"> </span><span lang="zh-CN">如下：</span></span></p><pre code_snippet_id="681618" snippet_file_name="blog_20150602_3_7008531" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;definitions xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:activiti=&quot;http://activiti.org/bpmn&quot; xmlns:bpmndi=&quot;http://www.omg.org/spec/BPMN/20100524/DI&quot; xmlns:omgdc=&quot;http://www.omg.org/spec/DD/20100524/DC&quot; xmlns:omgdi=&quot;http://www.omg.org/spec/DD/20100524/DI&quot; typeLanguage=&quot;http://www.w3.org/2001/XMLSchema&quot; expressionLanguage=&quot;http://www.w3.org/1999/XPath&quot; targetNamespace=&quot;http://www.activiti.org/test&quot;&gt;
+  &lt;process id=&quot;myProcess&quot; name=&quot;My process&quot; isExecutable=&quot;true&quot;&gt;
+    &lt;startEvent id=&quot;startevent1&quot; name=&quot;Start&quot;&gt;&lt;/startEvent&gt;
+    &lt;userTask id=&quot;xvshu&quot; name=&quot;xvshu&quot;&gt;
+      &lt;extensionElements&gt;
+        &lt;activiti:taskListener event=&quot;create&quot; class=&quot;com.tgb.itoo.activiti.controller.xvshuDelegate&quot;&gt;&lt;/activiti:taskListener&gt;
+      &lt;/extensionElements&gt;
+    &lt;/userTask&gt;
+    &lt;sequenceFlow id=&quot;flow1&quot; sourceRef=&quot;startevent1&quot; targetRef=&quot;xvshu&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;userTask id=&quot;jingyuan&quot; name=&quot;jingyuan&quot;&gt;
+      &lt;extensionElements&gt;
+        &lt;activiti:taskListener event=&quot;create&quot; class=&quot;com.tgb.itoo.activiti.controller.jingyuanDelegate&quot;&gt;&lt;/activiti:taskListener&gt;
+      &lt;/extensionElements&gt;
+    &lt;/userTask&gt;
+    &lt;userTask id=&quot;usertask1&quot; name=&quot;guhaiyan&quot;&gt;
+      &lt;extensionElements&gt;
+        &lt;activiti:taskListener event=&quot;create&quot; class=&quot;com.tgb.itoo.activiti.controller.guhaiyanDelegate&quot;&gt;&lt;/activiti:taskListener&gt;
+      &lt;/extensionElements&gt;
+    &lt;/userTask&gt;
+    &lt;endEvent id=&quot;endevent1&quot; name=&quot;End&quot;&gt;&lt;/endEvent&gt;
+    &lt;sequenceFlow id=&quot;flow4&quot; sourceRef=&quot;usertask1&quot; targetRef=&quot;endevent1&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;exclusiveGateway id=&quot;exclusivegateway1&quot; name=&quot;Exclusive Gateway&quot;&gt;&lt;/exclusiveGateway&gt;
+    &lt;sequenceFlow id=&quot;flow5&quot; sourceRef=&quot;xvshu&quot; targetRef=&quot;exclusivegateway1&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;sequenceFlow id=&quot;flow6&quot; name=&quot;jingyuan&quot; sourceRef=&quot;exclusivegateway1&quot; targetRef=&quot;jingyuan&quot;&gt;
+      &lt;conditionExpression xsi:type=&quot;tFormalExpression&quot;&gt;&lt;![CDATA[${result==flowjingyuan}]]&gt;&lt;/conditionExpression&gt;
+    &lt;/sequenceFlow&gt;
+    &lt;userTask id=&quot;usertask2&quot; name=&quot;guhaiyan&quot;&gt;
+      &lt;extensionElements&gt;
+        &lt;activiti:taskListener event=&quot;create&quot; class=&quot;com.tgb.itoo.activiti.controller.guhaiyanDelegate&quot;&gt;&lt;/activiti:taskListener&gt;
+      &lt;/extensionElements&gt;
+    &lt;/userTask&gt;
+    &lt;sequenceFlow id=&quot;flow13&quot; name=&quot;guhaiyan&quot; sourceRef=&quot;exclusivegateway1&quot; targetRef=&quot;usertask2&quot;&gt;
+      &lt;conditionExpression xsi:type=&quot;tFormalExpression&quot;&gt;&lt;![CDATA[${result==flowhaiyan}]]&gt;&lt;/conditionExpression&gt;
+    &lt;/sequenceFlow&gt;
+    &lt;userTask id=&quot;milaoshi&quot; name=&quot;milaoshi&quot; activiti:async=&quot;true&quot;&gt;
+      &lt;extensionElements&gt;
+        &lt;activiti:taskListener event=&quot;create&quot; class=&quot;com.tgb.itoo.activiti.controller.milaoshiDelegate&quot;&gt;&lt;/activiti:taskListener&gt;
+      &lt;/extensionElements&gt;
+    &lt;/userTask&gt;
+    &lt;sequenceFlow id=&quot;flow14&quot; name=&quot;milaoshi&quot; sourceRef=&quot;exclusivegateway1&quot; targetRef=&quot;milaoshi&quot;&gt;
+      &lt;conditionExpression xsi:type=&quot;tFormalExpression&quot;&gt;&lt;![CDATA[${result==flowmilaoshi}]]&gt;&lt;/conditionExpression&gt;
+    &lt;/sequenceFlow&gt;
+    &lt;sequenceFlow id=&quot;flow15&quot; sourceRef=&quot;milaoshi&quot; targetRef=&quot;endevent1&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;sequenceFlow id=&quot;flow16&quot; sourceRef=&quot;usertask2&quot; targetRef=&quot;endevent1&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;sequenceFlow id=&quot;flow17&quot; name=&quot;guhaiyan&quot; sourceRef=&quot;exclusivegateway2&quot; targetRef=&quot;usertask1&quot;&gt;
+      &lt;conditionExpression xsi:type=&quot;tFormalExpression&quot;&gt;&lt;![CDATA[${result==flowhaiyan}]]&gt;&lt;/conditionExpression&gt;
+    &lt;/sequenceFlow&gt;
+    &lt;sequenceFlow id=&quot;flow18&quot; sourceRef=&quot;exclusivegateway2&quot; targetRef=&quot;endevent1&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;exclusiveGateway id=&quot;exclusivegateway2&quot; name=&quot;Exclusive Gateway&quot;&gt;&lt;/exclusiveGateway&gt;
+    &lt;sequenceFlow id=&quot;flow19&quot; sourceRef=&quot;jingyuan&quot; targetRef=&quot;exclusivegateway2&quot;&gt;&lt;/sequenceFlow&gt;
+  &lt;/process&gt;
+  &lt;bpmndi:BPMNDiagram id=&quot;BPMNDiagram_myProcess&quot;&gt;
+    &lt;bpmndi:BPMNPlane bpmnElement=&quot;myProcess&quot; id=&quot;BPMNPlane_myProcess&quot;&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;startevent1&quot; id=&quot;BPMNShape_startevent1&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;35.0&quot; width=&quot;35.0&quot; x=&quot;60.0&quot; y=&quot;150.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;xvshu&quot; id=&quot;BPMNShape_xvshu&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;55.0&quot; width=&quot;105.0&quot; x=&quot;140.0&quot; y=&quot;140.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;jingyuan&quot; id=&quot;BPMNShape_jingyuan&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;55.0&quot; width=&quot;105.0&quot; x=&quot;400.0&quot; y=&quot;140.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;usertask1&quot; id=&quot;BPMNShape_usertask1&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;55.0&quot; width=&quot;105.0&quot; x=&quot;630.0&quot; y=&quot;140.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;endevent1&quot; id=&quot;BPMNShape_endevent1&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;35.0&quot; width=&quot;35.0&quot; x=&quot;745.0&quot; y=&quot;270.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;exclusivegateway1&quot; id=&quot;BPMNShape_exclusivegateway1&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;40.0&quot; width=&quot;40.0&quot; x=&quot;290.0&quot; y=&quot;147.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;usertask2&quot; id=&quot;BPMNShape_usertask2&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;55.0&quot; width=&quot;105.0&quot; x=&quot;350.0&quot; y=&quot;14.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;milaoshi&quot; id=&quot;BPMNShape_milaoshi&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;55.0&quot; width=&quot;105.0&quot; x=&quot;258.0&quot; y=&quot;260.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;exclusivegateway2&quot; id=&quot;BPMNShape_exclusivegateway2&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;40.0&quot; width=&quot;40.0&quot; x=&quot;539.0&quot; y=&quot;147.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow1&quot; id=&quot;BPMNEdge_flow1&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;95.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;140.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow4&quot; id=&quot;BPMNEdge_flow4&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;735.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;762.0&quot; y=&quot;173.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;762.0&quot; y=&quot;270.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow5&quot; id=&quot;BPMNEdge_flow5&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;245.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;290.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow6&quot; id=&quot;BPMNEdge_flow6&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;330.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;400.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;bpmndi:BPMNLabel&gt;
+          &lt;omgdc:Bounds height=&quot;14.0&quot; width=&quot;40.0&quot; x=&quot;339.0&quot; y=&quot;179.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+        &lt;/bpmndi:BPMNLabel&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow13&quot; id=&quot;BPMNEdge_flow13&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;310.0&quot; y=&quot;147.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;310.0&quot; y=&quot;41.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;350.0&quot; y=&quot;41.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;bpmndi:BPMNLabel&gt;
+          &lt;omgdc:Bounds height=&quot;14.0&quot; width=&quot;44.0&quot; x=&quot;310.0&quot; y=&quot;91.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+        &lt;/bpmndi:BPMNLabel&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow14&quot; id=&quot;BPMNEdge_flow14&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;310.0&quot; y=&quot;187.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;310.0&quot; y=&quot;260.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;bpmndi:BPMNLabel&gt;
+          &lt;omgdc:Bounds height=&quot;14.0&quot; width=&quot;38.0&quot; x=&quot;310.0&quot; y=&quot;219.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+        &lt;/bpmndi:BPMNLabel&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow15&quot; id=&quot;BPMNEdge_flow15&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;363.0&quot; y=&quot;287.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;745.0&quot; y=&quot;287.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow16&quot; id=&quot;BPMNEdge_flow16&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;455.0&quot; y=&quot;41.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;762.0&quot; y=&quot;41.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;762.0&quot; y=&quot;270.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow17&quot; id=&quot;BPMNEdge_flow17&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;579.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;630.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;bpmndi:BPMNLabel&gt;
+          &lt;omgdc:Bounds height=&quot;14.0&quot; width=&quot;100.0&quot; x=&quot;578.0&quot; y=&quot;150.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+        &lt;/bpmndi:BPMNLabel&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow18&quot; id=&quot;BPMNEdge_flow18&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;559.0&quot; y=&quot;187.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;559.0&quot; y=&quot;287.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;745.0&quot; y=&quot;287.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow19&quot; id=&quot;BPMNEdge_flow19&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;505.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;539.0&quot; y=&quot;167.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+    &lt;/bpmndi:BPMNPlane&gt;
+  &lt;/bpmndi:BPMNDiagram&gt;
+&lt;/definitions&gt;</pre><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;">启动流程对应的代码：</span></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></span></p><pre code_snippet_id="681618" snippet_file_name="blog_20150602_4_1131161" name="code" class="java">import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.ProcessEngineConfiguration;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
+
+public class NameDemo {
+
+	private static String readDataFromConsole(String prompt) {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String str = null;
+		try {
+			System.out.print(prompt);
+			str = br.readLine();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return str;
+	}
+
+	public static void main(String[] args) {
+
+		String str = readDataFromConsole(&quot;Please input string：&quot;);
+		System.out.println(&quot;The information from console： &quot; + str);
+		
+		// 创建流程引擎		
+		ProcessEngineConfiguration processEngineConfiguration = ProcessEngineConfiguration
+				.createStandaloneProcessEngineConfiguration();
+		// 连接数据库的配置
+		processEngineConfiguration.setJdbcDriver(&quot;com.mysql.jdbc.Driver&quot;);
+		processEngineConfiguration
+				.setJdbcUrl(&quot;jdbc:mysql://localhost:3306/activitiexam?useUnicode=true&amp;characterEncoding=utf8&quot;);
+		processEngineConfiguration.setJdbcUsername(&quot;root&quot;);
+		processEngineConfiguration.setJdbcPassword(&quot;root&quot;);
+		ProcessEngine processEngine = processEngineConfiguration
+				.buildProcessEngine();
+		
+		//使用Spring来管理工作流引擎的创建
+		/* ProcessEngine processEngine = ProcessEngineConfiguration  
+	                .createProcessEngineConfigurationFromResource(&quot;applicationContext-common.xml&quot;)  
+	                .buildProcessEngine();  */
+		System.out.println(processEngine);
+		// 获取流程存储服务组件
+		RepositoryService repositoryService = processEngine
+				.getRepositoryService();
+
+		// 获取运行时服务组件
+		RuntimeService runtimeService = processEngine.getRuntimeService();
+
+		// 获取流程任务组件
+		TaskService taskService = processEngine.getTaskService();
+
+		// 1、部署流程文件
+		repositoryService.createDeployment().name(&quot;MyProcess&quot;)
+				.addClasspathResource(&quot;diagrams/&quot; + str + &quot;.bpmn&quot;).deploy();
+
+		// 2、启动流程--根据key部署的话是默认找的最新版本
+		ProcessInstance processInstance = runtimeService
+				.startProcessInstanceByKey(&quot;myProcess&quot;);
+		
+		String end=&quot;0&quot;;//processInstance.getId() != null
+	
+		while (end.equalsIgnoreCase(&quot;0&quot;)) {
+			//循环查询任务
+			
+			Task task = taskService.createTaskQuery()
+					.processInstanceId(processInstance.getId()).singleResult();		
+			Map&lt;String, Object&gt; variables = new HashMap&lt;String, Object&gt;();
+			if(task==null){	
+				end=&quot;1&quot;;
+				System.out.println(&quot;任务已经结束&quot;);
+				break;
+			}else{	
+				str = readDataFromConsole(&quot;Please input result:&quot;);
+				String flowjingyuan=readDataFromConsole(&quot;Please input flowjingyuan:&quot;);
+				String flowhaiyan=readDataFromConsole(&quot;Please input flowhaiyan:&quot;);
+				String flowmilaoshi=readDataFromConsole(&quot;Please input flowmilaoshi:&quot;);
+				
+				variables.put(&quot;result&quot;, str);
+				variables.put(&quot;flowjingyuan&quot;, flowjingyuan);
+				variables.put(&quot;flowhaiyan&quot;, flowhaiyan);
+				variables.put(&quot;flowmilaoshi&quot;, flowmilaoshi);
+								
+				taskService.complete(task.getId(),variables);	//完成任务
+				
+			}				
+					
+		}
+			
+	}
+
+}</pre><p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">执行结果：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><img src="33158288677310" alt=""><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><br></span></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"></span></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">总结：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">首先解释一下，现在在客户端存在的所有暂停其实在真实的开发中均是不存在的，此处只是为了传递变量，告诉工作流如何继续向下一个结点执行，在真实的开发业务中是不同的人处理不同的任务，每次的查询只查询自己的任务，只有本身自己的任务完成后工作流才会自动向下执行。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">解释一下执行结果：</span></p><p style="margin: 0in; font-size: 14pt;"><br></p><img src="195964010031163" alt=""><br><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><br></span></span></span></p><p style="margin:0in;font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">xvshu</span><span lang="zh-CN">结点是在工作流启动后立即执行，但是在办理</span><span lang="en-US">xvshu</span><span lang="zh-CN">结点时需要输入下一个结点的参数，当输入的</span><span lang="en-US">result==flowjingyuan</span><span lang="zh-CN">时，则立即执行</span><span lang="en-US">jingyuan</span><span lang="zh-CN">结点，输出</span><span lang="en-US">jingyuan</span><span lang="en-US">88</span><span lang="zh-CN">，办理</span><span lang="en-US">jingyuan</span><span lang="zh-CN">结点时也需要输入下一个结点的参数，当输入的内容</span><span lang="en-US">result==flowhaiyan</span><span lang="zh-CN">即立即执行</span><span lang="en-US">haiyan</span><span lang="zh-CN">结点，输出</span><span lang="en-US">88guhaiyan</span><span lang="zh-CN">，办理</span><span lang="en-US">guhaiyan</span><span lang="zh-CN">结点时，需要输入下一个结点的参数，因为</span><span lang="en-US">haiyan</span><span lang="zh-CN">结点的下一个结点为结束，而且没有条件限制，故输入任何信息都会结束。</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><br>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/46328841'>原文链接</a>

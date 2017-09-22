@@ -1,0 +1,294 @@
+﻿<div style="color:blue" align=center>【整合篇】JBPM44业务与流程的整合</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">在这次学习工作流的过程中，工作流如何与业务结合有多种方式，虽然很简单，但是每次都要再次梳理几分钟，这次拿出来整理一下，将它真正成为自己的知识。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">从启动流程开始说：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">申请页面：选择所用流程（即画的流程图的</span><span lang="en-US">id</span><span lang="zh-CN">）</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<pre code_snippet_id="585019" snippet_file_name="blog_20150121_1_8567867" name="code" class="html">&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; class=&quot;mainForm&quot;&gt;
+					&lt;tr&gt;                  
+                        &lt;td	width=&quot;120px&quot;&gt;
+	                        &lt;div&gt;                        
+	                        	所用流程:&lt;s:select name=&quot;processDefinitionKey&quot; cssClass=&quot;SelectStyle&quot;  
+	                        		list=&quot;processDefinitionList&quot; listKey=&quot;key&quot; listValue=&quot;key&quot;/&gt;           		
+	                        &lt;/div&gt;                  
+                        &lt;/td&gt;              							
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                      	&lt;td&gt;申请名称:&lt;/td&gt;
+                        &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;title&quot; cssClass=&quot;InputStyle&quot; /&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                     &lt;tr&gt;
+                        &lt;td&gt;申请理由:&lt;/td&gt;
+                        &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;reason&quot; cssClass=&quot;InputStyle&quot; /&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+    &lt;/table&gt;
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">提交申请：获取前台传来的&#20540;</span></p>
+<p style="margin:0in; font-size:14pt">
+<pre code_snippet_id="585019" snippet_file_name="blog_20150121_2_260485" name="code" class="java">/** 提交申请 */
+public String submit() throws Exception {
+	
+	// 封装申请信息
+	Application application = new Application();
+	title=new String(title.getBytes(&quot;iso-8859-1&quot;),&quot;utf-8&quot;);
+	reason=new String(reason.getBytes(&quot;iso-8859-1&quot;),&quot;utf-8&quot;);
+	application.setApplicant(getCurrentUser()); // 申请人，当前用户	
+	application.setTitle(title);
+	application.setReason(reason);
+        String processDefinitionKeyStr=new String(processDefinitionKey.getBytes(&quot;iso-8859-1&quot;),&quot;utf-8&quot;);
+       application.setProcessDefinitionKey(processDefinitionKeyStr);
+
+	// 调用业务方法（保存申请信息，并启动流程开始流转）
+	applicationService.submit(application);
+
+	return &quot;toMyApplicationList&quot;; // 成功后转到&quot;我的申请查询&quot;
+}
+
+public void submit(Application application) {
+	// 1，设置属性并保存application
+	application.setApplyTime(sdf.format(new Date())); // 申请时间，当前时间
+	application.setStatus(Application.STATUS_RUNNING);		
+	
+	// 2，启动程程实例开始流转
+	// &gt;&gt; 准备流程变量
+	Map&lt;String, Object&gt; variablesMap = new HashMap&lt;String, Object&gt;();
+	variablesMap.put(&quot;application&quot;, application);
+	// &gt;&gt; 启动流程实例，并带上流程变量（当前的申请信息）
+	
+	//获取流程定义的key
+	
+	String pdKey = application.getProcessDefinitionKey();
+	
+	//根据流程定义的key值和相应的流程变量启动流程		
+	ProcessInstance pi = processEngine.getExecutionService()//
+			.startProcessInstanceByKey(pdKey, variablesMap);
+	application.setExecuteId(pi.getId());
+	getSession().save(application); // 保存
+	
+	// &gt;&gt; 办理完第1个任务“提交申请”
+	Task task = processEngine.getTaskService()// 
+			.createTaskQuery()// 查询出本流程实例中当前仅有的一个任务“提交申请”
+			.processInstanceId(pi.getId())//
+			.uniqueResult();
+	processEngine.getTaskService().completeTask(task.getId());
+}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">当点击提交申请时application，我们来看看工作流的各个表的变化：<br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="40934315965842" alt="" width="907" height="251"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><strong><br>
+</strong></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><strong>jbpm4_execution：</strong></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><strong><br>
+</strong></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><img src="27182945288037" alt=""><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><strong>jbpm4_task：</strong><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><img src="19873179249205" alt=""><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><img src="3231137759727" alt=""><br>
+</p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><strong><br>
+</strong></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><strong>jbpm4_variable：</strong></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><img src="26234685662112" alt=""><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312">那么通过查看上面表的变化，我们不难发现执行的流程是通过什么和业务绑定的，即jbpm4_execution和jbpm4_variable的关系。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">从流程的启动开始，就与业务绑定关系，那么接下来如何应用呢？</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">下面只是简单介绍，对于一些结合业务的查询问题会单独再说明：</span></p>
+<p style="margin:0in; font-size:14pt">&nbsp;</p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">查看待办任务：一般是根据用户名来查看（当前登陆用户）</span></p>
+<pre code_snippet_id="585019" snippet_file_name="blog_20150121_3_3523266" name="code" class="java">/** 待我审批（我的任务列表） */
+public String myTaskList() throws Exception {
+			
+	List&lt;TaskView&gt; taskViewList = applicationService.getMyTaskViewList(getCurrentUser());
+	//List&lt;TaskView&gt; taskViewList = applicationService.getMyTaskViewList(user);
+	ActionContext.getContext().put(&quot;taskViewList&quot;, taskViewList);
+	return &quot;myTaskList&quot;;
+}
+</pre><br>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">审批处理：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 本环节因为单独出来有一个审批意见表，故会将所有的审批意见添加的审批意见表中，故这个环节的内容是保存数据然后办理任务并判断流程是否结束。当然我们也可以不单独设计审批意见表，而是将所有的审批意见存储到流程变量中。</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 办理任务需要获取任务</span><span lang="en-US">id</span><span lang="zh-CN">，也就是在查看任务列表中获取</span><span lang="zh-CN">taskViewList</span><span lang="zh-CN">。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">审批处理页面,审批处理：</span></p>
+<pre code_snippet_id="585019" snippet_file_name="blog_20150121_4_1802556" name="code" class="java">/** 审批处理页面 */
+public String approveUI() throws Exception {
+	Set&lt;String&gt; outcomes = applicationService.getOutcomesByTaskId(taskId);
+	ActionContext.getContext().put(&quot;outcomes&quot;, outcomes);
+	return &quot;approveUI&quot;;
+}
+
+/** 审批处理 */
+public String approve() throws Exception {
+	// 封装
+	ApproveInfo approveInfo = new ApproveInfo();
+										
+	 comment=new String(comment.getBytes(&quot;iso-8859-1&quot;),&quot;utf-8&quot;);
+		
+	approveInfo.setComment(comment);
+	approveInfo.setApproval(approval);
+	approveInfo.setApplication(applicationService.getById(applicationId));
+		
+	approveInfo.setApprover(getCurrentUser()); // 审批人，当前登录用户					
+	approveInfo.setApproveTime(sdf.format(new Date())); // 当前时间
+	if(outcome!=null){
+		// 调用用业务方法（保存本次审批信息，并办理完任务，并维护申请的状态）
+		outcome=new String(outcome.getBytes(&quot;iso-8859-1&quot;),&quot;utf-8&quot;);
+	}
+	applicationService.approve(approveInfo, taskId, outcome);
+
+	return &quot;toMyTaskList&quot;; // 成功后转到待我审批页面
+}
+
+//办理任务
+public void approve(ApproveInfo approveInfo, String taskId, String outcome) {
+	// 1，保存本次审批信息
+	getSession().save(approveInfo);
+
+	// 2，办理完任务
+	Task task = processEngine.getTaskService().getTask(taskId); // 一定要先取出Task对象，再完成任务，否则拿不到，因为执行完就变成历史信息了。
+	if (outcome == null) {
+		processEngine.getTaskService().completeTask(taskId);
+	} else {
+		processEngine.getTaskService().completeTask(taskId, outcome);
+	}
+
+	// &gt;&gt; 取出所属的流程实例，如果取出的为null，说明流程实例执行完成了，已经变成了历史记录
+	ProcessInstance pi = processEngine.getExecutionService().findProcessInstanceById(task.getExecutionId());
+
+	// 3，维护申请的状态
+	Application application = approveInfo.getApplication();
+	if (!approveInfo.isApproval()) {
+		// 如果本环节不同意，则流程实例直接结束，申请的状态为：未通过
+		if (pi != null) { // 如果流程还未结束
+			processEngine.getExecutionService().endProcessInstance(task.getExecutionId(), ProcessInstance.STATE_ENDED);
+		}
+		application.setStatus(Application.STATUS_REJECTED);
+	} else {
+		// 如果本环节同意，而且本环节是最后一个环节，则流程实例正常结束，申请的状态为：已通过
+		if (pi == null) { // 本环节是最后一个环节，即流程已经结束了
+			application.setStatus(Application.STATUS_APPROVED);
+		}
+	}
+	getSession().update(application);
+}
+</pre><br>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">查看流转记录：即类&#20284;淘宝查看物流信息类&#20284;，完全使用业务信息<br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<pre code_snippet_id="585019" snippet_file_name="blog_20150121_5_3429134" name="code" class="java">/** 查看流转记录 applicationId*/
+public String approveHistory() throws Exception {						
+	Application application = applicationService.getById(applicationId);
+	System.out.println(application.getTitle());
+	ActionContext.getContext().put(&quot;approveInfos&quot;, application.getApproveInfos());
+	return &quot;approveHistory&quot;;
+}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">查看我的申请：完全查看自己的业务信息表即可<br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<pre code_snippet_id="585019" snippet_file_name="blog_20150121_6_6691915" name="code" class="java">/** 我的申请查询 */
+public String myApplicationList() throws Exception {
+		  						
+	String strHQL=&quot;from Application where applicant=&quot;+getCurrentUser().getUserId() ;
+	// 准备数据
+	List&lt;Application&gt; applicationList = applicationService.findByHql(strHQL);
+	ActionContext.getContext().put(&quot;applicationList&quot;, applicationList);			
+	
+	return &quot;myApplicationList&quot;;
+}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<pre code_snippet_id="585019" snippet_file_name="blog_20150121_7_2778595" name="code" class="java">/**
+ * 查看流程图，高亮当前正在执行的节点
+ */
+public String showProcessImageUI() throws Exception {
+	/*boolean isEnded = &quot;true&quot;.equals(request.getParameter(&quot;isEnded&quot;)); // 是否已执行完
+	String processInstanceId = getParameter(request, &quot;processInstanceId&quot;);*/
+	
+	//未考虑是否完成情况
+	//boolean isEnded=false;
+	//启动的实例id
+	//String processInstanceId=&quot;ApplyDepartment.8&quot;;
+	
+	// 1，获取当前正在执行的活动名称
+	String deploymentId = null;
+	String processDefinitionId = null;
+	Set&lt;String&gt; activityNames = null;
+	status=new String(status.getBytes(&quot;iso-8859-1&quot;),&quot;utf-8&quot;);
+	if (!status.equals(&quot;审批中&quot;)) {
+	// 已执行完的，就查询历史
+	HistoryProcessInstance hpi = processEngine.getHistoryService()//
+			.createHistoryProcessInstanceQuery()//
+			.processInstanceId(processInstanceId)//
+			.uniqueResult();
+
+			processDefinitionId = hpi.getProcessDefinitionId();
+			activityNames = new HashSet&lt;String&gt;();
+			activityNames.add(hpi.getEndActivityName()); // 结束的活动名称
+	} else {
+		// 正在执行的，就使用ExecutionService查询
+		ProcessInstance pi = processEngine.getExecutionService()//
+				.createProcessInstanceQuery()//						
+				.processInstanceId(processInstanceId)//
+				.uniqueResult();
+
+		processDefinitionId = pi.getProcessDefinitionId();
+		activityNames = new HashSet&lt;String&gt;(pi.findActiveActivityNames()); // 当前正在执行的活动的名称
+	}
+	ActionContext.getContext().put(&quot;processDefinitionId&quot;, processDefinitionId);
+	// 2，找出他们的坐标
+	Set&lt;ActivityCoordinates&gt; coordList = new HashSet&lt;ActivityCoordinates&gt;();
+	for (String activityName : activityNames) {
+		ActivityCoordinates coord = processEngine.getRepositoryService().getActivityCoordinates(
+				processDefinitionId, activityName);
+		coordList.add(coord);
+	}			
+	ActionContext.getContext().put(&quot;coordList&quot;, coordList);
+	// 3，获取 deploymentId
+	deploymentId = processEngine.getRepositoryService().createProcessDefinitionQuery()//
+			.processDefinitionId(processDefinitionId)//
+			.uniqueResult()//
+			.getDeploymentId();			
+	ActionContext.getContext().put(&quot;deploymentId&quot;, deploymentId);
+	return &quot;showProcessImageUI&quot;;
+}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">总结：</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp;其实写这篇博客的目的是结合工作流的数据库来分析业务与流程是如何绑定的，那么对于流程中需要的一些常用方法的使用在这里也简单的介绍了一番，这样做的目的也是为后面的</span><span lang="en-US">Activiti</span><span lang="zh-CN">中的应用实例的常用方法介绍做个对比，其实无论是</span><span lang="en-US">JBPM4.4</span><span lang="zh-CN">还是它的升级版</span><span lang="en-US">Activiti</span><span lang="zh-CN">本质上都是一样的。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/42871329'>原文链接</a>

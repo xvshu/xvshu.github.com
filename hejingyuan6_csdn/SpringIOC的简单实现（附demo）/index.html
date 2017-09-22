@@ -1,0 +1,253 @@
+﻿<div style="color:blue" align=center>SpringIOC的简单实现（附demo）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><span style="font-size:18px"><br>
+</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN">简单的说，</span><span lang="en-US">Spring</span><span lang="en-US">就是通过工厂</span><span lang="en-US">&#43;</span><span lang="en-US">反射将我们的</span><span lang="en-US">bean</span><span lang="en-US">放到它的容器中的，当我们想用某个</span><span lang="en-US">bean</span><span lang="en-US">的时候，只需要调用</span><span lang="en-US">getBean(&quot;beanID&quot;)</span><span lang="en-US">方法</span><span lang="zh-CN">即可</span><span lang="en-US">。</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">原理简单说明：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN">Spring</span><span lang="zh-CN">容器的原理，其实就是通过解析</span><span lang="en-US">xml</span><span lang="en-US">文件，</span><span lang="zh-CN">通过反射创建出我们所需要的</span><span lang="en-US">bean</span><span lang="en-US">，</span><span lang="zh-CN">再</span><span lang="en-US">将这些</span><span lang="en-US">bean</span><span lang="en-US">挨个放到集合中，然后对外提供一个</span><span lang="en-US">getBean()</span><span lang="en-US">方法，以便我们获得这</span><span lang="en-US">bean</span><span lang="en-US">。</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN">下面我们来简单实现一个</span><span lang="en-US">demo</span></span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">beans.xml</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="615697" snippet_file_name="blog_20150310_1_556655" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans&gt;  
+    &lt;bean id=&quot;user&quot; class=&quot;com.yyb.model.User&quot; /&gt;  
+    &lt;bean id=&quot;userDAO&quot; class=&quot;com.yyb.dao.impl.UserDAOImpl&quot; /&gt;  
+    &lt;bean id=&quot;userService&quot; class=&quot;com.yyb.service.UserService&quot;&gt;  
+        &lt;property name=&quot;userDAO&quot; bean=&quot;userDAO&quot; /&gt;  
+    &lt;/bean&gt;  
+&lt;/beans&gt; </pre>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">BeanFactory</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="615697" snippet_file_name="blog_20150310_2_7826886" name="code" class="java">public interface BeanFactory {
+
+	 Object getBean(String name);  
+}</pre>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">ClassPathXmlApplicationContext：读取xml文件内容，并创建对象及对象关系（使用setter方式）</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="615697" snippet_file_name="blog_20150310_3_876996" name="code" class="java">package com.yyb.spring;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+public class ClassPathXmlApplicationContext implements BeanFactory
+{
+	private Map&lt;String, Object&gt; beans = new HashMap&lt;String, Object&gt;();
+	public ClassPathXmlApplicationContext() throws JDOMException, IOException,
+			InstantiationException, IllegalAccessException,
+			ClassNotFoundException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InvocationTargetException
+	{
+		SAXBuilder sb = new SAXBuilder();
+		// 构造文档对象
+		Document doc = sb.build(ClassPathXmlApplicationContext.class
+				.getClassLoader().getResourceAsStream(&quot;beans.xml&quot;));
+		// 获取根元素
+		Element root = doc.getRootElement();
+		// 取到根元素所有元素
+		List list = root.getChildren();
+		
+		for (int i = 0; i &lt; list.size(); i++)
+		{
+			Element element = (Element) list.get(i);
+			// 取id子元素
+			String beanid = element.getAttributeValue(&quot;id&quot;);
+			// 取class子元素
+			String clzss = element.getAttributeValue(&quot;class&quot;);
+			// 实例化
+			Object o = Class.forName(clzss).newInstance();
+			// 将所有bean放入map中
+			beans.put(beanid, o);
+			// 获取property 进行依赖注入
+			for (Element propertyElement : (List&lt;Element&gt;) element
+					.getChildren(&quot;property&quot;))
+			{
+				String name = propertyElement.getAttributeValue(&quot;name&quot;);
+				System.out.println(name);//userDAO
+				String bean = propertyElement.getAttributeValue(&quot;bean&quot;);
+				System.out.println(bean);//userDAO
+				// 从beans.xml中根据id取到类的对象
+				//Object beanObj = this.getBean(name);
+				// 从beans.xml中根据id取到类的对象
+				Object beanObj = this.getBean(bean);
+				System.out.println(beanObj);//com.yyb.dao.impl.UserDAOImpl@a09ee92
+				// 形成setXXX方法名
+				String methodName = &quot;set&quot; + name.substring(0, 1).toUpperCase()
+						+ name.substring(1);
+				System.out.println(name.substring(0, 1).toUpperCase());//U
+				System.out.println(name.substring(1));//serDAO
+				System.out.println(methodName);//setUserDAO
+				
+				// 反射机制对方法进行调用，将对象在加载bean时就注入到环境上下文中
+				Method m = o.getClass().getMethod(methodName,
+						beanObj.getClass().getInterfaces()[0]);
+				System.out.println(o.getClass());//class com.yyb.service.UserService
+				System.out.println(beanObj.getClass().getInterfaces()[0]);//interface com.yyb.dao.UserDAO
+				System.out.println(m);//public void com.yyb.service.UserService.setUserDAO(com.yyb.dao.UserDAO)
+				// 执行注入,相当于执行了一个setXXX(args..)的方法
+				m.invoke(o, beanObj);
+			}
+		}
+	}
+	@Override
+	public Object getBean(String name)
+	{
+		return beans.get(name);
+	}
+}
+</pre><br>
+<p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">对于以上这段代码实现的效果为：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">Service service=(Service)beans.get(&quot;userService&quot;);</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN">Dao dao = (Dao)beans.get(&quot;</span><span lang="en-US">userDAO</span><span lang="zh-CN">&quot;);</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN">//</span><span lang="zh-CN">依赖注入，</span><span lang="en-US">Service</span><span lang="en-US">实现依赖</span><span lang="en-US">dao</span><span lang="en-US">的实现</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">service.setDao(dao);</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp;</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">User:实体类</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="615697" snippet_file_name="blog_20150310_4_3611461" name="code" class="java">public class User {
+
+    private String userName;  
+    private String password;  
+    /** 
+     * @return the userName 
+     */  
+    public String getUserName()  
+    {  
+        return userName;  
+    }  
+    /** 
+     * @param userName 
+     *            the userName to set 
+     */  
+    public void setUserName(String userName)  
+    {  
+        this.userName = userName;  
+    }  
+    /** 
+     * @return the password 
+     */  
+    public String getPassword()  
+    {  
+        return password;  
+    }  
+    /** 
+     * @param password 
+     *  the password to set 
+     */  
+    public void setPassword(String password)  
+    {  
+        this.password = password;  
+    }  
+    public String toString()  
+    {  
+        StringBuffer sb = new StringBuffer();  
+        sb.append(this.userName);  
+        sb.append(this.password);  
+        return sb.toString();  
+    }  
+}</pre>
+<p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">UserDAO</span></span></p>
+<p><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="615697" snippet_file_name="blog_20150310_5_1362437" name="code" class="java">public interface UserDAO {
+	 void save(User u);  
+	 void delete(); 
+}</pre>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">UserDAOImpl</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="615697" snippet_file_name="blog_20150310_6_7477208" name="code" class="java">public class UserDAOImpl implements UserDAO {
+	 @Override  
+	    public void save(User u) {  
+	        System.out.println(&quot;User:&quot; + u.toString());  
+	    }  
+	    @Override  
+	    public void delete() {  
+	        System.out.println(&quot;delete User&quot;);  
+	          
+	    }  
+}</pre>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">UserService</span></span></p>
+<p><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="615697" snippet_file_name="blog_20150310_7_178654" name="code" class="java">public class UserService {
+	
+   private UserDAO userDAO;  
+	
+   public void addUser(User u)  
+    {  
+        this.userDAO.save(u);  
+    }  
+    /** 
+     * @return the userDAO 
+     */  
+    public UserDAO getUserDAO()  
+    {  
+        return userDAO;  
+    }  
+    /** 
+     * @param userDAO 
+     *            the userDAO to set 
+     */  
+    public void setUserDAO(UserDAO userDAO)  
+    {  
+        this.userDAO = userDAO;  
+    }  
+}</pre><br>
+<p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">下面我们来简单测试一下实现的效果：</span></span></p>
+<p style="margin:0in"><br>
+</p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">Client</span></span></p>
+<p><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="615697" snippet_file_name="blog_20150310_8_6816814" name="code" class="java">public class client {
+
+	public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, JDOMException, IOException {
+	BeanFactory factory = new ClassPathXmlApplicationContext(); 
+	//通过工厂直接获取
+        UserService userService = (UserService) factory.getBean(&quot;userService&quot;); 
+        //其实User也可以从工厂中获得
+        User u=(User)factory.getBean(&quot;user&quot;);
+        //User u = new User();  
+        u.setUserName(&quot;yyb&quot;);  
+        u.setPassword(&quot;1234&quot;);  
+        userService.addUser(u);//打印结果yyb1234
+	}
+
+}</pre>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><br>
+</span></span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN">当然以上我们是通过</span><span lang="en-US">setter</span><span lang="zh-CN">方法注入，还可以使用</span><span lang="zh-CN">构造器注入，也就是在建立对象的时候建立关系（即在</span><span lang="zh-CN">UserService</span><span lang="zh-CN">的构造函数中添加对</span><span lang="zh-CN">userDAO</span><span lang="zh-CN">的赋&#20540;操作</span><span lang="zh-CN">）</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style=""><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">总结：</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN">以上通过</span><span lang="en-US">IOC的一个简要实现实例，模拟了Spring中IOC的实现，虽然只是完成了Spring中依赖注入的一小部分工作，但是很好的展现了Java反射机制在Spring中的应用，能使我们能更好的从原理上了解IOC的实现，也能为我们实现自己的Spring框架提供</span><span lang="zh-CN">了</span><span lang="en-US">方案</span><span lang="zh-CN">。</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN"><br>
+</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><span lang="zh-CN">Spring IOC实现原理demo：<a target="_blank" target="_blank" href="http://download.csdn.net/detail/hejingyuan6/8487907">IOC</a></span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><br>
+</span></span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/44173631'>原文链接</a>

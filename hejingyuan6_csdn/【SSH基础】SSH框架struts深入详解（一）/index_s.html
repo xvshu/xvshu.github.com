@@ -1,0 +1,150 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【SSH基础】SSH框架struts深入详解（一）</div><div style="color:blue" align=center>【SSH基础】SSH框架struts深入详解（一）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 学习了</span><span lang="en-US">struts</span><span lang="zh-CN">，但是对于它的由来，以及为什么使用</span><span lang="en-US">action</span><span lang="zh-CN">和</span><span lang="en-US">struts.xml</span><span lang="zh-CN">的方式而不采用以前的</span><span lang="en-US">servlet</span><span lang="zh-CN">方式，有些疑问，到底之前的方式有什么弊端，</span><span lang="en-US">struts</span><span lang="zh-CN">又给我们带来了什么便利？</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">下面一一为大家解答！</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">struts</span><span lang="zh-CN">的由来：</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">随着JSP与Servlet 技术大量应用于以Web为基础的应用程序，为了提升Web 应用程序可维护性与重复使用性，Java开发人员提出了一些较佳的开发模式。比较常见的两种JSP应用架构分别为Model1 与Model 2。详情参见（</span><span lang="en-US"><a target="_blank" target="_blank" href="http://blog.csdn.net/hejingyuan6/article/details/38085095">J</a></span><span lang="zh-CN"><a target="_blank" target="_blank" href="http://blog.csdn.net/hejingyuan6/article/details/38085095">AVA学习篇--JAVA的两种编程模式对比</a>）</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">简单回顾两种模型：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp; &nbsp; Mode1 1</span><span lang="zh-CN">是一个以</span><span lang="en-US">JSP</span><span lang="zh-CN">文件为中心的模式，</span><span lang="en-US"> JSP</span><span lang="zh-CN">不仅负责表现逻辑，也负责控制逻辑。逻辑耦合在页面中，这种处理方式，对一些规模很小的项目是可以的，但是用在开发大型项目时，页面很难把握流向，界面间关联性太强，使得程序的修改与维护变得困难；此外程序逻辑与页面显示交叉，既不便于分工合作也不利于代码的重用，这样的程序其健壮性和可伸缩性都不好。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp; &nbsp; Model 2</span><span lang="zh-CN">中</span><span lang="en-US">Servlet</span><span lang="zh-CN">扮演前端</span><span lang="en-US">Controller</span><span lang="zh-CN">角色，客户端的请求不再直接送给</span><span lang="en-US">JSP</span><span lang="zh-CN">，而是送给</span><span lang="en-US">Servlet</span><span lang="zh-CN">，再由</span><span lang="en-US">Servlet</span><span lang="zh-CN">根据具体的请求调用不同的事务逻辑，并将处理结果返回到合适的页面。最重要的是</span><span lang="en-US">Model2</span><span lang="zh-CN">将业务逻辑从</span><span lang="en-US">JSP</span><span lang="zh-CN">文件剥离，分离后，</span><span lang="en-US">JSP</span><span lang="zh-CN">文件单纯只是显示，这就是常说的</span><span lang="en-US">View</span><span lang="zh-CN">；而独立出来的事务逻辑和数据处理等是常说的</span><span lang="en-US">Model,</span><span lang="zh-CN">再加上控制器</span><span lang="en-US">Control</span><span lang="zh-CN">本身，即为</span><span lang="en-US">MVC</span><span lang="zh-CN">模式。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp; &nbsp; MVC</span><span lang="zh-CN">模式为大型程序的开发及维护提供了巨大的便利。但是</span><span lang="en-US">Model2</span><span lang="zh-CN">的优点也造成了他的缺点，因为解耦，分层，使得</span><span lang="en-US">Model2</span><span lang="zh-CN">的编写变得复杂，尤其是大型项目，</span><span lang="en-US">Servlet</span><span lang="zh-CN">过多，转向频繁，流程，配置等不易集中管理。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 所以基于以上这些原因，</span><span lang="en-US">Struts</span><span lang="zh-CN">将某些功能进行提取，然后做了一个封装，能让我们更好的使用。上面说的都太过&#31548;统，也许大家还是很难想象。下面结合具体实例说明一下不使用</span><span lang="en-US">struts</span><span lang="zh-CN">的弊端！</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">具体示例分析（不使用</span><span lang="en-US">struts</span><span lang="zh-CN">）</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">add.html</span></p>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre name="code" class="html">&lt;HTML&gt;
+&lt;BODY&gt;
+	&lt;FORM ACTION=&quot;../addGrade&quot; METHOD=&quot;POST&quot;&gt;
+		学号：&lt;INPUT TYPE=&quot;TEXT&quot; NAME=&quot;USERID&quot; &gt;&lt;BR&gt;
+		姓名：&lt;INPUT TYPE=&quot;TEXT&quot; NAME=&quot;USERNAME&quot; &gt;&lt;BR&gt;
+		语文：&lt;INPUT TYPE=&quot;TEXT&quot; NAME=&quot;CHINESE&quot; &gt;&lt;BR&gt;
+		数学：&lt;INPUT TYPE=&quot;TEXT&quot; NAME=&quot;MATHS&quot; &gt;&lt;BR&gt;
+		英语：&lt;INPUT TYPE=&quot;TEXT&quot; NAME=&quot;ENGLISH&quot; &gt;&lt;BR&gt;
+		&lt;INPUT TYPE=&quot;SUBMIT&quot; VALUE=&quot;保存&quot;&gt;
+		&lt;INPUT TYPE=&quot;RESET&quot; VALUE=&quot;取消&quot;&gt;
+	&lt;/FORM&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+</pre><br>
+<p>
+<p lang="en-US" style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">配置文件</span></p>
+<span style="font-family:KaiTi_GB2312"></span><pre name="code" class="html">&lt;servlet&gt;
+	&lt;servlet-name&gt;addgradeservlet&lt;/servlet-name&gt;
+	&lt;servlet-class&gt;servlet.addGradeServlet&lt;/servlet-class&gt;
+&lt;/servlet&gt;
+&lt;servlet-mapping&gt;
+	&lt;servlet-name&gt;addgradeservlet&lt;/servlet-name&gt;
+	&lt;url-pattern&gt;/addGrade&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+
+</pre><br>
+<p lang="en-US" style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">addGradeServlet</span><span lang="en-US">.java:</span><span lang="zh-CN">对应的</span><span lang="en-US">servlet</span></span></p>
+<span style="font-family:KaiTi_GB2312"></span><pre name="code" class="java">public class addGradeServlet extends HttpServlet{
+	
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String strUserId = request.getParameter(&quot;USERID&quot;);
+		String strUserName = request.getParameter(&quot;USERNAME&quot;);
+		String strChinese = request.getParameter(&quot;CHINESE&quot;);
+		String strMaths = request.getParameter(&quot;MATHS&quot;);
+		String strEnglish = request.getParameter(&quot;ENGLISH&quot;);
+		
+		Grade grade=new Grade();
+		grade.setUSERID(strUserId);
+		grade.setUSERNAME(strUserName);
+		grade.setCHINESE(strChinese);
+		grade.setMATHS(strMaths);
+		grade.setENGLISH(strEnglish);
+		
+		gradeDao gradedao=new gradeDao();
+		gradedao.insertGrade(grade); 
+		
+		ArrayList&lt;Grade&gt; gradeList=(ArrayList)gradedao.listGrade();
+		
+		HttpSession session=request.getSession();
+		ServletContext scx=session.getServletContext();
+		scx.setAttribute(&quot;gradeList&quot;,gradeList);
+		response.sendRedirect(&quot;javabean_test/show.jsp&quot;);
+		
+	}
+	
+	public void doGet(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException{
+		this.doPost(request, response);
+	}
+</pre><br>
+<p lang="en-US" style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">分析：此段代码完成的功能是得到学号，姓名，语文，数学，英语等信息，进行相应的操作，并转向相应的页面。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">问题</span><span lang="en-US">1</span><span lang="zh-CN">：对于跳转页来说，就是项目中的页面名称，比如：show.jsp等等这些东西都写死了，比如想换一个页面，因为文件名都已经写死在了程序中，改动起来很麻烦，也不符合</span><span lang="en-US">OCP</span><span lang="zh-CN">原则。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">而且对于上面的代码我们不难发现，每个方法的跳转代码几乎相同，只有跳转的具体页面有差别，那么我们就可以将那些不需要改动的内容抽取出来，做成框架，需要改动的部分拿出来，想要用什么配置一下就可以，比如想改jsp名，只需要配置一下就可以了。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">问题</span><span lang="en-US">2</span><span lang="zh-CN">：就上面的添加功能来说，我们需要从前台获取多个参数，然后再一个一个的设置到对象中，不但增加了我们的代码量，还使我们的程序难于维护。代码如下：</span></span></p>
+<span style="font-family:KaiTi_GB2312"></span><pre name="code" class="java">String strUserId = request.getParameter(&quot;USERID&quot;);
+String strUserName = request.getParameter(&quot;USERNAME&quot;);
+String strChinese = request.getParameter(&quot;CHINESE&quot;);
+String strMaths = request.getParameter(&quot;MATHS&quot;);
+String strEnglish = request.getParameter(&quot;ENGLISH&quot;);
+
+Grade grade=new Grade();
+grade.setUSERID(strUserId);
+grade.setUSERNAME(strUserName);
+grade.setCHINESE(strChinese);
+grade.setMATHS(strMaths);
+grade.setENGLISH(strEnglish);
+</pre><br>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">问题</span><span lang="en-US">3:</span><span lang="zh-CN">上面采用的是添加使用</span><span lang="en-US">addServlet</span><span lang="zh-CN">，那么删除，修改，查询呢，对于一个功能块来说，就最少需要</span><span lang="en-US">4</span><span lang="zh-CN">个</span><span lang="en-US">servlet</span><span lang="zh-CN">来管理，那么这么多个</span><span lang="en-US">servlet</span><span lang="zh-CN">，增加了程序的负担，使我们不容易维护。而即使我们将一个功能块的所有</span><span lang="en-US">servlet</span><span lang="zh-CN">都统一管理，那么我们就又需要添加</span><span lang="en-US">if</span><span lang="zh-CN">判断语句，类&#20284;如下代码：</span><br>
+</span></p>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<pre name="code" class="java">protected void doGet(HttpServletRequest request, HttpServletResponse response)
+		throws ServletException, IOException {
+	if(Constants.SHOW_ADD.equals(getCommand())){
+		showAdd(request,response);
+	}else if(Constants.ADD.equals(getCommand())){
+		add(request,response);
+	}else if(Constants.DEL.equals(getCommand())){
+		del(request,response);
+	}else if(Constants.AUDIT.equals(getCommand())){
+		audit(request,response);
+	}else {
+		//分页查询
+		search(request,response);
+	}
+}
+
+/**
+	 * 删除
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void del(HttpServletRequest request, HttpServletResponse response)
+	throws ServletException, IOException {
+		String[] flowCardVouNos=request.getParameterValues(&quot;selectFlag&quot;);
+		flowCardManager.delFlowCard(flowCardVouNos);
+		response.sendRedirect(request.getContextPath()+&quot;/servlet/flowcard/FlowCardServlet&quot;);
+	}
+</pre><br>
+<p>
+<p lang="en-US" style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 但是这样写又有什么弊端呢？因为if语句的不稳定性，为什么这么说呢？上面有了添加，删除，查询，送审的功能，那么现在我要添加修改的功能，我就需要修改代码</span><span lang="en-US">--</span><span lang="zh-CN">违反了</span><span lang="en-US">OCP</span><span lang="zh-CN">原则。所以它适应需求的能力就比较差。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp; &nbsp; 以上是针对</span><span lang="en-US">struts</span><span lang="zh-CN">能解决的问题，再反过来看我们不用</span><span lang="en-US">struts</span><span lang="zh-CN">时我们程序中会出现的问题进行陈述，当然</span><span lang="en-US">struts</span><span lang="zh-CN">不仅仅只解决了这些问题，上面所述只是为了帮助大家理解简单的举例，理解的不对还请大家指正！下篇博客将继续叙述</span><span lang="en-US">struts</span><span lang="zh-CN">是如何解决上述问题的及它的实现原理！</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:14.0pt"><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/38539715'>原文链接</a>

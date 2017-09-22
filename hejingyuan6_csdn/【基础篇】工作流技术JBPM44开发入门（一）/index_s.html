@@ -1,0 +1,37 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【基础篇】工作流技术JBPM44开发入门（一）</div><div style="color:blue" align=center>【基础篇】工作流技术JBPM44开发入门（一）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">什么是工作流？</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">对于工作流的官方解释在这里就不在赘述了，通俗的说呢，工作流就是对于我们业务中的流程管理！</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">由来：</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">由于我们接触的大部分</span><span lang="en-US">OA</span><span lang="zh-CN">系统中存在着大量的工作流程，而这些流程夹杂着不同领域的业务，无论是状态还是一些操作等都由我们自己维护，而一旦发生业务流程上的变化，修改源代码变成为家常便饭，整个项目举步维艰，况且需求的变更又是无处不在，业务流程的变化更是不可避免。</span></span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">那么说了这么多，工作流到底帮我们做了什么呢？</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">工作流的实现原理：</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">对于工作流，其实它并不是什么高大上的技术，它的实现原理很简单，其实就是将我们平时手动调用的方法，不再在程序中写死，而是将调用方法的过程用</span><span lang="en-US">xml</span><span lang="zh-CN">表示出来，当需要调用某个方法时，我们去读</span><span lang="en-US">xml</span><span lang="zh-CN">来实现，通过去调用</span><span lang="en-US">xml</span><span lang="zh-CN">来读取下一方法的调用，这样来实现灵活配置！</span></span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">相信知道它的原理了，大家就都觉得工作流真的没什么了，而且实现这么一个最最简单的工作流我们也花不了多长时间。</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">JBPM</span><span lang="zh-CN">又是什么？</span></span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">可以说</span><span lang="en-US">JBPM</span><span lang="zh-CN">是工作流思想的一种实现！</span></span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">它的工作其实是对我们常用的业务进行一步抽象封装，将业务中常用的公共方法抽象出来，进行统一管理，当我们应用的时候只需要面对它抽象出来的方法进行调用即可（</span><span lang="en-US">API</span><span lang="zh-CN">），常规的复杂的业务流程都交由工作流来管理，而且应对变化来说，我们需要的也仅仅是更改调用流程的配置。</span></span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">总结：</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">以上只能说是一个对于工作流认识的一个入门，想要表达的只有一个意思，工作流技术并不高深，所有的实现及现在出现的各种工作流产品都是基于它的实现原理来进行不断的抽象封装，只要我们懂得原理其余的只是如何应用别人封装好的方法而已！</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">下篇继续介绍</span><span lang="en-US">JBPM</span><span lang="zh-CN">！</span></span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; margin-left:.375in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/41415303'>原文链接</a>

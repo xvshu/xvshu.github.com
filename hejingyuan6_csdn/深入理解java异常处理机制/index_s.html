@@ -1,0 +1,188 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 深入理解java异常处理机制</div><div style="color:blue" align=center>深入理解java异常处理机制</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><span style="font-family:KaiTi_GB2312;font-size:18px;">首先解释一下try catch finally的用法：</span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><span style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);">1、try+catch<span style="background-color: inherit;">&nbsp;</span></span><br style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);"><span style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);">程序的流程是：运行到try块中，如果有异常抛出，则转到catch块去处理。然后执行catch块后面的语句<span style="background-color: inherit;">&nbsp;</span></span><br style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);"><br style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);"><span style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);">2、try+catch+finally<span style="background-color: inherit;">&nbsp;</span></span><br style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);"><span style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);">程序的流程是：运行到try块中，如果有异常抛出，则转到catch块,catch块执行完毕后，执行finally块的代码，再执行finally块后面的代码。</span><br style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);"><span style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);">如果没有异常抛出，执行完try块，也要去执行finally块的代码。然后执行finally块后面的语句<span style="background-color: inherit;">&nbsp;</span></span><br style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);"><br style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);"><span style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);">3、try+finally<span style="background-color: inherit;">&nbsp;</span></span><br style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);"><span style="line-height: 21px; widows: auto; color: rgb(69, 69, 69);">程序的流程是：运行到try块中,如果有异常抛出的话，程序转向执行finally块的代码。那末finally块后面的代码还会被执行吗？不会！因为没有处理异常，所以遇到异常后，执行完finally后，方法就已抛出异常的方式退出了。</span></span><br></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><span style="font-size: 14px; line-height: 21px; widows: auto; color: rgb(69, 69, 69); font-family: arial, 宋体, sans-serif, tahoma, 'Microsoft YaHei';"><br></span></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">demo1：</span></p><p><pre code_snippet_id="1669255" snippet_file_name="blog_20160502_1_5118796" name="code" class="java">package test.java.example;
+
+/**
+ * Created by hejingyuan on 2016/5/2.
+ */
+public class TestCatchException {
+    public TestCatchException() {
+    }
+
+    boolean testEx1() {
+        boolean ret = true;
+        try {
+            ret = testEx2();
+            if (!ret) {
+                return false;
+            }
+            System.out.println(&quot;testEx1, at the end of try&quot;);
+        } catch (Exception e) {
+            System.out.println(&quot;testEx1, catch exception&quot;);
+            ret = false;
+        }
+        return ret;
+    }
+
+    boolean testEx2(){
+        boolean ret = true;
+        try {
+            int b = 12;
+            int c;
+            for (int i = 2; i &gt;= -2; i--) {
+                c = b / i;
+                System.out.println(&quot;i=&quot; + i);
+            }
+            ret = true;
+        } catch (Exception e) {
+            System.out.println(&quot;testEx2, catch exception&quot;);
+            ret = false;
+        }
+        return ret;
+    }
+
+    public static void main(String[] args) {
+        TestCatchException testException1 = new TestCatchException();
+        try {
+            testException1.testEx1();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+</pre><p><p><br></p><span style="font-family:KaiTi_GB2312;font-size:18px;">执行结果：</span><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">i=2<br>i=1<br>testEx2, catch exception</span></p><p><span style="font-family:KaiTi_GB2312;"><span style="font-size: 18px;">原因：在<span style="font-family: KaiTi_GB2312; font-size: 18px;">testEx2方法中已经catch住了异常<span style="font-family: KaiTi_GB2312; font-size: 18px;">（执行catch方法）</span>，即将异常自己处理掉了，然后继续往下执行返回，所以在<span style="font-family: KaiTi_GB2312; font-size: 18px;">testEx1中并不会有任何异常出现，也就不会执行catch代码块，而是走try的正常流程，经过if判断直接返回false</span></span></span></span></p><p><span style="font-family:KaiTi_GB2312;"><span style="font-size: 18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br></span></span></span></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">demo2：</span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><pre code_snippet_id="1669255" snippet_file_name="blog_20160502_2_8182676" name="code" class="java">package test.java.example;
+
+/**
+ * Created by hejingyuan on 2016/5/2.
+ */
+public class TestThrowException {
+    public TestThrowException() {
+    }
+
+    boolean testEx() throws Exception {
+        boolean ret = true;
+        try {
+            ret = testEx1();
+            return ret;
+        } catch (Exception e) {
+            System.out.println(&quot;testEx, catch exception&quot;);
+            ret = false;
+            throw e;
+        } finally {
+            System.out.println(&quot;testEx, finally; return value=&quot; + ret);
+        }
+    }
+
+    boolean testEx1() throws Exception {
+        boolean ret = true;
+        try {
+            ret = testEx2();
+            if (!ret) {
+                return false;
+            }
+            System.out.println(&quot;testEx1, at the end of try&quot;);
+            return ret;
+        } catch (Exception e) {
+            System.out.println(&quot;testEx1, catch exception&quot;);
+            ret = false;
+            throw e;
+        } finally {
+            System.out.println(&quot;testEx1, finally; return value=&quot; + ret);
+        }
+    }
+
+    boolean testEx2() throws Exception {
+        boolean ret = true;
+        try {
+            int b = 12;
+            int c;
+            for (int i = 2; i &gt;= -2; i--) {
+                c = b / i;
+                System.out.println(&quot;i=&quot; + i);
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println(&quot;testEx2, catch exception&quot;);
+            ret = false;
+            throw e;
+        } finally {
+            System.out.println(&quot;testEx2, finally; return value=&quot; + ret);
+        }
+
+    }
+    public static void main(String[] args) {
+        TestThrowException testException1 = new TestThrowException();
+        try {
+            testException1.testEx();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}</pre><p><br><span style="font-family:KaiTi_GB2312;font-size:18px;">执行结果:</span><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">i=2<br>i=1<br>testEx2, catch exception<br>testEx2, finally; return value=false<br>testEx1, catch exception<br>testEx1, finally; return value=false<br>testEx, catch exception<br>testEx, finally; return value=false<br>java.lang.ArithmeticException: / by zero<br><span style="white-space:pre">	</span>at test.java.example.TestThrowException.testEx2(TestThrowException.java:48)<br><span style="white-space:pre">	</span>at test.java.example.TestThrowException.testEx1(TestThrowException.java:27)<br><span style="white-space:pre">	</span>at test.java.example.TestThrowException.testEx(TestThrowException.java:13)<br><span style="white-space:pre">	</span>at test.java.example.TestThrowException.main(TestThrowException.java:64)<br><span style="white-space:pre">	</span>at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)<br><span style="white-space:pre">	</span>at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)<br><span style="white-space:pre">	</span>at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)<br><span style="white-space:pre">	</span>at java.lang.reflect.Method.invoke(Method.java:606)<br><span style="white-space:pre">	</span>at com.intellij.rt.execution.application.AppMain.main(AppMain.java:134)<br><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">原因：在<span style="font-family: KaiTi_GB2312; font-size: 18px;">testEx2方法中出现除数为0时会抛出异常，然后由<span style="font-family: KaiTi_GB2312; font-size: 18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">catch</span></span>捕获到，故执行<span style="font-family: KaiTi_GB2312; font-size: 18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">catch</span></span>部分，打印并抛出异常，然后执行finally打印信息，由于catch中抛出了异常，所以上层方法将会执行<span style="font-family: KaiTi_GB2312; font-size: 18px;">catch</span>部分，即<span style="font-family: KaiTi_GB2312; font-size: 18px;">testEx1方法将执行<span style="font-family: KaiTi_GB2312; font-size: 18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">catch</span></span>部分，之后异常还是会继续往上层抛出，到<span style="font-family: KaiTi_GB2312; font-size: 18px;">testEx方法并不会执行返回仍然<span style="font-family: KaiTi_GB2312; font-size: 18px;">catch</span>住异常然后抛给main函数的<span style="font-family: KaiTi_GB2312; font-size: 18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;">catch</span></span>，然后打印出来</span></span></span></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><span style="font-family: KaiTi_GB2312; font-size: 18px;"><br></span></span></span></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">demo3:</span></p><p><br></p><p><pre code_snippet_id="1669255" snippet_file_name="blog_20160502_3_6612512" name="code" class="java">package test.java.example;
+
+public class TestException {
+    public TestException() {
+    }
+
+    boolean testEx() throws Exception {
+        boolean ret = true;
+        try {
+            ret = testEx1();
+        } catch (Exception e) {
+            System.out.println(&quot;testEx, catch exception&quot;);
+            ret = false;
+            throw e;
+        } finally {
+            System.out.println(&quot;testEx, finally; return value=&quot; + ret);
+            return ret;
+        }
+    }
+
+    boolean testEx1() throws Exception {
+        boolean ret = true;
+        try {
+            ret = testEx2();
+            if (!ret) {
+                return false;
+            }
+            System.out.println(&quot;testEx1, at the end of try&quot;);
+            return ret;
+        } catch (Exception e) {
+            System.out.println(&quot;testEx1, catch exception&quot;);
+            ret = false;
+            throw e;
+        } finally {
+            System.out.println(&quot;testEx1, finally; return value=&quot; + ret);
+            return ret;
+        }
+    }
+
+    boolean testEx2() throws Exception {
+        boolean ret = true;
+        try {
+            int b = 12;
+            int c;
+            for (int i = 2; i &gt;= -2; i--) {
+                c = b / i;
+                System.out.println(&quot;i=&quot; + i);
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println(&quot;testEx2, catch exception&quot;);
+            ret = false;
+            throw e;
+        } finally {
+            System.out.println(&quot;testEx2, finally; return value=&quot; + ret);
+            return ret;
+        }
+    }
+
+    public static void main(String[] args) {
+        TestException testException1 = new TestException();
+        try {
+            testException1.testEx();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}</pre><br><span style="font-family:KaiTi_GB2312;font-size:18px;">执行结果：</span><p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">i=2<br>i=1<br>testEx2, catch exception<br>testEx2, finally; return value=false<br>testEx1, finally; return value=false<br>testEx, finally; return value=false<br><br><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;">原因:</span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:18px;"><span style="color: rgb(75, 75, 75); line-height: 19.5px;">（假设方法需要返回值）</span><br style="color: rgb(75, 75, 75); line-height: 19.5px;"><span style="color: rgb(75, 75, 75); line-height: 19.5px;">java 的异常处理中，</span><br style="color: rgb(75, 75, 75); line-height: 19.5px;"><span style="color: rgb(75, 75, 75); line-height: 19.5px;">在不抛出异常的情况下，程序执行完 try 里面的代码块之后，该方法并不会立即结束，而是继续试图去寻找该方法有没有 finally 的代码块，</span><br style="color: rgb(75, 75, 75); line-height: 19.5px;"><span style="color: rgb(75, 75, 75); line-height: 19.5px;">如果没有&nbsp;finally 代码块，整个方法在执行完 try 代码块后返回相应的值来结束整个方法；</span><br style="color: rgb(75, 75, 75); line-height: 19.5px;"><span style="color: rgb(75, 75, 75); line-height: 19.5px;">如果有 finally 代码块，此时程序执行到 try 代码块里的 return 语句之时并不会立即执行 return，而是先去执行 finally 代码块里的代码，</span><br style="color: rgb(75, 75, 75); line-height: 19.5px;"><span style="color: rgb(75, 75, 75); line-height: 19.5px;">若 finally 代码块里没有 return 或没有能够终止程序的代码，程序将在执行完 finally 代码块代码之后再返回 try 代码块执行 return 语句来结束整个方法；</span><br style="color: rgb(75, 75, 75); line-height: 19.5px;"><span style="color: rgb(75, 75, 75); line-height: 19.5px;">若 finally 代码块里有 return 或含有能够终止程序的代码，方法将在执行完 finally 之后被结束，不再跳回 try 代码块执行 return。</span><br style="color: rgb(75, 75, 75); line-height: 19.5px;"><span style="color: rgb(75, 75, 75); line-height: 19.5px;">在抛出异常的情况下，原理也是和上面的一样的，你把上面说到的 try 换成 catch 去理解就 OK 了 *_*，即catch中无论是返回还是抛出异常，最终返回的均是finally中的结果，除非finally无返回。</span><br></span></p><p><span style="color: rgb(75, 75, 75); line-height: 19.5px;"><span style="font-family:KaiTi_GB2312;font-size:18px;"><br></span></span></p><p><span style="color: rgb(75, 75, 75); font-family: Verdana, Geneva, Arial, Helvetica, sans-serif; font-size: 13px; line-height: 19.5px;"><br></span></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/51296904'>原文链接</a>

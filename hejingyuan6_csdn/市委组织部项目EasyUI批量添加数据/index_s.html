@@ -1,0 +1,127 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 市委组织部项目EasyUI批量添加数据</div><div style="color:blue" align=center>市委组织部项目EasyUI批量添加数据</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">需求：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">&nbsp; &nbsp; 由于</span><span lang="en-US">easyui</span><span lang="zh-CN">只有添加一条记录，删除一条记录的实现方式，但是对于批量删除和添加的功能却没有，而我们需要的是使用复选框批量绑定数据，固在此基础上修改！</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN"><img src="23511257487124" alt=""><br>
+</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN"></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">核心思路：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">easyui</span><span lang="zh-CN">中</span><span lang="en-US">datagrid</span><span lang="zh-CN">的</span><span lang="en-US">g</span><span lang="zh-CN">etSelections的方法：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">msdn</span><span lang="zh-CN">解释：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">返回所有被选择的行，当没有记录被选择时，将返回一个空数组。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">将getSelections方法得到的数组，赋给字符串用“</span><span lang="en-US">|</span><span lang="zh-CN">”隔开，之后传到一般处理程序处，再使用“</span><span lang="en-US">|</span><span lang="zh-CN">”将数据分开循环获取</span><span lang="en-US">id</span><span lang="zh-CN">&#20540;，然后将数据循环添加的数据库中即可！</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<pre code_snippet_id="158146" snippet_file_name="blog_20140115_1_5375397" name="code" class="javascript">&lt;script type=&quot;text/javascript&quot;&gt;
+             var url;
+             function newUser() {              
+          
+                 $(&#39;#fm&#39;).form(&#39;clear&#39;);
+                 var row = $(&#39;#dg&#39;).datagrid(&#39;getSelections&#39;);
+                 var msg;
+                 msg = row[0].Id;
+                 if (row.length &gt; 1) {
+                     for (var i = 1; i &lt; row.length; i++) {
+                         msg = msg + &quot;|&quot; + row[i].Id;
+                     }
+                 }
+                 document.getElementById(&quot;test&quot;).value = &quot;add&quot;;//设定表示为后台调不同方法数据提供接口           
+                 var test = document.getElementById(&quot;test&quot;).value;
+                 var roleID;
+                 roleID = $(&#39;#RoleName&#39;).combobox(&#39;getValue&#39;);
+                 if (row) {
+                     $(&#39;#form1&#39;).form(&#39;submit&#39;, {
+                         url: &quot;AdmRoleWindowsRelative.ashx?Id=&quot; + msg + &quot;&amp;roleID=&quot; + roleID + &quot;&amp;test=&quot; + test,
+                         //url: &quot;AdmAddMenu.ashx?Id=&quot; + Id + &quot;&amp;MenuName=&quot; + MenuName + &quot;&amp;MenuDescribe=&quot; + MenuDescribe + &quot;&amp;test=&quot; + test,
+
+                         onSubmit: function () {
+                         },
+                         //判断结果是否正确
+                         success: function (result) {
+                             if (result.indexOf(&quot;T&quot;) == 0) {
+                                 $(&#39;#dlg&#39;).dialog(&#39;close&#39;);
+                                 alert(&#39;恭喜您，信息绑定成功！&#39;)
+                                 // close the dialog
+                                 $(&#39;#dg&#39;).datagrid(&#39;reload&#39;);
+                                 //$(&#39;#fm&#39;).form(&#39;submit&#39;);
+                             }
+                             else if (result.indexOf(&quot;E&quot;) == 0) {
+                                 alert(&#39;绑定失败,此绑定已经存在，请查看已绑定页面！&#39;)
+                                 $(&#39;#dg&#39;).datagrid(&#39;reload&#39;);
+                             } else {
+                                 alert(&#39;绑定失败,请联系管理员！&#39;)
+                             }
+                             var result = eval(&#39;(&#39; + result + &#39;)&#39;);
+
+                         }
+                     });
+                 }
+             }
+ &lt;/script&gt;
+</pre><br>
+<pre code_snippet_id="158146" snippet_file_name="blog_20140115_2_6869113" name="code" class="csharp">        /// &lt;summary&gt;
+        /// 添加记录
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
+        public void Add(HttpContext context)
+        {
+            EvaluationSystem.Model.RoleWindowEntity  enRoleWindows = new Model.RoleWindowEntity();
+            string strId = context.Server.UrlDecode(context.Request.QueryString[&quot;Id&quot;]);
+            string roleId=context.Server.UrlDecode(context.Request.QueryString[&quot;roleID&quot;]);
+            string[] strids = strId.ToString().Split(&#39;|&#39;);
+            string blD;
+            blD = &quot;true&quot;;
+            for (int i = 0; i &lt; strids.Length; i++)
+            {
+                enRoleWindows.WindowsID  = strids[i].ToString();
+                enRoleWindows.RoleID=roleId;
+                if (roleWindowsBll.Exists(enRoleWindows) == false)
+                {
+                    if (!roleWindowsBll.Add(enRoleWindows))
+                    {
+                        blD = &quot;false&quot;;
+                    }
+                }
+                else {
+                    blD = &quot;exists&quot;;
+                }
+                
+
+            }
+            //enRoleWindows.Id = context.Server.UrlDecode(context.Request.QueryString[&quot;ID&quot;]);
+            //转向首页
+            //caresBasicInfoEntity. = context.Session[&quot;AdminName&quot;].ToString();
+            if (blD==&quot;true&quot;)
+            {
+                context.Response.Write(&quot;T&quot;);
+            }
+            else if (blD == &quot;false&quot;)
+            {
+                context.Response.Write(&quot;F&quot;);
+            }
+            else {
+                context.Response.Write(&quot;E&quot;);
+            }
+            context.Response.ContentType = &quot;text/plain&quot;;
+        }
+</pre>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN"><br>
+</span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px">总结：</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">&nbsp; &nbsp; 这段时间做市委组织部考核项目对</span><span lang="en-US">easyui</span><span lang="zh-CN">有了一个简单的理解。jQueryEasyUI的目标就是帮助web开发者更轻松的打造出功能丰富并且美观的UI界面。开发者不需要编写复杂的javascript，也不需要对css样式有深入的了解，开发者需要了解的只有一些简单的html标签。对于敏捷开发来说真的是个不错的选择，而且我们可以将EasyUI进行简单的改写，实现我们的效果！</span></span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN"><br>
+</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><span lang="zh-CN"><br>
+</span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/18319441'>原文链接</a>

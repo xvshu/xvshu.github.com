@@ -1,0 +1,257 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【应用篇】Activiti监听（抽象）与业务颗粒结合的简单应用（二）</div><div style="color:blue" align=center>【应用篇】Activiti监听（抽象）与业务颗粒结合的简单应用（二）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">Activiti</span><span lang="zh-CN">的简单应用，应用监听来实现简单的业务颗粒与工作流程结合，让流程带动业务颗粒执行的过程，此次的监听我们应用抽象的监听来实现，也就是说所有的普通业务类均应用此抽象监听，而不需要每一个类一个监听的来操作。</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">新建两个普通类：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="java">package com.tgb.itoo.activiti.controller;
+
+public class milaoshi {
+	public static void SayHello(){
+		System.out.println(&quot;milaoshi--sayHello--&quot;);
+	}
+/*	public static void SayHi(){
+		System.out.println(&quot;milaoshi--sayHi--&quot;);
+	}*/
+}
+
+package com.tgb.itoo.activiti.controller;
+
+public class tanghuan {
+	public static void SayHello(){
+		System.out.println(&quot;tanghuan--sayHello--&quot;);
+	}
+	public static void SayHi(){
+		System.out.println(&quot;tanghuan--sayHi--&quot;);
+	}
+}
+</pre><br><p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">抽象监听类：</span></p><span style="font-family:KaiTi_GB2312;"></span><pre name="code" class="java">package com.tgb.itoo.activiti.controller;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.activiti.engine.delegate.DelegateTask;
+import org.activiti.engine.delegate.TaskListener;
+
+public class CommonDelegate implements TaskListener{
+
+	static Map&lt;Object,Object&gt; map;
+
+	public CommonDelegate(){}
+	public CommonDelegate(Map&lt;Object,Object&gt; map){
+		this.map=map;
+	}
+		
+	@Override
+	public void notify(DelegateTask delegateTask) {
+			
+		Object obj=map.get(&quot;object&quot;);
+		Class clazz=obj.getClass();
+		Method[] methods=clazz.getDeclaredMethods();
+		for(int i=0;i&lt;methods.length;i++ ){			 					
+			try {				
+				
+				Method beforMehod = clazz.getMethod(methods[i].getName());
+		        beforMehod.invoke(obj);
+				
+			} catch (NoSuchMethodException | SecurityException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+	}
+	
+	
+}
+</pre><br><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">业务流程图</span><span lang="en-US"> </span><span lang="zh-CN">如图（</span><span lang="en-US">tanghuan</span><span lang="zh-CN">类和</span><span lang="en-US">milaoshi</span><span lang="zh-CN">类均绑定同一个监听）：</span><br></span></p><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><img src="20407939856259" alt=""><br></span></span></p><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></span></p><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">流程变量</span><span lang="en-US"> </span><span lang="zh-CN">如图（不同意如图，同意为${result}）：</span><br></span></span></p><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></span></p><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"><img src="2352526089728" alt=""><br></span></span></span></p><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">最终生成的配置文件</span><span lang="en-US"> </span><span lang="zh-CN">如下：</span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN"><br></span></span></p><pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;definitions xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:activiti=&quot;http://activiti.org/bpmn&quot; xmlns:bpmndi=&quot;http://www.omg.org/spec/BPMN/20100524/DI&quot; xmlns:omgdc=&quot;http://www.omg.org/spec/DD/20100524/DC&quot; xmlns:omgdi=&quot;http://www.omg.org/spec/DD/20100524/DI&quot; typeLanguage=&quot;http://www.w3.org/2001/XMLSchema&quot; expressionLanguage=&quot;http://www.w3.org/1999/XPath&quot; targetNamespace=&quot;http://www.activiti.org/test&quot;&gt;
+  &lt;process id=&quot;myProcess&quot; name=&quot;My process&quot; isExecutable=&quot;true&quot;&gt;
+    &lt;startEvent id=&quot;startevent1&quot; name=&quot;Start&quot;&gt;&lt;/startEvent&gt;
+    &lt;userTask id=&quot;usertask1&quot; name=&quot;tanghuan&quot;&gt;
+      &lt;extensionElements&gt;
+        &lt;activiti:taskListener event=&quot;create&quot; class=&quot;com.tgb.itoo.activiti.controller.CommonDelegate&quot;&gt;&lt;/activiti:taskListener&gt;
+      &lt;/extensionElements&gt;
+    &lt;/userTask&gt;
+    &lt;sequenceFlow id=&quot;flow1&quot; sourceRef=&quot;startevent1&quot; targetRef=&quot;usertask1&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;exclusiveGateway id=&quot;exclusivegateway1&quot; name=&quot;Exclusive Gateway&quot;&gt;&lt;/exclusiveGateway&gt;
+    &lt;sequenceFlow id=&quot;flow2&quot; sourceRef=&quot;usertask1&quot; targetRef=&quot;exclusivegateway1&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;userTask id=&quot;usertask2&quot; name=&quot;milaoshi&quot;&gt;
+      &lt;extensionElements&gt;
+        &lt;activiti:taskListener event=&quot;create&quot; class=&quot;com.tgb.itoo.activiti.controller.CommonDelegate&quot;&gt;&lt;/activiti:taskListener&gt;
+      &lt;/extensionElements&gt;
+    &lt;/userTask&gt;
+    &lt;sequenceFlow id=&quot;flow3&quot; name=&quot;同意&quot; sourceRef=&quot;exclusivegateway1&quot; targetRef=&quot;usertask2&quot;&gt;
+      &lt;conditionExpression xsi:type=&quot;tFormalExpression&quot;&gt;&lt;![CDATA[${result}]]&gt;&lt;/conditionExpression&gt;
+    &lt;/sequenceFlow&gt;
+    &lt;endEvent id=&quot;endevent1&quot; name=&quot;End&quot;&gt;&lt;/endEvent&gt;
+    &lt;sequenceFlow id=&quot;flow4&quot; sourceRef=&quot;usertask2&quot; targetRef=&quot;endevent1&quot;&gt;&lt;/sequenceFlow&gt;
+    &lt;sequenceFlow id=&quot;flow5&quot; name=&quot;不同意&quot; sourceRef=&quot;exclusivegateway1&quot; targetRef=&quot;endevent1&quot;&gt;
+      &lt;conditionExpression xsi:type=&quot;tFormalExpression&quot;&gt;&lt;![CDATA[${!result}]]&gt;&lt;/conditionExpression&gt;
+    &lt;/sequenceFlow&gt;
+  &lt;/process&gt;
+  &lt;bpmndi:BPMNDiagram id=&quot;BPMNDiagram_myProcess&quot;&gt;
+    &lt;bpmndi:BPMNPlane bpmnElement=&quot;myProcess&quot; id=&quot;BPMNPlane_myProcess&quot;&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;startevent1&quot; id=&quot;BPMNShape_startevent1&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;35.0&quot; width=&quot;35.0&quot; x=&quot;139.0&quot; y=&quot;102.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;usertask1&quot; id=&quot;BPMNShape_usertask1&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;55.0&quot; width=&quot;105.0&quot; x=&quot;219.0&quot; y=&quot;92.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;exclusivegateway1&quot; id=&quot;BPMNShape_exclusivegateway1&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;40.0&quot; width=&quot;40.0&quot; x=&quot;369.0&quot; y=&quot;100.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;usertask2&quot; id=&quot;BPMNShape_usertask2&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;55.0&quot; width=&quot;105.0&quot; x=&quot;454.0&quot; y=&quot;93.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNShape bpmnElement=&quot;endevent1&quot; id=&quot;BPMNShape_endevent1&quot;&gt;
+        &lt;omgdc:Bounds height=&quot;35.0&quot; width=&quot;35.0&quot; x=&quot;489.0&quot; y=&quot;222.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+      &lt;/bpmndi:BPMNShape&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow1&quot; id=&quot;BPMNEdge_flow1&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;174.0&quot; y=&quot;119.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;219.0&quot; y=&quot;119.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow2&quot; id=&quot;BPMNEdge_flow2&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;324.0&quot; y=&quot;119.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;369.0&quot; y=&quot;120.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow3&quot; id=&quot;BPMNEdge_flow3&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;409.0&quot; y=&quot;120.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;454.0&quot; y=&quot;120.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;bpmndi:BPMNLabel&gt;
+          &lt;omgdc:Bounds height=&quot;14.0&quot; width=&quot;100.0&quot; x=&quot;419.0&quot; y=&quot;120.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+        &lt;/bpmndi:BPMNLabel&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow4&quot; id=&quot;BPMNEdge_flow4&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;506.0&quot; y=&quot;148.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;506.0&quot; y=&quot;222.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+      &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow5&quot; id=&quot;BPMNEdge_flow5&quot;&gt;
+        &lt;omgdi:waypoint x=&quot;389.0&quot; y=&quot;140.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;389.0&quot; y=&quot;239.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;omgdi:waypoint x=&quot;489.0&quot; y=&quot;239.0&quot;&gt;&lt;/omgdi:waypoint&gt;
+        &lt;bpmndi:BPMNLabel&gt;
+          &lt;omgdc:Bounds height=&quot;14.0&quot; width=&quot;100.0&quot; x=&quot;399.0&quot; y=&quot;201.0&quot;&gt;&lt;/omgdc:Bounds&gt;
+        &lt;/bpmndi:BPMNLabel&gt;
+      &lt;/bpmndi:BPMNEdge&gt;
+    &lt;/bpmndi:BPMNPlane&gt;
+  &lt;/bpmndi:BPMNDiagram&gt;
+&lt;/definitions&gt;
+</pre><br><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">启动流程对应的代码：</span></p><p style="margin: 0in; font-size: 14pt;"><pre code_snippet_id="681354" snippet_file_name="blog_20150602_4_5560981" name="code" class="java">import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.ProcessEngineConfiguration;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
+
+import com.tgb.itoo.activiti.controller.CommonDelegate;
+import com.tgb.itoo.activiti.controller.milaoshi;
+import com.tgb.itoo.activiti.controller.tanghuan;
+
+public class MapDemo {
+
+	private static String readDataFromConsole(String prompt) {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String str = null;
+		try {
+			System.out.print(prompt);
+			str = br.readLine();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return str;
+	}
+
+	public static void main(String[] args) {
+
+		String str = readDataFromConsole(&quot;Please input string：&quot;);
+		System.out.println(&quot;The information from console： &quot; + str);
+		// 创建流程引擎
+		ProcessEngineConfiguration processEngineConfiguration = ProcessEngineConfiguration
+				.createStandaloneProcessEngineConfiguration();
+		// 连接数据库的配置
+		processEngineConfiguration.setJdbcDriver(&quot;com.mysql.jdbc.Driver&quot;);
+		processEngineConfiguration
+				.setJdbcUrl(&quot;jdbc:mysql://localhost:3306/activitiexam?useUnicode=true&amp;characterEncoding=utf8&quot;);
+		processEngineConfiguration.setJdbcUsername(&quot;root&quot;);
+		processEngineConfiguration.setJdbcPassword(&quot;root&quot;);
+		ProcessEngine processEngine = processEngineConfiguration
+				.buildProcessEngine();
+
+		System.out.println(processEngine);
+		// 获取流程存储服务组件
+		RepositoryService repositoryService = processEngine
+				.getRepositoryService();
+
+		// 获取运行时服务组件
+		RuntimeService runtimeService = processEngine.getRuntimeService();
+
+		// 获取流程任务组件
+		TaskService taskService = processEngine.getTaskService();
+
+		// 1、部署流程文件
+		repositoryService.createDeployment().name(&quot;MyProcess&quot;)
+				.addClasspathResource(&quot;diagrams/&quot; + str + &quot;.bpmn&quot;).deploy();
+
+		
+		Map&lt;Object,Object&gt; map=new HashMap&lt;Object,Object&gt;();
+		tanghuan th=new tanghuan();
+		milaoshi mxj=new milaoshi();
+		//向map里面扔对象
+		map.put(&quot;object&quot;, th);
+		/*map.put(&quot;milaoshi&quot;, mxj);*/			
+		CommonDelegate common=new CommonDelegate(map);
+		
+		// 2、启动流程
+		ProcessInstance processInstance = runtimeService
+				.startProcessInstanceByKey(&quot;myProcess&quot;);
+		String end=&quot;1&quot;;//processInstance.getId() != null
+		while (end.equalsIgnoreCase(&quot;1&quot;)) {
+			map.remove(&quot;object&quot;);
+			map.put(&quot;object&quot;, mxj);
+			// 3、查询第一个任务
+			Task task = taskService.createTaskQuery()
+					.processInstanceId(processInstance.getId()).singleResult();
+			;			
+							
+			if (task != null) {
+				System.out.println(&quot;============&quot; + task.getId()
+						+ &quot;============&quot; + task.getName() + &quot;============&quot;);
+				str = readDataFromConsole(&quot;Please input result:&quot;);
+				Map&lt;String, Object&gt; variables = new HashMap&lt;String, Object&gt;();
+				Boolean result;
+				if (str.equalsIgnoreCase(&quot;true&quot;)) {
+					result = true;
+				} else {
+					result = false;
+
+				}
+				variables.put(&quot;result&quot;, result);
+				taskService.complete(task.getId(), variables); // 完成任务
+
+			}else {
+				end=&quot;0&quot;;
+				System.out.println(&quot;任务已经完成&quot;);
+			} 
+
+		}
+
+	}
+
+}
+</pre><br><p><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312;"></span></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">执行结果：</span></p><p style="margin: 0in; font-size: 14pt;"><br></p><img src="12625555830788" alt=""><br><p style="margin: 0in; font-size: 14pt;"><span lang="zh-CN"><span lang="zh-CN"></span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">总结：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp; &nbsp; 以上这种方式主要是应用了反射技术实现，我们在客户端动态的向监听内扔对象，根据扔的对象来去执行对应的方法，减少了我们编写监听的个数。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><br>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/46324789'>原文链接</a>

@@ -1,0 +1,122 @@
+﻿<div style="color:blue" align=center>发布系统后Excel导出失效</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">由来：考试系统中导出学生成绩，当时可能是自己的疏忽，觉得调试时能很成功的导出成绩，就不会有什么大问题，但是当真正使用的时候，应用发布的版本导出成绩系统却没有任何反应，也不提示任何错误。原因？</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">问题一：代码</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">如下是两种方式的导出</span><span lang="en-US">excel</span><span lang="zh-CN">的代码：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">代码</span><span lang="en-US">1</span><span lang="zh-CN">：</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"></span></p>
+<pre code_snippet_id="127301" snippet_file_name="blog_20131225_1_7004754" name="code" class="csharp" style="font-size: 16pt; font-family: 宋体;">        /// &lt;summary&gt;
+        /// 导出Excel
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;dt&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;ExportFileName&quot;&gt;&lt;/param&gt;
+        public void ToExcel(DataTable dt)
+        {
+            DataGrid dgExcel = new DataGrid();
+            dgExcel.DataSource = dt;
+            dgExcel.DataBind();
+
+            HttpContext.Current.Response.Charset = &quot;GB2312&quot;;
+            string fileName = HttpUtility.UrlEncode(Guid.NewGuid().ToString(), System.Text.Encoding.UTF8);
+            string str = &quot;attachment;filename=&quot; + fileName + &quot;.xls&quot;;
+            HttpContext.Current.Response.ContentEncoding = System.Text.Encoding.UTF8;
+            HttpContext.Current.Response.ContentType = &quot;application/ms-excel&quot;;
+            HttpContext.Current.Response.AppendHeader(&quot;content-disposition&quot;, str);
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htmTextWriter = new HtmlTextWriter(sw);
+            dgExcel.RenderControl(htmTextWriter);
+            HttpContext.Current.Response.Write(&quot;&lt;html&gt;&lt;head&gt;&lt;meta http-equiv=\&quot;Content-Type\&quot; content=\&quot;text/html; charset=utf-8\&quot; /&gt;&quot;);
+            string style = &quot;&lt;style&gt;td{mso-number-format:\&quot;\\@\&quot;;}&lt;/style&gt;&quot;;//防止导出excel时将以0开头的全数字数据的0去掉
+            HttpContext.Current.Response.Write(style);
+            HttpContext.Current.Response.Write(&quot;&lt;/head&gt;&lt;body&gt;&quot;);
+            HttpContext.Current.Response.Write(sw);
+            HttpContext.Current.Response.Write(&quot;&lt;/body&gt;&lt;/html&gt;&quot;);
+            HttpContext.Current.Response.Flush();
+            sw.Close();
+            htmTextWriter.Close();
+
+        }
+</pre><br>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">代码</span><span lang="en-US">2</span><span lang="zh-CN">：</span></span><br>
+<p>
+<p style="margin:0in"><span lang="zh-CN"><span lang="zh-CN"></span></span></p>
+<pre code_snippet_id="127301" snippet_file_name="blog_20131225_2_7669846" name="code" class="csharp" style="font-size: 16pt; font-family: 宋体;">	//导出excel
+	public void ToExcel(System.Data.DataTable dt)
+	        {
+	            //新建Excel程序
+	            Application excelApp = new Application();
+	            //设置Excel程序显示
+	            excelApp.Visible = true;
+	            //新建工作簿
+	            Workbook workBook = excelApp.Workbooks.Add(true);
+	            //获取工作表
+	            Worksheet workSheet = workBook.Worksheets[1];
+	            //设置所有列为文本格式
+	            workSheet.Columns.NumberFormatLocal = &quot;@&quot;;
+	
+	            //填充Excel工作表
+	            //填充表头
+	            int countRow;//行计数变量
+	            int countCol;//列计数变量
+	            for (countCol = 0; countCol &lt; dt.Columns.Count; countCol++)
+	            {
+	                workSheet.Cells[1, countCol + 1] = dt.Columns[countCol].ColumnName;
+	            }
+	
+	            //填充内容
+	            for (countRow = 0; countRow &lt; dt.Rows.Count; countRow++)
+	            {
+	                for (countCol = 0; countCol &lt; dt.Columns.Count; countCol++)
+	                {
+	                    workSheet.Cells[countRow + 2, countCol + 1] = dt.Rows[countRow][countCol].ToString();
+	                }
+	            }
+	
+	            /*---------------设置Excel单元格的格式-------------*/
+	            //获取最后一列的内容区
+	            Range errorMessageRange = workSheet.Range[workSheet.Cells[2, countCol], workSheet.Cells[countRow + 1, countCol]];
+	            //获取第一行
+	            Range headRange = workSheet.Range[&quot;A1&quot;, workSheet.Cells[1, countCol]];
+	            //设置第一行字体加粗
+	            headRange.Font.Bold = true;
+	            //设置所有列宽自适应
+	            workSheet.Columns.EntireColumn.AutoFit();
+	
+	
+	        }
+</pre><br>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 同样是以</span><span lang="en-US">datatable</span><span lang="zh-CN">来导出</span><span lang="en-US">excel</span><span lang="zh-CN">，分析一下这两种代码的异同！使用第二种方式的时候导出</span><span lang="en-US">excel</span><span lang="zh-CN">大家有没有注意到，点击导出后，</span><span lang="en-US">excel</span><span lang="zh-CN">立即打开，单元&#26684;中填充着我们要的数据，但是为什么当我们将系统一发布，导出</span><span lang="en-US">excel</span><span lang="zh-CN">就失效了，还没有任何异常抛出。当你看到</span><span lang="en-US">excel</span><span lang="zh-CN">导出成功并直接打开，有没有考虑过什么是</span><span lang="en-US">web</span><span lang="zh-CN">开发？</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; 在调试的过程中，因为觉得未发布没有问题，那么应该不是代码的问题，就一直在网上查找原因，各种方式的尝试，直到分析代码时才察觉到问题的所在。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 其实当我们发现在本地导出</span><span lang="en-US">excel</span><span lang="zh-CN">时，它直接打开</span><span lang="en-US">excel</span><span lang="zh-CN">就应该发现问题。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; Web开发的B/S是浏览器/服务器模式则无需客户端软件，只要客户端安装Web浏览器就能够使用系统功能，而系统的更新也只需要管理员替换服务器文件就可以实现，无需用户去下载客户端。流程：客户端发送路径（网址）用来向服务端请求服务，通了之后服务端会返回来一些信息来提供服务。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; 既然是这样，那么在这个过程中怎么可能出现代码</span><span lang="en-US">2</span><span lang="zh-CN">的编写方式呢，不可能客户端自己建立</span><span lang="en-US">excel</span><span lang="zh-CN">呀！而是第一种方式请求服务器，从服务器下载下来的才是我们的需要呀！固如图：</span></span></p>
+<p style="font-size:16pt; font-family:宋体; margin:0in 0in 0in 1.125in"><img src="23665398427487" alt=""><br>
+</p>
+<br>
+<p style="margin:0in"><span lang="zh-CN"><span lang="zh-CN"></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">问题二：</span><span lang="en-US">U</span><span lang="en-US">pdatePanel</span><span lang="zh-CN">的慎用</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; ScriptManager和UpdatePanel控件联合使用可以实现页面异步局部更新的效果。其中的UpdatePanel就是设置页面中异步局部更新区域，它必须依赖于ScriptManager存在，因为ScriptManger控件提供了客户端脚本生成与管理UpdatePanel的功能。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; UpdatePanel可以避免页面的频繁刷新！当然它的优点是简单易用，但是也容易引起一些功能（弹出框，导出</span><span lang="en-US">excel</span><span lang="zh-CN">，分页等）的失效（本应刷新的内容却被阻止）！</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">注意：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">使用</span><span lang="en-US">U</span><span lang="en-US">pdatePanel</span><span lang="zh-CN">时，尽量让UpdatePanel仅包含必要的内容，不要盲目的扩大</span><span lang="en-US">U</span><span lang="en-US">pdatePanel</span><span lang="zh-CN">的包含范围！</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">总结：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; 本身就这个问题而言应该不是什么难实现的功能，在实现的时候也没有考虑很多，将这次开发的大前提忽视了。出现问题时也一直觉得代码不会有问题，毕竟可以实现，对于发布不成功一直以为是发布过程中缺少了什么。通过这次教训更深刻的理解了BS的运行的机制，对于BS的前后台有了一个更清晰的概念。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">下篇博客将继续介绍</span><span lang="en-US">U</span><span lang="en-US">pdatePanel</span><span lang="zh-CN">的用法！</span></span></p>
+<br>
+<p style="margin:0in"><span lang="zh-CN"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span lang="zh-CN"><br>
+</span></span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/17401897'>原文链接</a>

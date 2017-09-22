@@ -1,0 +1,79 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; MyBatis之ResultMap简介，关联对象</div><div style="color:blue" align=center>MyBatis之ResultMap简介，关联对象</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">MyBatis中在查询进行select映射的时候，返回类型可以用resultType，也可以用resultMap，resultType是直接表示返回类型的，而resultMap则是对外部ResultMap的引用，但是resultType跟resultMap不能同时存在。</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">1.resultType</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">&nbsp;</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">在MyBatis进行查询映射的时候，其实查询出来的每一个属性都是放在一个对应的Map里面的，其中键是属性名，值则是其对应的值。当提供的返回类型属性是resultType的时候，MyBatis会将Map里面的键值对取出赋给resultType所指定的对象对应的属性。所以其实MyBatis的每一个查询映射的返回类型都是ResultMap，只是当我们提供的返回类型属性是resultType的时候，MyBatis对自动的给我们把对应的值赋给resultType所指定对象的属性，而当我们提供的返回类型是resultMap的时候，因为Map不能很好表示领域模型，我们就需要自己再进一步的把它转化为对应的对象，这常常在复杂查询中很有作用。</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">&nbsp;</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">这里要强调的是，<span style="color:#990000;">Mybatis是对返回的结果的每一行做映射的</span>。所以，下面的语句返回的是Integer,而不是List</span></p><br><pre name="code" class="html">&lt;select id=&quot;count&quot; parameterType=&quot;AreaDto&quot; resultType=&quot;java.lang.Integer&quot;&gt;  
+        SELECT id FROM USER  
+&lt;/select&gt; </pre><br><p><span style="font-family:KaiTi_GB2312;font-size:14px;">返回一个int</span></p><p><pre name="code" class="html">&lt;select id=&quot;count&quot; parameterType=&quot;AreaDto&quot; resultType=&quot;java.lang.Integer&quot;&gt;  
+        SELECT count(*) FROM USER  
+&lt;/select&gt; </pre><br><span style="font-family:KaiTi_GB2312;font-size:14px;">返回map</span><p><p><pre name="code" class="html">&lt;select id=”selectUsers” parameterType=”int” resultType=”hashmap”&gt;  
+    select id, username, hashedPassword  
+    from some_table  
+    where id = #{id}  
+&lt;/select&gt; </pre><br><p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">这样一个语句简单作用于所有列被自动映射到HashMap的键上，这由resultType属性指定。这在很多情况下是有用的，但是HashMap不能很好描述一个领域模型。那样你的应用程序将会使用JavaBeans或POJOs（Plain Old Java Objects，普通Java对象）来作为领域模型</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">返回javaBEAN 对象</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">这些情况下，MyBatis会在幕后自动创建一个ResultMap，基于属性名来映射列到JavaBean的属性上</span></p><p><p><span style="font-family:KaiTi_GB2312;font-size:14px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">2.resultMap</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">&nbsp;</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">MyBatis会自动创建一个ResultMap对象，然后基于查找出来的属性名进行键值对封装，然后再看到返回类型是Blog对象，再从ResultMap中取出与Blog对象对应的键值对进行赋值。</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">当返回类型直接是一个ResultMap的时候也是非常有用的，这主要用在进行复杂联合查询上，因为进行简单查询是没有什么必要的。</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">&nbsp;</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">简单resultMap配置 </span><br></p><p><pre name="code" class="html">&lt;resultMap type=&quot;com.liulanghan.Blog&quot; id=&quot;BlogResult&quot;&gt;    
+    &lt;id column=&quot;id&quot; property=&quot;id&quot;/&gt;    
+    &lt;result column=&quot;title&quot; property=&quot;title&quot;/&gt;    
+    &lt;result column=&quot;content&quot; property=&quot;content&quot;/&gt;    
+    &lt;result column=&quot;owner&quot; property=&quot;owner&quot;/&gt;    
+&lt;/resultMap&gt;   
+   
+&lt;select id=&quot;selectBlog&quot; parameterType=&quot;int&quot; resultMap=&quot;BlogResult&quot;&gt;    
+      select * from t_blog where id = #{id}    
+&lt;/select&gt;</pre><br><p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">结果集的列比resultMap多会报错么？<br>不会,只映射resultMap中有的列。</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">&nbsp;</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">结果集的列比resultMap少会报错么？<br>不会,只映射结果集中有的列。</span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">&nbsp;</span></p><span style="font-family:KaiTi_GB2312;font-size:14px;">详细说明，请参考：<a target="_blank" target="_blank" href="http://zhuyuehua.iteye.com/blog/1721715">Mybatis中resultMap</a></span><p><span style="font-family:KaiTi_GB2312;font-size:14px;"><br></span></p><p><span style="font-family:KaiTi_GB2312;font-size:14px;">附：一个一直让自己迷糊的地方</span></p><p><br></p><p><pre name="code" class="html">&lt;resultMap id=&quot;promotionActivity&quot; type=&quot;PromotionActivity&quot;&gt;
+		&lt;id property=&quot;id&quot; column=&quot;id&quot;/&gt;
+		&lt;result property=&quot;name&quot; column=&quot;name&quot;/&gt;
+		&lt;result property=&quot;balanceName&quot; column=&quot;balance_name&quot;/&gt;	
+		 ...//省略
+		&lt;result property=&quot;newCustomer&quot; column=&quot;new_customer&quot;/&gt;
+		&lt;association property=&quot;orderPlatform&quot; javaType=&quot;OrderPlatform&quot;&gt;
+			&lt;id property=&quot;id&quot; column=&quot;platform_id&quot;/&gt;
+			&lt;result property=&quot;name&quot; column=&quot;orderplatform_name&quot;/&gt;								
+		&lt;/association&gt;
+		&lt;association property=&quot;promotionTemplate&quot; javaType=&quot;PromotionTemplate&quot;&gt;
+			&lt;id property=&quot;id&quot; column=&quot;templat_id&quot;/&gt;			
+			&lt;result property=&quot;name&quot; column=&quot;template_name&quot;/&gt;
+			&lt;result property=&quot;types&quot; column=&quot;template_types&quot;/&gt;
+			&lt;result property=&quot;relation&quot; column=&quot;template_relation&quot;/&gt;
+			&lt;result property=&quot;minCups&quot; column=&quot;template_mincups&quot;/&gt;
+			&lt;result property=&quot;cups&quot; column=&quot;template_cups&quot;/&gt;
+			&lt;result property=&quot;limitedProduct&quot; column=&quot;template_limitedproduct&quot;/&gt;							
+		&lt;/association&gt;  	 			
+	&lt;/resultMap&gt;
+
+&nbsp;&lt;select id=&quot;get&quot; parameterType=&quot;long&quot; resultMap=&quot;promotionActivity&quot;&gt;
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;SELECT PA.id,PA.balance_name,PA.name,PA.total_times,PA.start_time,PA.end_time,PA.template_id,
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;PA.region_limit_type,PA.region_limit,PA.new_customer,PA.uniqueness,PT.name as template_name,
+                      PT.types as template_types,
+                      PT.relation as template_relation,PT.min_cups as template_mincups,
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;PT.cups as template_cups,PT.limited_product as template_limitedproduct,&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;OT.name as orderplatform_name,PA.day_total_times,PA.customer_total_times,PA.customer_day_total_times,
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;PA.repeat_times,PT.id as templat_id,OT.id as platform_id
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;from promotion_activity PA
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;left join promotion_template PT on PT.id=PA.template_id&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;left join order_platform OT on OT.id=PA.platform_id
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;where PA.active='Y'
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; AND PA.id = #{id}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp;&lt;/select&gt;
+&lt;select id=&quot;queryPage&quot; parameterType=&quot;Map&quot; resultMap=&quot;promotionActivity&quot;&gt;
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;SELECT PA.id,PA.balance_name,PA.name,PA.total_times,PA.start_time,PA.end_time,PA.template_id,
+&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;PA.region_limit_type,PA.region_limit from promotion_activity PA&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; where active='Y' 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;if test=&quot;cityId != null and cityId != ''&quot; &gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;and ((region_limit like CONCAT('%',',${cityId},','%' ) or 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;region_limit like CONCAT('%',',${cityId}') or
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;region_limit like CONCAT('${cityId},','%' ) or
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;region_limit like '${cityId}')
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; and region_limit_type='c' )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;or (region_limit_type = 'z' and&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;foreach collection=&quot;zoneList&quot; index=&quot;index&quot; item=&quot;region&quot; open=&quot;(&quot;
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;separator=&quot;or&quot; close=&quot;)&quot;&gt;
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; PA.region_limit like&nbsp; CONCAT('%',',${region},','%' ) or 
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;PA.region_limit like&nbsp; CONCAT('%',',${region}' ) or
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; PA.region_limit like&nbsp; CONCAT('${region},','%' ) or
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; PA.region_limit like '${region}'&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&lt;/foreach&gt; ) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/if&gt; 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp;&lt;/select&gt; 
+&nbsp;&nbsp;&nbsp; 
+&nbsp;</pre><br><br><br>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/50764785'>原文链接</a>

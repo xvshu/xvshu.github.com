@@ -1,0 +1,136 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 数据结构线性表（2）</div><div style="color:blue" align=center>数据结构线性表（2）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">线性表定义：</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">线性表是最基本、最简单、也是最常用的一种数据结构。线性表中数据元素之间的关系是一对一的关系，即除了第一个和最后一个数据元素之外，其它数据元素都是首尾相接的。线性表的逻辑结构简单，便于实现和操作。因此，线性表这种数据结构在实际应用中是广泛采用的一种数据结构。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp;&nbsp;<img src="13422647668859" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">存储空间是否连续：</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">一、顺序表的特点是逻辑上相邻的数据元素，物理存储位置也相邻，并且，顺序表的存储空间需要预先分配。</span></p>
+<span style="font-family:KaiTi_GB2312">&nbsp;</span>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="29520386996166" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt">
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">优点：&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">（1）方法简单，各种高级语言中都有数组，容易实现。&nbsp;&nbsp;&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">（2）不用为表示节点间的逻辑关系而增加额外的存储开销。&nbsp;&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">（3）顺序表具有按元素序号随机访问的特点。</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">缺点：&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">（1）在顺序表中做插入、删除操作时，平均移动表中的一半元素，因此对n较大的顺序表效率低。&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">（2）需要预先分配足够大的存储空间，估计过大，可能会导致顺序表后部大量闲置；预先分配过小，又会造成溢出。</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">二、在链表中逻辑上相邻的数据元素，物理存储位置不一定相邻，它使用指针实现元素之间的逻辑关系。并且，链表的存储空间是动态分配的。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="49735287583183" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">优点</span><span lang="en-US">：插入、删除运算方便。&nbsp;</span></span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">缺点：&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">（1）要占用额外的存储空间存储元素之间的关系，存储密度降低。存储密度是指一个节点中数据元素所占的存储单元和整个节点所占的存储单元之比。&nbsp;&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">（2）链表不是一种随机存储结构，不能随机存取元素</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">链表的操作：</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">针对双向链表来说，如图：</span></p>
+<span style="font-family:KaiTi_GB2312">&nbsp;&nbsp;</span>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="28532595663231" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">删除结点：<br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="49483668814889" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">代码</span><span lang="en-US">:</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">p-&gt;prior-&gt;next=p-&gt;next;//p</span><span lang="zh-CN">的前驱结点的后链指向</span><span lang="en-US">p</span><span lang="zh-CN">的后继结点</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">p-&gt;next-&gt;prior=p-&gt;prior;//p</span><span lang="zh-CN">后继结点的前链指向</span><span lang="en-US">P</span><span lang="zh-CN">的前驱结点</span></span></p>
+<p lang="en-US" style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">Free(p)</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">插入结点：</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="51283717218506" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">代码：</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">q-&gt;prior=p;//q</span><span lang="zh-CN">的前链指向</span><span lang="en-US">p</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">q-&gt;next=p-&gt;next;//</span><span lang="en-US">q</span><span lang="zh-CN">的后链指向</span><span lang="en-US">p</span><span lang="zh-CN">的后继结点</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">p-&gt;next-&gt;prior=q;//p</span><span lang="zh-CN">的后继结点的前链指向</span><span lang="en-US">q</span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">p-&gt;next=q;//p</span><span lang="zh-CN">的后链指向</span><span lang="en-US">q</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">对于插入操作来说，要先连线再拆线！而且前链和后链指向的均为数据域！</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">顺序表与链表对比</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="5484447255238" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">栈，队列，数组</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">栈是限制在表的一端进行插入和删除的线性表。允许插入、删除的这一端称为栈顶，另一个固定端称为栈底。当表中没有元素时称为空栈。</span><span lang="en-US">--</span><span lang="zh-CN">先进后出</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="27659566541305" alt=""></span>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">队列（Queue）是限定只能在表的一端进行插入和在另一端进行删除操作的线性表。</span><span lang="en-US">--</span><span lang="zh-CN">先进先出</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="50365698868302" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">循环队列：</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">由来：</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">如图：</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="13544047613551" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><br>
+</p>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">如果数组的最大下标为</span><span lang="en-US">5</span><span lang="zh-CN">，元素</span><span lang="en-US">J6</span><span lang="zh-CN">已占用了该单元，如果还要有元素入队列，则将超出数组的下标范围，从而使将要入队的新元素无法进入队列，而此时数组中下标底端还有空位置，即数组的实际空间并没有占满，这种现象称为“假溢出”。</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">若要插入新元素，应将队列中现有元素向队首方向移动，以便在队尾腾出空间。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">为了避免元素的移动，可以将存储队列元素的一维数组首尾相接，形成一个环状，这样的队列称为循环队列</span><span lang="en-US">--</span><span lang="zh-CN">克服假上溢</span></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">循环队列</span><span lang="en-US"></span><span lang="zh-CN">如图：</span></span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="29943119604473" alt=""></span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:16pt">
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">总结：</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">线性表根据存储空间是否连续分为顺序表和链表，栈和队列都是特殊的线性表，它们二者的区别在于出栈的顺序不同。而数组是线性表的变化形式，一般在写程序时线性表都用数组来表示。它们都是软件设计中常用的数据结构。可以说，栈和队列是操作受限的线性表。</span></p>
+<p style="margin:0in; font-size:16pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span><br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/26147943'>原文链接</a>

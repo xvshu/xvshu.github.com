@@ -1,0 +1,280 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; JAVA容器简单介绍（1）</div><div style="color:blue" align=center>JAVA容器简单介绍（1）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:宋体"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">容器位于</span><span lang="en-US">java.util</span><span lang="zh-CN">包内</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">Java容器类库的用途是保存对象，根据数据结构不同将其划分为两个不同的概念</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">（1）&nbsp;&nbsp;&nbsp;Collection，一个独立元素的序列，其中List按照元素的插入顺序保存元素，而set不能有重复元素，Queue（队列）按照先进先出（FIFO）的方式来管理数据，Stack（栈）按照后进先出（LIFO）的顺序管理数据。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">（2）&nbsp;&nbsp;&nbsp;Map，一组键&#20540;对（key-value）对象的序列，可以使用key来查找value，其中key是不可以重复的，value可以重复。我们可以称其为字典或者关联数组。其中HashMap是无序的，TreeMap是有序的，WeakHashMap是弱类型的，Hashtable是线程安全的。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">容器</span><span lang="en-US">API</span><span lang="zh-CN">的类图结构如图：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="15130979989158" alt=""><br>
+</span>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">C</span><span lang="en-US">ollection</span><span lang="zh-CN">接口</span></span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">--</span><span lang="zh-CN">定义了存取一组对象的方法，其子接口</span><span lang="en-US">Set</span><span lang="zh-CN">和</span><span lang="en-US">List</span><span lang="zh-CN">分别定义了存储方式。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">示例：</span></p>
+<pre code_snippet_id="276514" snippet_file_name="blog_20140405_1_1027931" name="code" class="java">import java.util.*;
+public class TestCollection{
+	public static void main(String[] args){
+		Collection c=new ArrayList();
+		//可以放入不同类型的对象
+		c.add(&quot;hello&quot;);
+		c.add(new Name(&quot;f1&quot;,&quot;l1&quot;));
+		c.add(new Integer(100));
+		System.out.println(c.size());
+		System.out.println(c);
+		}
+}
+class Name{
+	private String firstName,lastName;
+	public Name(String firstName,String lastName){
+		this.firstName=firstName;
+		this.lastName=lastName;
+		}
+	public String getFirstName(){
+		return firstName;
+		}
+	public String getLastName(){
+		return lastName;
+		
+	}
+	public String toString(){
+		return firstName+&quot; &quot;+lastName;
+		}
+}
+</pre><br>
+<img src="13997508388523" alt=""><br>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US"><br>
+</span></span></p>
+<h2><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">Set</span><span lang="zh-CN">接口：</span></span></h2>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">Set</span><span lang="zh-CN">接口是</span><span lang="en-US">Collection</span><span lang="zh-CN">的子接口，</span><span lang="en-US">Set</span><span lang="zh-CN">接口没有提供额外的方法，但实现</span><span lang="en-US">Set</span><span lang="zh-CN">接口的容器类中的元素是没有顺序的，而且不可以重复。</span></span></p>
+<p style="font-size:16pt; font-family:宋体; margin:0in"><span lang="zh-CN"></span></p>
+<pre code_snippet_id="276514" snippet_file_name="blog_20140405_2_4169040" name="code" class="java">import java.util.*;
+public class TestSet{
+	public static void main(String[] args){
+		Set s1=new HashSet();
+		Set s2=new HashSet();
+		s1.add(&quot;a&quot;);
+		s1.add(&quot;b&quot;);
+		s1.add(&quot;c&quot;);
+		s2.add(&quot;d&quot;);
+		s2.add(&quot;a&quot;);
+		s2.add(&quot;b&quot;);
+		Set sn=new HashSet(s1);
+		//sn中与s2相同的
+		sn.retainAll(s2);
+		Set su=new HashSet(s1);
+		//所有的
+		su.addAll(s2);
+		System.out.println(sn);
+		System.out.println(su);
+		}
+}
+</pre><br>
+<p>
+<p><img src="24945075470257" alt=""><br>
+</p>
+<p style="margin:0in"><span lang="zh-CN"></span></p>
+<p style="margin:0in"><br>
+</p>
+<h2><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">L</span><span lang="en-US">ist</span><span lang="zh-CN">接口：</span></span></h2>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">List</span><span lang="zh-CN">接口是</span><span lang="en-US">Collection</span><span lang="zh-CN">的子接口，实现</span><span lang="en-US">List</span><span lang="zh-CN">接口的容器类中的元素是有顺序的，而且可以重复。</span><span lang="en-US">List</span><span lang="zh-CN">容器中的元素都对应一个整数型的序号记载其在容器中的位置，可以根据序号存取容器中的元素。</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:Calibri; font-size:16pt">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px; font-weight:normal">次序是List最重要的特点；它确保维护元素特定的顺序。List为Collection添加了许多方法，使得能够向List中间插入与移除元素(只推荐 LinkedList使用)。</span></p>
+<div style="font-family:Calibri; font-size:16pt"><span style="font-size:14px"><br>
+</span></div>
+<p>
+<pre code_snippet_id="276514" snippet_file_name="blog_20140405_3_5183579" name="code" class="java">import java.util.*;
+public class TestList{
+	public static void main(String[] args){
+		List l1=new LinkedList();
+		for(int i=0;i&lt;=5;i++){
+			l1.add(&quot;a&quot;+i);
+			}
+		System.out.println(l1);
+		l1.add(3,&quot;a100&quot;);
+		System.out.println(l1);
+		l1.set(6,&quot;a200&quot;);
+		System.out.println(l1);
+		System.out.print((String)l1.get(2)+&quot; &quot;);
+		System.out.println(l1.indexOf(&quot;a3&quot;));
+		l1.remove(1);
+		System.out.println(l1);
+	}
+}</pre>
+<p>
+<p><img src="38088786707304" alt=""><br>
+</p>
+<p><br>
+</p>
+<p>
+<h1><span style="font-family:KaiTi_GB2312"><span lang="en-US">M</span><span lang="en-US">ap</span><span lang="zh-CN">接口</span></span></h1>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">定义了存储“键（</span><span lang="en-US">key</span><span lang="zh-CN">）</span><span lang="en-US">-</span><span lang="zh-CN">&#20540;（</span><span lang="en-US">value</span><span lang="zh-CN">）映射对”的方法</span></span></p>
+<pre code_snippet_id="276514" snippet_file_name="blog_20140405_4_7626577" name="code" class="java">import java.util.*;
+public class TestMap{
+	public static void main(String args[]){
+		Map m1=new HashMap();
+		Map m2=new TreeMap();
+		m1.put(&quot;one&quot;,new Integer(1));
+		m1.put(&quot;two&quot;,new Integer(2));
+		m1.put(&quot;three&quot;,new Integer(3));
+		m2.put(&quot;A&quot;,new Integer(1));
+		m2.put(&quot;B&quot;,new Integer(2));
+		
+		System.out.println(m1.size());
+		System.out.println(m1.containsKey(&quot;one&quot;));
+		System.out.println(m2.containsValue(new Integer(1)));
+		
+		if(m1.containsKey(&quot;two&quot;)){
+			int i=((Integer)m1.get(&quot;two&quot;)).intValue();
+			System.out.println(i);
+			
+			}
+			Map m3=new HashMap(m1);
+			m3.putAll(m2);
+			System.out.println(m3);
+		}
+
+}</pre>
+<p><br>
+</p>
+<p><img src="5669099800218" alt=""></p>
+<br>
+<h1><span style="font-family:KaiTi_GB2312"><span lang="en-US">Iterator</span><span lang="zh-CN">接口：</span></span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">所有实现了</span><span lang="en-US">C</span><span lang="en-US">ollection</span><span lang="zh-CN">接口的容器类都有一个</span><span lang="en-US">iterator</span><span lang="zh-CN">方法用以返回一个实现了</span><span lang="en-US">Iterator</span><span lang="zh-CN">接口的对象。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">Iterator</span><span lang="zh-CN">对象称作迭代器，用以方便的实现对容器内元素的遍历操作。</span></span></p>
+<br>
+<p style="font-size:16pt; font-family:宋体; margin:0in">
+<pre code_snippet_id="276514" snippet_file_name="blog_20140405_5_69576" name="code" class="java">import java.util.*;
+public class TestIterator{
+	public static void main(String[] args){
+		Collection c=new HashSet();
+		c.add(new Name(&quot;f1&quot;,&quot;l1&quot;));
+		c.add(new Name(&quot;f2&quot;,&quot;l2&quot;));
+		c.add(new Name(&quot;f3&quot;,&quot;l3&quot;));
+		Iterator i=c.iterator();
+		while (i.hasNext()){
+			//next()的返回值为Object类型，需要转换为相应类型
+			Name n=(Name)i.next();
+			System.out.println(n.getFirstName()+&quot; &quot;); 
+			}
+		}
+}
+class Name{
+	private String firstName,lastName;
+	public Name(String firstName,String lastName){
+		this.firstName=firstName;
+		this.lastName=lastName;
+		}
+	public String getFirstName(){
+		return firstName;
+		}
+	public String getLastName(){
+		return lastName;
+		
+	}
+	public String toString(){
+		return firstName+&quot; &quot;+lastName;
+		}
+}
+</pre><br>
+<p>
+<p><img src="319898302976" alt=""><br>
+</p>
+<p><br>
+</p>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in">
+<h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px">数组和容器类的区别：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">效率、类型限定和对于基本类型的处理。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">1，效率肯定是内建的数组效率更高一些。数组是一种高效的存储和随机访问对象引用序列的方式，使用数组可以快速的访问数组中的元素。但是当创建一个数组对象 ( 注意和对象数组的区别 ) 后，数组的大小也就固定了，当数组空间不足的时候就再创建一个新的数组，把旧的数组中所有的引用复制到新的数组中。,</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">2，在泛型出来之前，容器类都是存取Object，而数组规定了确定类型。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">3，在自动封包解包前，容器类不支持基本类型，而数组支持。</span></p>
+<div><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></div>
+<div><br>
+</div>
+<br>
+<h2><span style="font-family:KaiTi_GB2312; font-size:24px">泛型：</span></h2>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp;&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 起因：类型不明确</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">&nbsp; &nbsp; 装入集合的类型都被当做</span><span lang="en-US">O</span><span lang="en-US">bject</span><span lang="zh-CN">对待，从而失去自己的实际类型</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 从集合中取出时往往需要转型，效率底，容易产生错误</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">解决办法：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 在定义集合的时候同时定义集合中对象的类型</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1</span><span lang="zh-CN">，可以在定义</span><span lang="en-US">C</span><span lang="en-US">ollection</span><span lang="zh-CN">的时候指定</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2</span><span lang="zh-CN">，也可以在循环时用</span><span lang="en-US">I</span><span lang="en-US">terator</span><span lang="zh-CN">指定</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; 好处：增强程序的可读性和稳定性</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">
+<pre code_snippet_id="276514" snippet_file_name="blog_20140405_6_6449288" name="code" class="java">import java.util.*;
+
+public class BasicGeneric {
+	public static void main(String[] args) {
+		List&lt;String&gt; c = new ArrayList&lt;String&gt;();
+		c.add(&quot;aaa&quot;);
+		c.add(&quot;bbb&quot;);
+		c.add(&quot;ccc&quot;);
+		for(int i=0; i&lt;c.size(); i++) {
+			String s = c.get(i);
+			System.out.println(s);
+		}
+		
+		Collection&lt;String&gt; c2 = new HashSet&lt;String&gt;();
+		c2.add(&quot;aaa&quot;); c2.add(&quot;bbb&quot;); c2.add(&quot;ccc&quot;);
+		for(Iterator&lt;String&gt; it = c2.iterator(); it.hasNext(); ) {
+			String s = it.next();
+			System.out.println(s);
+		}
+	}
+}</pre><br>
+<p>
+<img src="2515157655833" alt=""><br>
+<p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:24px">总结：</span></h1>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-size:16pt; font-family:宋体">&nbsp;</span><span style="font-family:KaiTi_GB2312; font-size:24px"> &nbsp; 以上只是简单介绍了容器的概念，以及各个容器类的特点和使用范例，对于容器类和数组来说，一般情况下，考虑到效率与类型检查，应该尽可能考虑使用数组。如果要解决一般化的问题，数组可能会受到一些限制，这时可以使用Java提供的容器类。</span></p>
+<p style="margin:0in"><span style="font-size:16pt; font-family:宋体">&nbsp; &nbsp; </span><span style="font-family:KaiTi_GB2312; font-size:24px">下篇博客将继续介绍集合类中如果实现判断大小和是否重复！</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/22062247'>原文链接</a>

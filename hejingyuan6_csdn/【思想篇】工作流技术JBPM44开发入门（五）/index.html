@@ -1,0 +1,67 @@
+﻿<div style="color:blue" align=center>【思想篇】工作流技术JBPM44开发入门（五）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">继上篇博客</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">上篇博客我们将现有的实现介绍了一番，不知道大家有没有发现问题，也有可能因为我并没有贴上相应的代码，大家很难理解，下面我来说明一下：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">首先说，之前的那种方式是实现了工作流类&#20284;的功能，但是它的实现方式，却没有做到灵活，而是加强了和业务的耦合，而且并没有实现工作流管理业务。</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">我们一再强调，工作流管理业务，每个工作流结点并不知道业务需要做什么，每个结点也不知道要实现什么功能，这一切的操作都要看业务给了我们什么，当业务结点扔到工作流程中，那么业务就被工作流管理起来了，而业务要实现的功能由业务提供。</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">其实这也就是说我们常说的委托实现，我们不再靠强耦合去调用相应的方法，而是在于业务主动向外提供给我们什么服务。</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">这种方式的实现更强调实现流程的复用，以及工作流管理业务。即我画好一个流程图，那么他的结点个数已经确定，而此时业务和这个结点绑定什么业务，那么这个结点就实现什么功能，这时我们不但结点复用，而且流程同样可以复用</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">对比前后两种方式的区别：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">之前方式：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">优点：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">1，对于已经使用工作流的业务，应对业务变更不需要编写任何代码</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">缺点：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">1，业务和工作流的方法完全耦合在一起，只是将工作流的方法单独抽象来了一个类而已。当然实现功能是没有问题，而且所有的业务只要是继承我们抽象出来的工作流方法就可以很好的共用这套方法，但是这就需要我们业务要懂得我们抽象出来的方法的含义</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">2，不能实现整个流程的复用。因为和业务的耦合</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">3，之前的方式更强掉的是业务的变更。（对于已经使用工作流的业务的变更，如果是之前并没有使用工作流，后来想要应用的话，维护很不便。因为和业务的耦合）</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">4，并没有体现出工作流管理业务</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">5，不能应对扩展</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">思考：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">改进方式：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">抽象出来单独的结点池，所有的业务都使用使用这些结点池中的结点，对于具体业务要什么通过委托的方式实现！</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">//结点池1</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">publicvoid test1(){</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">//启动流程</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">//调用委托</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">//调用完成当前结点</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">}</span></p>
+<p><span style="font-size:18px; font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">//结点池2</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">publicvoidtest2(){&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">//调用委托）</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">//调用完成当前结点</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">}</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">优点：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">1，实现流程的复用</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">2，真正做到和具体业务解耦</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">3，扩展方便</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">4，由工作流管理业务（开发结点池，只要是使用工作流，那么它的结点池就已经设置好了执行过程）</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">5，当然也能应对业务的变更</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">总的来说，虽然第一种方式实现了业务的变更，但是这并不是工作流出现的核心目的，这仅仅是应用工作流的第一步，随着我们对工作流的理解我们应该将它应用的更加淋漓尽致。当然也很有可能，到现在我们的理解还不是很透彻，还不是很成熟，这都是学习的一个过程，在实践中再不断完善！</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/41747271'>原文链接</a>

@@ -1,0 +1,112 @@
+﻿<div style="color:blue" align=center>CSS样式表</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp;CSS</span><span lang="zh-CN" style="font-family:仿宋">的全称</span><span lang="en-US" style="font-family:Calibri">Cascading Stylesheets</span><span lang="zh-CN" style="font-family:仿宋">样式表，它可以对布局，字体，颜色，背景和其他文图效果实现更加精确的控制。</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h1>样式表的具体优势：</h1>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h2>&#26684;式和结构的分离</h2>
+<p style="margin:0in; margin-left:.375in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">HTML</span><span lang="zh-CN" style="font-family:仿宋">没有具体控制网页的&#26684;式或外观，浏览器自己决定应该如何显示。层叠样式表通过将定义结构的部分和定义&#26684;式的部分分离，使我们能够对页面的布局施加更多的控制。</span><span lang="en-US" style="font-family:Calibri">HTML</span><span lang="zh-CN" style="font-family:仿宋">仍可以保持简单明了的初衷。</span><span lang="en-US" style="font-family:Calibri">CSS</span><span lang="zh-CN" style="font-family:仿宋">代码独立出来从另一个角度可控制页面外观。</span></p>
+<h2>更好的控制页面的全局的能力</h2>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">使用层叠样式表我们可以调整字号，字体，控制边距等等，对页面的全局信息更精确的控制。</p>
+<h2>可以制作出体积更小下载更快的网页</h2>
+<p style="margin:0in; margin-left:.375in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">样式表只是简单的文本，就像</span><span lang="en-US" style="font-family:Calibri">html</span><span lang="zh-CN" style="font-family:仿宋">那样。它不需要图像，不需要执行程序，不需要插件。使用串接样式表可以减少表&#26684;标签及其它加大</span><span lang="en-US" style="font-family:Calibri">HTML</span><span lang="zh-CN" style="font-family:仿宋">体积的代码，减少图像用量从而减少文件尺寸。</span></p>
+<h2>更快更容易地维护及更新大量的网页</h2>
+<p style="margin:0in; margin-left:.375in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">没有样式表时，如果我想更新整个站点中所有主题文本的字体，我必须一页一页的修改每张网页。样式表的主旨就是将&#26684;式和结构分离，利用样式表，我可以将站点上所有的网页指向单一的一个</span><span lang="en-US" style="font-family:Calibri">CSS</span><span lang="zh-CN" style="font-family:仿宋">文件，我只需要修改</span><span lang="en-US" style="font-family:Calibri">css</span><span lang="zh-CN" style="font-family:仿宋">文件中的某一行，那个整个站点都会随之发生变动。</span></p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h1>CSS的核心内容：标准流，盒子模型，定位</h1>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h2>标准流：</h2>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;在说标准流之前不得不说的块级元素和行内元素</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; margin-left:.375in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">行内元素：</span><span lang="en-US" style="font-family:Calibri">span---</span><span lang="zh-CN" style="font-family:仿宋">一个容器</span></p>
+<p style="margin:0in; margin-left:.375in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">块级元素：</span><span lang="en-US" style="font-family:Calibri">div--</span><span lang="zh-CN" style="font-family:仿宋">一个容器</span></p>
+<p lang="en-US" style="margin:0in; margin-left:.375in; font-family:Calibri; font-size:16.0pt">
+&nbsp;</p>
+<p style="margin:0in; margin-left:.375in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">div</span><span lang="zh-CN" style="font-family:仿宋">与</span><span lang="en-US" style="font-family:Calibri">span</span><span lang="zh-CN" style="font-family:仿宋">的区别就是：</span><span lang="en-US" style="font-family:Calibri">span</span><span lang="zh-CN" style="font-family:仿宋">为行内元素，</span><span lang="en-US" style="font-family:Calibri">div</span><span lang="zh-CN" style="font-family:仿宋">为块级元素</span></p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">块级元素是占满一行的，而行内元素的大小只与内容大小有关</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">举例：</p>
+<p style="margin:0in; margin-left:.375in"><img src="26768075699009" alt=""><br>
+</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; margin-left:.375in"><img src="451177710085122" alt=""><br>
+</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">将行内元素转变成块级元素</p>
+<p style="margin:0in; margin-left:.375in"><img src="19849889957046" alt=""><br>
+</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; margin-left:.375in"><img src="34710167728244" alt=""><br>
+</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">显示结果：</p>
+<p style="margin:0in; margin-left:.375in"><img src="16966477221062" alt=""><br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;标准流：就是标签的排列方式。</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&lt;divclass=&quot;style2&quot;&gt;我的未来不是梦&lt;/div&gt;</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&lt;spanid=&quot;st&quot; class=&quot;style1&quot;&gt;栏目一&lt;/span&gt;</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&lt;spanclass=&quot;style2&quot;&gt;栏目二&lt;/span&gt;</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&lt;br/&gt;</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&lt;spanclass=&quot;style3 guaiji&quot;&gt;阳光男孩&lt;/span&gt;</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&lt;spanclass=&quot;style3 &quot;&gt;栏目三&lt;/span&gt;</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">以上是标签的排列方式，下面是网页内容的呈现方式，它是以标签的排列方式来呈现的，标准流就像流水，排在前面的标签内容前面出现，排在后面的标签内容后面出现。</p>
+<p style="margin:0in; margin-left:.375in"><img src="14974138611301" alt=""><br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">注意：</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">行内样式对某些样式是不支持的</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h2>盒子模型：</h2>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">标准盒子模型：</p>
+<p style="margin:0in; margin-left:.375in"><img src="2559795247048" alt=""><br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h2>定位：（相对定位，绝对定位，浮动）</h2>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;它允许你定义元素框相对于其正常位置应该出现的位置，或者相对于父元素、另一个元素甚至浏览器窗口本身的位置。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><br>
+</p>
+<h3>浮动：</h3>
+<p><span style="font-family:仿宋; font-size:16pt">&nbsp; &nbsp;浮动的框可以向左或向右移动，直到它的外边缘碰到包含框或另一个浮动框的边框为止。</span><span style="font-family:仿宋; font-size:16pt">由于浮动框不在文档的普通流中，所以文档的普通流中的块框表现得就像浮动框不存在一样。</span></p>
+<p><span lang="zh-CN" style="font-family:仿宋; font-size:16pt">举例：</span><span lang="en-US" style="font-size:16pt; font-family:Calibri">css</span><span lang="zh-CN" style="font-family:仿宋; font-size:16pt">浮动</span></p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">请看下图，当把框1 向右浮动时，它脱离文档流并且向右移动，直到它的右边缘碰到包含框的右边缘：</p>
+<p style="margin:0in; margin-left:.375in"><img src="46445605511643" alt=""><br>
+</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">再请看下图，当框1 向左浮动时，它脱离文档流并且向左移动，直到它的左边缘碰到包含框的左边缘。因为它不再处于文档流中，所以它不占据空间，实际上覆盖住了框 2，使框 2从视图中消失。</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">如果把所有三个框都向左移动，那么框1 向左浮动直到碰到包含框，另外两个框向左浮动直到碰到前一个浮动框。</p>
+<p style="margin:0in; margin-left:.375in"><img src="13633246258854" alt=""><br>
+</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">如下图所示，如果包含框太窄，无法容纳水平排列的三个浮动元素，那么其它浮动块向下移动，直到有足够的空间。如果浮动元素的高度不同，那么当它们向下移动时可能被其它浮动元素“卡住”：</p>
+<p style="margin:0in; margin-left:.375in"><img src="34866125433604" alt=""><br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h3>相对定位：相对于原来的位置进行偏移</h3>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;注意，在使用相对定位时，无论是否进行移动，元素仍然占据原来的空间。因此，移动元素会导致它覆盖其它框。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">举例：</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">注意，在使用相对定位时，无论是否进行移动，元素仍然占据原来的空间。因此，移动元素会导致它覆盖其它框。</p>
+<p style="margin:0in; margin-left:.375in; font-family:仿宋; font-size:16.0pt">如图：</p>
+<p style="margin:0in; margin-left:.75in"><img src="34190399799575" alt=""><br>
+</p>
+<p style="margin:0in; margin-left:.75in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<h3>绝对定位：</h3>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;设置为绝对定位的元素框从文档流完全删除，以其所在标签的父标签进行定位，如果其外面没有别的块级元素标签则以&lt;body&gt;&lt;/body&gt;为父标签进行定位。元素原先在正常文档流中所占的空间会关闭，就好像该元素原来不存在一样。元素定位后生成一个块级框，而不论原来它在正常流中生成何种类型的框。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;绝对定位使元素的位置与文档流无关，因此不占据空间。这一点与相对定位不同，相对定位实际上被看作普通流定位模型的一部分，因为元素的位置相对于它在普通流中的位置。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">举例：</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">普通流中其它元素的布局就像绝对定位的元素不存在一样：</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">#box_relative {</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; position: absolute;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; left: 30px;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; top: 20px;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">}</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in"><img src="285811510097070" alt=""><br>
+</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp;相对定位是“相对于”元素在文档中的初始位置，而绝对定位是“相对于”最近的已定位祖先元素，如果不存在已定位的祖先元素，那么“相对于”最初的包含块。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/8960189'>原文链接</a>

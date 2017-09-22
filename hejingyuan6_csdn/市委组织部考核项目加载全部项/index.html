@@ -1,0 +1,269 @@
+﻿<div style="color:blue" align=center>市委组织部考核项目加载全部项</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">需求：&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">&nbsp; &nbsp;下拉框加载内容，其中加载之前要给下拉框添加一条数据</span><span lang="en-US">&quot;</span><span lang="zh-CN">全部</span><span lang="en-US">&quot;。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">第一种方式，使用</span><span lang="en-US">asp.net</span><span lang="zh-CN">控件，</span><span lang="en-US">easyui</span><span lang="zh-CN">的样式</span><span lang="en-US">,</span><span lang="zh-CN">需要点击查询按钮才出结果。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">第二种方式，使用</span><span lang="en-US">easyui</span><span lang="zh-CN">的控件，问题是：添加</span><span lang="en-US">&quot;</span><span lang="zh-CN">全部</span><span lang="en-US">&quot;</span><span lang="zh-CN">这一项无</span><span lang="en-US">id</span><span lang="zh-CN">，经过测试对于</span><span lang="en-US">easyui</span><span lang="zh-CN">控件来说必须绑定</span><span lang="en-US">id</span><span lang="zh-CN">字段，否则出错</span><span lang="en-US">(</span><span lang="zh-CN">每次选择都为第一项</span><span lang="en-US">)</span><span lang="zh-CN">。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">第三种方式，<span lang="zh-CN" style="font-family:KaiTi_GB2312; font-size:24px">使用</span><span lang="en-US" style="font-family:KaiTi_GB2312; font-size:24px">easyui</span><span lang="zh-CN" style="font-family:KaiTi_GB2312; font-size:24px">的控件，将绑定的id和text设置成同一字段即可！无需点击查询按钮！</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">页面：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;<img src="41326986349990" alt=""><br>
+</span></p>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">下面分别介绍一下第一种方式和第三种方式：</span></p>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">第一种方式：</span></p>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">html</span><span lang="zh-CN">代码：</span></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="html">  &lt;span&gt;年　份:&nbsp;&lt;/span&gt;
+        &lt;asp:DropDownList ID=&quot;YearName&quot;  runat=&quot;server&quot; editable=&quot;false&quot; panelHeight=&quot;auto&quot; class=&quot;easyui-combobox&quot; required=&quot;true&quot; Width=&quot;131px&quot;&gt;&lt;/asp:DropDownList&gt;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;span&gt;类　型:&nbsp;&lt;/span&gt;
+        &lt;asp:DropDownList ID=&quot;UnitsName&quot;  runat=&quot;server&quot; editable=&quot;false&quot; panelHeight=&quot;250px&quot; class=&quot;easyui-combobox&quot; required=&quot;true&quot; Width=&quot;131px&quot;&gt;&lt;/asp:DropDownList&gt;&nbsp;&nbsp;&nbsp;&nbsp;      
+       
+        &lt;label class=&quot;first txt-green&quot;&gt;文件名:&nbsp;&lt;/label&gt;
+        &lt;asp:TextBox ID=&quot;txtWordName&quot; runat=&quot;server&quot;&gt;&lt;/asp:TextBox&gt;&nbsp;&nbsp;
+        &lt;%-- 何静媛 2014年2月18日 ,模糊查询 文本框输入进行限制,防止SQL注入 ErrorMessage=&quot;请输入模糊查询条件&quot;--%&gt;
+            &lt;%--&lt;asp:LinkButton ID=&quot;btnSearch&quot; class=&quot;btn-lit btn-middle&quot; runat=&quot;server&quot; onclick=&quot;queryYear()&quot;  ValidationGroup=&quot;fuzzyQueryExam&quot;  &gt;&lt;span&gt;查询&lt;/span&gt;&lt;/asp:LinkButton&gt;--%&gt;                  
+            &lt;asp:RequiredFieldValidator ID=&quot;RequiredFieldValidator1&quot; runat=&quot;server&quot;  ControlToValidate=&quot;txtWordName&quot; ValidationGroup=&quot;fuzzyQueryExam&quot; Display=&quot;Dynamic&quot; &gt;&lt;/asp:RequiredFieldValidator&gt;
+            &lt;asp:RegularExpressionValidator ID=&quot;RegularExpressionValidator1&quot; runat=&quot;server&quot; ControlToValidate=&quot;txtWordName&quot; ValidationGroup=&quot;fuzzyQueryExam&quot;
+                ErrorMessage=&quot;请输入汉字,数字,字母或下划线_!&quot; 
+                ValidationExpression=&quot;^[a-zA-Z0-9_\u4e00-\u9fa5]+$&quot; Display=&quot;Dynamic&quot;&gt;&lt;/asp:RegularExpressionValidator&gt;
+       &lt;%-- 结束 何静媛 2014年2月18日 --%&gt;
+        &lt;a href=&quot;#&quot; class=&quot;easyui-linkbutton&quot; onclick=&quot;queryYear();&quot; data-options=&quot;&quot;&gt;查询&lt;/a&gt;&lt;br /&gt;
+      &lt;br /&gt;</pre>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">JS</span><span lang="zh-CN">代码：向一般处理程序传递参数</span></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="javascript">&lt;script type=&quot;text/javascript&quot;&gt;   
+                //  根据类型选择条件进行查询
+        function queryYear() {
+            //查询参数直接添加在queryParams中
+            var queryParams = $('#dg').datagrid('options').queryParams;
+            getQueryParams(queryParams);
+            $('#dg').datagrid('options').queryParams = queryParams;  //传递参数值
+            $('#dg').datagrid('reload');  //重新加载表信息datagrid
+
+        }
+        //查询并把数据传递给后台，数组
+        function getQueryParams(queryParams) {
+            var Category = $(&quot;#YearName&quot;).datebox(&quot;getText&quot;);
+            var UnitName = $(&quot;#UnitsName&quot;).datebox(&quot;getText&quot;);
+            var txtWordName = document.getElementById(&quot;txtWordName&quot;).value;
+            queryParams.YearName = Category;
+            queryParams.UnitName = UnitName;
+            queryParams.txtWordName = txtWordName;
+            return queryParams;
+        }
+ &lt;/script&gt;
+</pre><br>
+<br>
+<p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">一般处理程序：</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="csharp"> /// &lt;summary&gt;
+        /// 简单查询--根据前台传来的参数
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
+        public void Query(HttpContext context)
+        {
+            context.Response.ContentType = &quot;text/plain&quot;;
+            //===============================================================
+            //获取查询条件:【用户id,开始时间，结束时间，关键字】
+            string category, startTime, endTime, key, WordName;
+            category = startTime = endTime = key =WordName= &quot;&quot;;
+            //获取前台传来的值
+            if (null != context.Request.QueryString[&quot;YearName&quot;])
+            {//获取前台传来的值
+                if (context.Request.QueryString[&quot;YearName&quot;].ToString().Trim() == &quot;全部&quot;)
+                {
+                    category = &quot;&quot;;
+                }
+                else
+                {
+                    category = context.Request.QueryString[&quot;YearName&quot;].ToString().Trim();
+                }               
+               
+            }
+            if (null != context.Request.QueryString[&quot;txtWordName&quot;])
+            {//获取前台传来的值
+               
+                    WordName = context.Request.QueryString[&quot;txtWordName&quot;].ToString().Trim();
+            }
+            if (null != context.Request.QueryString[&quot;StartTime&quot;])
+            {
+                startTime = context.Request.QueryString[&quot;StartTime&quot;].ToString().Trim();
+            }
+            if (null != context.Request.QueryString[&quot;EndTime&quot;])
+            {
+                endTime = context.Request.QueryString[&quot;EndTime&quot;].ToString().Trim();
+            }
+            if (null != context.Request.QueryString[&quot;UnitName&quot;])
+            {
+                //key = context.Request.QueryString[&quot;KeyWord&quot;].ToString().Trim();
+                if (context.Request.QueryString[&quot;UnitName&quot;].ToString().Trim() == &quot;全部&quot;)
+                {
+                    key = &quot;&quot;;
+                }
+                else
+                {
+                    key = context.Request.QueryString[&quot;UnitName&quot;].ToString().Trim();
+                }               
+               
+            }
+
+            //================================================================
+            //获取分页和排序信息：页大小，页码，排序方式，排序字段
+            int pageRows, page;
+            pageRows = 10;
+            page = 1;
+            string order, sort, oderby; order = sort = oderby = &quot;&quot;;
+            if (null != context.Request.QueryString[&quot;rows&quot;])
+            {//获取前台传过来的
+                pageRows = int.Parse(context.Request.QueryString[&quot;rows&quot;].ToString().Trim());
+
+            }
+            if (null != context.Request.QueryString[&quot;page&quot;])
+            {
+
+                page = int.Parse(context.Request.QueryString[&quot;page&quot;].ToString().Trim());
+
+            }
+            if (null != context.Request.QueryString[&quot;sort&quot;])
+            {
+
+                order = context.Request.QueryString[&quot;sort&quot;].ToString().Trim();
+
+            }
+            if (null != context.Request.QueryString[&quot;order&quot;])
+            {
+
+                sort = context.Request.QueryString[&quot;order&quot;].ToString().Trim();
+
+            }
+
+
+            //===================================================================
+            //组合查询语句：条件+排序
+            StringBuilder strWhere = new StringBuilder();
+            if (WordName != &quot;&quot;)
+            {
+                //ScoreStyleName like '%{0}%' and &quot;, key
+                strWhere.AppendFormat(&quot; WordName like '%{0}%' and &quot;, WordName);
+            }
+            if (key != &quot;&quot;)
+            {
+                strWhere.AppendFormat(&quot; unitName = '{0}' and &quot;, key);
+            }
+            if (category != &quot;&quot;)
+            {
+                strWhere.AppendFormat(&quot; strYear= '{0}' and &quot;, category);
+            }
+            if (startTime != &quot;&quot;)
+            {
+                strWhere.AppendFormat(&quot; PublishDate &gt;= '{0}' and &quot;, startTime);
+            }
+            if (endTime != &quot;&quot;)
+            {
+                strWhere.AppendFormat(&quot; PublishDate &lt;= '{0}' and &quot;, endTime);
+            }
+
+            //删除多余的and
+            int startindex = strWhere.ToString().LastIndexOf(&quot;and&quot;);//获取最后一个and的位置
+            if (startindex &gt;= 0)
+            {
+                strWhere.Remove(startindex, 3);//删除多余的and关键字
+            }
+            if (sort != &quot;&quot; &amp;&amp; order != &quot;&quot;)
+            {
+                //strWhere.AppendFormat(&quot; order by {0} {1}&quot;, sort, order);//添加排序
+                oderby = order + &quot; &quot; + sort;
+            }
+            //DataSet ds = Bnotice.GetList(strWhere.ToString());  //调用不分页的getlist
+
+            //调用分页的GetList方法
+            DataSet ds = wordBll.GetListByPage(strWhere.ToString(), oderby, (page - 1) * pageRows + 1, page * pageRows);
+            int count = wordBll.GetRecordCount(strWhere.ToString());//获取条数
+            string strJson = ToJson.Dataset2Json(ds, count);//DataSet数据转化为Json数据
+            context.Response.Write(strJson);//返回给前台页面
+            context.Response.End();
+
+        }
+</pre><br>
+<p><br>
+</p>
+<p><br>
+</p>
+<p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">第三种方式：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">html代码：此下拉框绑定的valueField和textField绑定同一字段</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="html"> &lt;span&gt;考核年份:&nbsp;&lt;/span&gt;
+        &lt;%--&lt;asp:DropDownList ID=&quot;YearName&quot;  runat=&quot;server&quot; editable=&quot;false&quot; panelHeight=&quot;auto&quot; class=&quot;easyui-combobox&quot; required=&quot;true&quot; Width=&quot;131px&quot;&gt;&lt;/asp:DropDownList&gt;&nbsp;&nbsp;&nbsp;&nbsp;--%&gt;
+        &lt;input id=&quot;YearName&quot; class=&quot;easyui-combobox&quot;  style=&quot;width:180px&quot; editable=&quot;false&quot;  data-options=&quot; 
+                    panelHeight: 'auto',  
+                    valueField: 'stryear',  
+                    textField: 'stryear',
+                    select:true,            
+                    url: 'UnitsQueryWord.ashx?test=GetYear',   
+                onSelect: function(rec){                
+                    $('#dg').datagrid('reload',{YearName: $('#YearName').combobox('getText')});   
+                }
+                    &quot; /&gt; </pre><br>
+<span style="font-family:KaiTi_GB2312; font-size:24px">一般处理程序：将下拉框改变的事件传的&#20540;接收到</span>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre name="code" class="csharp"> if (null != context.Request.QueryString[&quot;YearName&quot;])
+            {//获取前台传来的值
+                if (context.Request.QueryString[&quot;YearName&quot;].ToString().Trim() == &quot;全部&quot;)
+                {
+                    category = &quot;&quot;;
+                }
+                else
+                {
+                    category = context.Request.QueryString[&quot;YearName&quot;].ToString().Trim();
+                }               
+               
+            }</pre><br>
+<br>
+<p><br>
+</p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">总结：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">通过做市委组织部考核项目使用</span><span lang="en-US">EasyUI</span><span lang="zh-CN">，对它有了一定的了解，</span><span lang="en-US">EasyUI</span><span lang="zh-CN">给我们带来了极大的方便，让我们的工作变的简单快捷，而且无需我们自己美化界面！但是在使用它的过程中也发现了一些它的不足和局限。下拉框必须绑定</span><span lang="en-US">id</span><span lang="zh-CN">，否则有错误，而且对于刚接触的人来说不经意动了哪可能效果就没了，还不知道问题出在哪里，比较让人苦恼！在这里只是简单的总结一下，以后应用时再注意！</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">其实出现这些问题只能说明我们还没有真正的了解它，而且我们要知道想实现上述功能有多种方式，再不行还可以直接修改</span><span lang="en-US">E</span><span lang="en-US">asyUI</span><span lang="zh-CN">的内部代码，这样什么都不是问题了，所以说我们要学的还很多，大家一起加油吧！</span></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt"><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/20572851'>原文链接</a>

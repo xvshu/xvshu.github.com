@@ -1,0 +1,155 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 编译原理基础</div><div style="color:blue" align=center>编译原理基础</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; 编译原理顾名思义就是处理高级语言，使之成为计算机能够识别的语言（低级语言）的原理。而文法呢？就是用来描述程序设计语言的方法。编译原理中的文法相当于语言学（人类语言）中的语义分析，即分析一个句所表示的含义。它是产生中间代码或目标代码的依据。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp;以下是对软考视频中的编译原理的简单理解：</span><span lang="en-US"></span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;<img src="7271656252610" alt=""><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px"></span></span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">文法分类：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">著名语言学家NoamChomsky(乔姆斯基)根据对产生式所施加的限制的不同，把文法分成四种类型，即0型、1型、2型和3型。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">文法G 定义为四元组（V<span style="vertical-align:sub">N</span> ,V<span style="vertical-align:sub">T</span> ,P,S）</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">¨V<span style="vertical-align:sub">N</span>&nbsp;：非终结符集</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">¨V<span style="vertical-align:sub">T</span>&nbsp;：终结符集</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">¨P ：产生式集合（规则集合）</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">¨S ：开始符号（识别符号）</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">注：一般以大写字母表示非终结符，以小写字母表示终结符。</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h2><span style="font-family:KaiTi_GB2312; font-size:18px">0型文法</span></h2>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">限制最少，每个产生式</span><span lang="zh-CN">α</span><span lang="zh-CN">→</span><span lang="zh-CN">β</span><span lang="zh-CN">中，</span><span lang="zh-CN">α</span><span lang="zh-CN">中至少含有一个非终结符（大写字母表示）</span></span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<h2><span style="font-family:KaiTi_GB2312; font-size:18px">1型文法</span></h2>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">对于每个产生式</span><span lang="zh-CN">α</span><span lang="zh-CN">→</span><span lang="zh-CN">β</span><span lang="zh-CN">中，都有|</span><span lang="zh-CN">β</span><span lang="en-US">|&gt;=|</span><span lang="el">α</span><span lang="en-US">|。这里的|</span><span lang="el">β</span><span lang="en-US">|表示的是</span><span lang="el">β</span><span lang="el">的长度</span></span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">&nbsp; &nbsp; &nbsp; &nbsp;</span><span lang="zh-CN">举例：如有A-&gt;Ba则|</span><span lang="zh-CN">β</span><span lang="en-US">|=2,|</span><span lang="el">α</span><span lang="en-US">|=1符合1型文法要求。反之,如aA-&gt;a，则不符合1型文法。</span><span lang="zh-CN">&nbsp;</span></span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; &nbsp; &nbsp;注意：虽然要求|</span><span lang="zh-CN">β</span><span lang="en-US">|&gt;=|</span><span lang="el">α</span><span lang="en-US">|，但有一特例：</span><span lang="el">α</span><span lang="x-IV_mathan">→</span><span lang="el">ε</span><span lang="el">也满足1型文法。</span></span></p>
+<p lang="en-US" style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h2><span style="font-family:KaiTi_GB2312; font-size:18px">2型文法</span></h2>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">每一个</span><span lang="zh-CN">α</span><span lang="zh-CN">→</span><span lang="zh-CN">β</span><span lang="zh-CN">都有</span><span lang="zh-CN">α</span><span lang="zh-CN">是非终结符。如A-&gt;Ba，符合2型文法要求。</span></span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; &nbsp; &nbsp;举例：</span><span lang="en-US">A</span><span lang="zh-CN">b-&gt;Bab虽然符合1型文法要求,但不符合2型文法要求，因为其</span><span lang="zh-CN">α</span><span lang="en-US">=Ab，而Ab不是一个非终结符。</span></span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp;</span></p>
+<h2><span style="font-family:KaiTi_GB2312; font-size:18px">3型文法</span></h2>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;它是在2型文法的基础上满足：A<span lang="zh-CN">→</span><span lang="zh-CN">α</span><span lang="en-US">|</span><span lang="el">α</span><span lang="en-US">B（右线性）或A</span><span lang="x-IV_mathan">→</span><span lang="el">α</span><span lang="en-US">|B</span><span lang="el">α</span><span lang="el">（左线性）。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">&nbsp; &nbsp; &nbsp; &nbsp;解释：如有：A-&gt;a,A-&gt;aB,B-&gt;a,B-&gt;cB，则符合3型文法的要求。但如果推导为:A-&gt;ab,A-&gt;aB,B-&gt;a,B-&gt;cB或推导为：A-&gt;a,A-&gt;Ba,B-&gt;a,B-&gt;cB则不符合3型方法的要求了。具体的说，例子A-&gt;ab,A-&gt;aB,B-&gt;a,B-&gt;cB中的A-&gt;ab不符合3型文法的定义,如果把后面的ab,改成“一个非终结符＋一个终结符”的形式(即为aB)就对了。例子A-&gt;a,A-&gt;Ba,B-&gt;a,B-&gt;cB中如果把B-&gt;cB改为B-&gt;Bc的形式就对了，因为A</span><span lang="zh-CN">→</span><span lang="zh-CN">α</span><span lang="en-US">|</span><span lang="el">α</span><span lang="en-US">B(右线性)和A</span><span lang="x-IV_mathan">→</span><span lang="el">α</span><span lang="en-US">|B</span><span lang="el">α</span><span lang="en-US">(左线性)两套规则不能同时出现在一个语法中，只能完全满足其中的一个，才能算3型文法。</span></span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US"><br>
+</span></span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">关系：</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="3764359948073" alt=""><br>
+</span></p>
+<p lang="en-US" style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in; color:rgb(73,73,73)"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">语法推导树：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">举例：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">已知文法</span><span lang="en-US">G</span><span lang="en-US">=</span><span lang="zh-CN">（</span><span lang="en-US">{a</span><span lang="zh-CN">，</span><span lang="en-US">b}</span><span lang="zh-CN">，</span><span lang="en-US">{S</span><span lang="zh-CN">，</span><span lang="en-US">A},S,P</span><span lang="zh-CN">）</span><span lang="en-US">,</span><span lang="zh-CN">其中：</span><span lang="en-US">S-&gt;aAS|a;A-&gt;SbA|SS|ba.</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">请构造句型</span><span lang="en-US">aabAa</span><span lang="zh-CN">的推导树。</span></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp;<img src="39330307673668" alt=""><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></span></p>
+<p style="margin:0in"><span lang="zh-CN"></span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">正规式与正规文法之间的转化</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<div style="direction:ltr">
+<table border="1" cellpadding="0" cellspacing="0" valign="top" style="direction:ltr; border-collapse:collapse; border-style:solid; border-color:#A3A3A3; border-width:1pt">
+<tbody>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6993in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3701in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">文法产生式</span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.852in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">正规式</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6993in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">规则</span><span lang="en-US">1</span></span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3701in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">x</span><span lang="en-US">B</span><span lang="zh-CN">，</span><span lang="en-US">B</span><span lang="x-IV_mathan">→</span><span lang="en-US">y</span></span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.852in; padding:4pt 4pt 4pt 4pt">
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">A=xy</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6993in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">规则</span><span lang="en-US">2</span></span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3701in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">xA|y</span></span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.852in; padding:4pt 4pt 4pt 4pt">
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">A=x<span style="vertical-align:super">*</span>y</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.6993in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">规则</span><span lang="en-US">3</span></span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:1.3701in; padding:4pt 4pt 4pt 4pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">x</span><span lang="en-US">,</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">y</span></span></p>
+</td>
+<td style="border-style:solid; border-color:#A3A3A3; border-width:1pt; vertical-align:top; width:.852in; padding:4pt 4pt 4pt 4pt">
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">A=x|y</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">规则1：由</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">x</span><span lang="en-US">B</span><span lang="zh-CN">，</span><span lang="en-US">B</span><span lang="x-IV_mathan">→</span><span lang="en-US">y</span><span lang="x-IV_mathan">，可知：</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">x</span><span lang="en-US">B</span><span lang="x-IV_mathan">→</span><span lang="zh-CN">x</span><span lang="en-US">y</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">规则</span><span lang="zh-CN">2</span><span lang="zh-CN">：由</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">xA|y</span><span lang="x-IV_mathan">，可知：</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">xA</span><span lang="x-IV_mathan">，</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">y</span><span lang="x-IV_mathan">，依次往下推</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">xA</span><span lang="x-IV_mathan">→</span><span lang="zh-CN">x</span><span lang="zh-CN" style="vertical-align:super">2</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="zh-CN">x</span><span lang="zh-CN" style="vertical-align:super">3</span><span lang="en-US">A……</span><span lang="x-IV_mathan">→</span><span lang="zh-CN">x</span><span lang="zh-CN" style="vertical-align:super">*</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="zh-CN">x</span><span lang="zh-CN" style="vertical-align:super">*</span><span lang="en-US">y</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">规则</span><span lang="en-US">3</span><span lang="zh-CN">：</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">x</span><span lang="en-US">,</span><span lang="en-US">A</span><span lang="x-IV_mathan">→</span><span lang="en-US">y</span><span lang="x-IV_mathan">简写成</span><span lang="en-US">A=x|y</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">算符优先：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">算符优先级的计算</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><img src="38304806210064" width="600" height="300" alt=""><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">firstvt</span><span lang="zh-CN">积：以终结符开始，或以一个“非终结符</span><span lang="en-US">&#43;</span><span lang="zh-CN">终结符”开始</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">lastvt</span><span lang="zh-CN">积：以终结符结尾，或以“一个终结符</span><span lang="en-US">&#43;</span><span lang="zh-CN">非终结符”结尾</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">对于算符的优先级计算，只需要使用上图的公式，逐步推导即可！</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">有限自动机（有穷自动机）</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">有限自动机是具有离散输入和输出的系统的一种数学模型。它拥有有限数量的状态，每个状态可以迁移到零个或多个状态，输入字串决定执行哪个状态的迁移。有限状态自动机可以表示为一个有向图</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">有限自动机分为：</span><span lang="en-US">NFA</span><span lang="zh-CN">不确定的有限自动机，</span><span lang="en-US">DFA</span><span lang="zh-CN">（</span><span lang="en-US">d</span><span lang="zh-CN">eterministicfinite
+ automaton）确定的有限自动机</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">定义</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="49954859336343" alt=""></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="40328335616492" alt=""></span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">总结：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; 对于编译原理的简单理解，文法只是简单的语法规则，只有转化为表达式才会有实际的计算意义即正规式，而对于有限自动机要想顺利工作，都必须有一个正则式和一个文本串，也就是根据正规式来判断串是否匹配，然后输出！</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; 对于编译原理这方面知识的学习理解还不是很深刻，如有异议，欢迎交流指导！</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in 0in 0in 1.5in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span><br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/23879071'>原文链接</a>

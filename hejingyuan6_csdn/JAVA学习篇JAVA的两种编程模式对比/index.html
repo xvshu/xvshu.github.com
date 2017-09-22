@@ -1,0 +1,249 @@
+﻿<div style="color:blue" align=center>JAVA学习篇JAVA的两种编程模式对比</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">在</span><span lang="en-US">Drp</span><span lang="zh-CN">项目中，讲解了两种编程模式</span><span lang="en-US">Model 1</span><span lang="zh-CN">和</span><span lang="en-US">Model2</span><span lang="zh-CN">，下面是对这两种模式的简单理解，以及由于</span><span lang="en-US">Model2</span><span lang="zh-CN">是基于</span><span lang="en-US">MVC</span><span lang="zh-CN">架构的模式，就将我们易混淆的</span><span lang="en-US">MVC</span><span lang="zh-CN">与我们之前学的三层架构进行对比学习一下。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<h1><span style="font-family:KaiTi_GB2312">Model1</span></h1>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">所谓Model1就是JSP大行其道的时代，在Model1模式下，整个Web应用几乎全部由JSP页面组成，JSP页面接收处理客户端请求，对请求处理后直接做出响应。用少量的JavaBean来处理数据库连接、数据库访问等操作。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="301959610120677" alt=""></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">代码示例：修改用户信息</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">主页面的</span><span lang="en-US">js</span><span lang="zh-CN">跳转：</span></span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="434359" snippet_file_name="blog_20140724_1_623727" name="code" class="javascript">function modifyUser() {
+	
+		var selectFlags=document.getElementsByName(&quot;selectFlag&quot;);
+		var count=0;
+		var j=0;
+		for(var i=0;i&lt;selectFlags.length;i++){
+			if(selectFlags[i].checked){
+				j=i;
+				count++;
+			}
+		}
+		if(count==0){
+			alert(&quot;请选择需要修改的用户&quot;);
+			return;
+		}
+		if(count&gt;1){
+			alert(&quot;一次只能修改一个用户&quot;);
+			return;
+		}
+		//alert(selectFlags[j].value);
+		window.self.location = &quot;user_modify.jsp?userId=&quot;+selectFlags[j].value;;
+	}
+</pre><br>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">jsp</span><span lang="zh-CN">页面的</span><span lang="en-US">java</span><span lang="zh-CN">代码：负责的任务为获取</span><span lang="en-US">http</span><span lang="zh-CN">协议传递的参数，然后调用业务逻辑方法<br>
+</span>&nbsp;<br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="434359" snippet_file_name="blog_20140724_2_1103688" name="code" class="java">&lt;% 
+    request.setCharacterEncoding(&quot;GB18030&quot;);
+    String command = request.getParameter(&quot;command&quot;);
+	//当点击修改按钮后，执行到此
+	if(&quot;modify&quot;.equals(command)){
+		User user=new User();
+		user.setUserId(request.getParameter(&quot;userId&quot;));
+		user.setUserName(request.getParameter(&quot;userName&quot;));
+		user.setPassword(request.getParameter(&quot;password&quot;));
+		user.setContactTel(request.getParameter(&quot;contactTel&quot;));
+		user.setEmail(request.getParameter(&quot;email&quot;));
+		
+		UserManager.getInstance().modifyUser(user);
+		out.println(&quot;修改用户成功！&quot;);
+	}
+	//显示要修改的用户信息
+	String userId=request.getParameter(&quot;userId&quot;);
+	User user=UserManager.getInstance().findUserById(userId);
+
+%&gt;
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="434359" snippet_file_name="blog_20140724_3_2215720" name="code" class="java">/**
+ * 修改用户
+ * @param user
+ */
+public void modifyUser(User user){
+	StringBuilder sbSql=new StringBuilder();
+
+	sbSql.append(&quot;update t_user &quot;)
+	.append(&quot;set    user_name   = ?, &quot;)
+	       .append(&quot;password    = ?, &quot;)
+	       .append(&quot;contact_tel = ?, &quot;)
+	       .append(&quot;email       = ? &quot;) 
+	.append(&quot;where  user_id     = ? &quot;);
+	Connection conn=null;
+	PreparedStatement pstmt=null;
+	
+	try{
+		conn=DbUtil.getConnection();
+		pstmt=conn.prepareStatement(sbSql.toString());
+		
+		pstmt.setString(1, user.getUserName());
+		pstmt.setString(2, user.getPassword());
+		pstmt.setString(3, user.getContactTel());
+		pstmt.setString(4, user.getEmail());
+		pstmt.setString(5, user.getUserId());
+		pstmt.executeUpdate();
+		
+	}catch(SQLException e){
+		e.printStackTrace();
+	}finally{
+		DbUtil.close(pstmt);
+		DbUtil.close(conn);
+	}
+	
+}</pre><br>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">Model1模式的实现比较简单，适用于快速开发小规模项目。但从工程化的角度看，它的局限性非常明显：JSP页面身兼View和Controller两种角色，将控制逻辑和表现逻辑混杂在一起，从而导致代码的重用性非常低，增加了应用的扩展性和维护的难度。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h1><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">由此而出现</span><span lang="en-US">Model 2</span><span lang="zh-CN">模型</span></span></h1>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">Model2已经是基于MVC架构的设计模式。在Model2架构中，Servlet作为前端控制器，负责接收客户端发送的请求，在Servlet中只包含控制逻辑和简单的前端处理；然后，调用后端JavaBean来完成实际的逻辑处理；最后，转发到相应的JSP页面处理显示逻辑。</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="13916835994282" alt=""></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">代码示例：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">主页面的</span><span lang="en-US">js</span><span lang="zh-CN">跳转</span></span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="434359" snippet_file_name="blog_20140724_4_7231446" name="code" class="javascript">function modifyItem() {
+		
+		var selectFlags  = document.getElementsByName(&quot;selectFlag&quot;);
+		var count = 0;
+		var j = 0;
+		for (var i=0; i&lt;selectFlags.length; i++) {
+			if (selectFlags[i].checked) {
+			    j = i;
+				count++;
+			}
+		}
+		if (count == 0) {
+			alert(&quot;请选择需要修改的物料！&quot;);
+			return;
+		}
+		if (count &gt; 1) {
+			alert(&quot;一次只能修改一个物料！&quot;);
+			return;
+		}
+		alert(j);
+		alert(selectFlags[j].value);
+		//window.self.location = &quot;&lt;%=basePath%&gt;servlet/item/ShowModifyItemServlet?itemNo=&quot; + selectFlags[j].value;
+		window.self.location = &quot;&lt;%=basePath%&gt;servlet/item/ShowModifyItemServlet?itemNo=&quot; + selectFlags[j].value;
+	}
+</pre><br>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">ShowModifyItemServlet：其中从</span><span lang="en-US">servlet</span><span lang="zh-CN">调用业务逻辑的代码省略</span></span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="434359" snippet_file_name="blog_20140724_5_503070" name="code" class="java">@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		//取得物料代码
+		String itemNo=request.getParameter(&quot;itemNo&quot;);
+		
+		//根据物料代码查询
+		Item item=itemManager.findItemById(itemNo);
+		
+		//将物料信息设置到request中
+		request.setAttribute(&quot;item&quot;, item);
+		
+		//取得物料类别列表
+		List itemCategoryList=DataDictManager.getInstance().findItemCategoryList();
+		
+		//取得物料单位列表
+		List itemUnitList=DataDictManager.getInstance().findItemUnitList();
+		
+		request.setAttribute(&quot;itemCategoryList&quot;, itemCategoryList);
+		request.setAttribute(&quot;itemUnitList&quot;, itemUnitList);
+		
+		request.getRequestDispatcher(&quot;/basedata/item_modify.jsp&quot;).forward(request, response);
+	}
+
+item_modify.jsp：
+</pre><br>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"></span></p>
+<pre code_snippet_id="434359" snippet_file_name="blog_20140724_6_1266438" name="code" class="java">&lt;%
+String path = request.getContextPath();
+String basePath = request.getScheme()+&quot;://&quot;+request.getServerName()+&quot;:&quot;+request.getServerPort()+path+&quot;/&quot;;
+	
+	Item item = (Item)request.getAttribute(&quot;item&quot;);	
+	List itemCategoryList = (List)request.getAttribute(&quot;itemCategoryList&quot;);
+	List itemUnitList = (List)request.getAttribute(&quot;itemUnitList&quot;);
+%&gt;
+</pre><br>
+<p style="margin:0in; font-size:14pt">
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">Model 2下JSP不再承担控制器的责任，根据代码我们也可以看出，</span><span lang="en-US">jsp</span><span lang="zh-CN">中的处理减少许多，此时它仅仅是表现层角色，仅仅用于将结果呈现给用户，JSP页面的请求与Servlet（控制器）交互，而Servlet负责与后台的JavaBean通信。在Model2模式下，模型（Model）由JavaBean
+ 充当，视图（View）由JSP页面充当，而控制器（Controller）则由Servlet充当。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">由于引入了MVC模式，使Model2具有组件化的特点，更适用于大规模应用的开发，使程序员各司其职，互不干涉，有利于开发中的分工，有利于组件的重用。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">其中缺点就是增加了应用开发的复杂程度。原本需要一个简单的JSP页面就能实现的应用，在Model2中被分解成多个协同工作的部分，需花更多时间才能真正掌握其设计和实现过程。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<h1><span style="font-family:KaiTi_GB2312">三层与MVC</span></h1>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">对于</span><span lang="en-US">Model2</span><span lang="zh-CN">模型中引入的</span><span lang="en-US">MVC</span><span lang="zh-CN">模式，相信许多人都层都曾为三层与</span><span lang="en-US">MVC</span><span lang="zh-CN">关系搞得一头雾水，下面我就来简单介绍一下它们二者的关系</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">首先三层架构绝不是MVC！！它们二者并没有关系</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">三层架构：界面层（UI）业务逻辑层（BLL）和数据访问层（DAL）构成的</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">MVC：模型层（M）界面层（View）和控制层（Controller）构成的，而且他们之间也不对应。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">如果硬要给他们对应的话，那么三层架构中的UI对应MVC中的view（jsp），都是用于显示以及获取界面的数据；三层架构中的BLL层和DAL层对应MVC中的Model（javabean）层都是用于处理上层传递来的数据以及从数据库获取的数据的；MVC中的Controller（Servlet）最多算是三层架构中的UI的一部分，也就我们常说的是Servlet。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">如下图所示：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="47694689791508" alt=""></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp; &nbsp;</span><span lang="zh-CN">三层架构的目的着重点是“高内聚，低耦合”，即解耦。它是系统级的架构设计，侧重于整个应用程序分层解耦</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp;&nbsp;</span><span lang="en-US">&nbsp;</span><span lang="zh-CN">MVC的目的则是实现Web系统的职能分工，即职责划分。它只是一种设计模式</span><span lang="en-US">,</span><span lang="zh-CN">更加侧重</span><span lang="en-US">web</span><span lang="zh-CN">页面显示的解耦。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">其实职责划分也是解耦，但是三层侧重的是整体的一个解耦，而MVC侧重的是web系统的解耦，即侧重jsp和Servlet的一个解耦，它把展示数据的HTML 页面尽可能的和业务代码分离。它将纯净的界面展示逻辑（用户界面）独立到一些文件中（</span><span lang="en-US">JSP--</span><span lang="zh-CN">Views），把一些和用户交互的程序逻辑（</span><span lang="en-US">Servlet</span><span lang="en-US">--C</span><span lang="zh-CN">ontroller）单独放在一些文件中，方便进行指责划分。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">比如一般美工只做jsp的页面部分，而对于页面与后台代码的处理则放在servlet中，让专门一部分人来做servlet，但从三层来讲，jsp和servlet都属于界面层，所以在这里使用MVC就实现了指责的划分</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">三层可以应用于任何语言、任何技术的应用程序；而MVC只是为了解决BS应用程序视图层各部分的耦合关系。它们互不冲突，可以同时存在，也可根据情况使用其中一种。</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">其实三层架构和MVC还是一个东西！！！</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">其实三层架构和MVC是一样的！！！我们所看到的不一样只是表面上的不一样。核心的东西是一致的，那么什么是核心？</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">答曰：分层，解耦！</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">如果从解耦的角度来看三层架构和MVC其实他们是一致的，只不过划分的方法不一样罢了，就像上面的图所示（将</span><span lang="en-US">UI</span><span lang="zh-CN">层再次细分）。从这一点说他们可以说是一个东西。这就相当于我们看到馒头和面条一样，表面上看他们不一样（注意仅仅是表面）但是他们核心是一致的，都是面……</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<h1><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">我们的架构</span><span lang="en-US">--</span><span lang="zh-CN">三层结合</span><span lang="en-US">MVC</span><span lang="zh-CN">模式</span></span></h1>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="35749136694324" alt=""></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt">
+<h1><span style="font-family:KaiTi_GB2312">总结：</span></h1>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">对于</span><span lang="en-US">Model 1</span><span lang="zh-CN">和</span><span lang="en-US">Model 2</span><span lang="zh-CN">模型来说，两种模型各有优缺点，各自有各自的用武之地，只要我们理解各自的优缺点（Model1模式的实现比较简单，适用于快速开发小规模项目。Model
+ 2具有组件化的特点，耦合性小，更适用于大规模应用的开发），在实际应用中根据需求，合理选择即可。</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">对于三层与</span><span lang="en-US">MVC</span><span lang="zh-CN">来说，刚开始接触的时候相信大家都搞不清楚，可能一直以为它们是一样的，这都没有错，因为学习本就是一个过程，对于知识的理解需要不断的加深认识，每一步的加深也许会推翻以前的自己，但是每次推翻都代表着进步，代表着理解的更深一层！</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in; font-family:华文中宋; font-size:14.0pt"><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/38085095'>原文链接</a>

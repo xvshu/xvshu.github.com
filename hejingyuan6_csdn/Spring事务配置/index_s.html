@@ -1,0 +1,346 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; Spring事务配置</div><div style="color:blue" align=center>Spring事务配置</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><span style="font-size: 14pt;">要了解事务配置的所有方法，请看一下<a target="_blank" target="_blank" href="http://www.blogjava.net/robbie/archive/2009/04/05/264003.html">《Spring事务配置的5种方法</a>》</span></p><p><span style="font-size: 14pt;">本文介绍两种配置方法：</span></p><p>&nbsp;</p><h2><a target="_blank" target="_blank" href="http://www.cnblogs.com/leiOOlei/p/3725911.html#s1">一、&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; XML，使用tx标签配置拦截器实现事务</a></h2><h2><a target="_blank" target="_blank" href="http://www.cnblogs.com/leiOOlei/p/3725911.html#s2">一、&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Annotation方式</a></h2><p><span style="font-size:18px;">以下所使用环境为Spring4.0.3、Hibernate4.3.5</span></p><p>&nbsp;</p><h2>一、&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; XML，使用tx标签配置拦截器实现事务</h2><p><br></p><p>Entity类User.java，持久化类，对应数据库表user</p><p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_1_6023918" name="code" class="java">package com.lei.demo.entity;
+
+import javax.persistence.*;
+
+@Entity(name=&quot;users&quot;)
+public class Users {
+    
+    public Users(){
+        super();
+    }
+    
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    @Column(name=&quot;id&quot;)
+    private Integer id;
+    
+    @Column(name=&quot;user_name&quot;,length=32)
+    private String user_name;
+    
+    @Column(name=&quot;age&quot;)
+    private Integer age;
+    
+    @Column(name=&quot;nice_name&quot;,length=32)
+    private String nice_name;
+    
+    //属性实现......
+
+}</pre><br>UserDAO.javar，user的一些操作，其中属性sessionFactory应该由Spring注入，如下：<p><p><br></p><p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_2_8248765" name="code" class="java">package com.lei.demo.dao;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.stereotype.Repository;
+
+import com.lei.demo.entity.Users;
+
+public class UsersDAO {
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    public SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
+    public List&lt;Users&gt; getAllUser(){
+        String hsql=&quot;from users&quot;;
+        Session session = sessionFactory.getCurrentSession();
+        Query query = session.createQuery(hsql);
+        
+        return query.list();
+    }
+}</pre><br>UserService.java，业务实现类，如下<p><p><br></p><p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_3_9502501" name="code" class="java">package com.lei.demo.service;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lei.demo.dao.*;
+
+public class UserService {
+    private UsersDAO userDao;
+    
+    public int userCount(){
+        return userDao.getAllUser().size();
+    }
+
+    public UsersDAO getUserDao() {
+        return userDao;
+    }
+
+    public void setUserDao(UsersDAO userDao) {
+        this.userDao = userDao;
+    }
+
+}</pre><br>首先看一下xml配置，spring-hibernate.xml如下：<p><p><br></p><p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_4_7932337" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
+    xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
+    xsi:schemaLocation=&quot;
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        &quot;&gt;
+
+    &lt;!-- Hibernate4 --&gt;
+    &lt;!-- 加载资源文件  其中包含变量信息，必须在Spring配置文件的最前面加载，即第一个加载--&gt;
+    &lt;context:property-placeholder location=&quot;classpath:persistence-mysql.properties&quot; /&gt;
+    
+    &lt;bean id=&quot;sessionFactory&quot; 
+        class=&quot;org.springframework.orm.hibernate4.LocalSessionFactoryBean&quot;&gt;
+        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt;
+        &lt;property name=&quot;packagesToScan&quot;&gt;
+            &lt;list&gt;
+                &lt;!-- 可以加多个包 --&gt;
+                &lt;value&gt;com.lei.demo.entity&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;hibernateProperties&quot;&gt;
+            &lt;props&gt;
+                &lt;prop key=&quot;hibernate.hbm2ddl.auto&quot;&gt;${hibernate.hbm2ddl.auto}&lt;/prop&gt;
+                &lt;prop key=&quot;hibernate.dialect&quot;&gt;${hibernate.dialect}&lt;/prop&gt;
+                &lt;prop key=&quot;hibernate.show_sql&quot;&gt;${hibernate.show_sql}&lt;/prop&gt;
+                &lt;!--  &lt;prop key=&quot;hibernate.current_session_context_class&quot;&gt;thread&lt;/prop&gt; --&gt; 
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+    
+    &lt;!-- 数据库映射 --&gt;
+    &lt;bean id=&quot;dataSource&quot; class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;&gt;
+      &lt;property name=&quot;driverClassName&quot; value=&quot;${jdbc.driverClassName}&quot; /&gt;
+      &lt;property name=&quot;url&quot; value=&quot;${jdbc.url}&quot; /&gt;
+      &lt;property name=&quot;username&quot; value=&quot;${jdbc.user}&quot; /&gt;
+      &lt;property name=&quot;password&quot; value=&quot;${jdbc.pass}&quot; /&gt;
+   &lt;/bean&gt;
+   
+    &lt;!-- 配置Hibernate事务管理器 --&gt;
+    &lt;bean id=&quot;transactionManager&quot;
+        class=&quot;org.springframework.orm.hibernate4.HibernateTransactionManager&quot;&gt;
+      &lt;property name=&quot;sessionFactory&quot; ref=&quot;sessionFactory&quot; /&gt;
+   &lt;/bean&gt;
+   
+   &lt;!-- 配置事务异常封装 --&gt;
+   &lt;bean id=&quot;persistenceExceptionTranslationPostProcessor&quot; 
+       class=&quot;org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor&quot; /&gt;
+   
+   &lt;!--  声明式容器事务管理 ,transaction-manager指定事务管理器为transactionManager --&gt;
+    &lt;tx:advice id=&quot;txAdvice&quot; transaction-manager=&quot;transactionManager&quot;&gt;
+        &lt;tx:attributes&gt;
+            &lt;tx:method name=&quot;add*&quot; propagation=&quot;REQUIRED&quot; /&gt;
+            &lt;tx:method name=&quot;get*&quot; propagation=&quot;REQUIRED&quot; /&gt;
+            &lt;tx:method name=&quot;*&quot; read-only=&quot;true&quot; /&gt;
+        &lt;/tx:attributes&gt;
+    &lt;/tx:advice&gt;
+    
+    &lt;aop:config expose-proxy=&quot;true&quot;&gt;
+        &lt;!-- 只对业务逻辑层实施事务 --&gt;
+        &lt;aop:pointcut id=&quot;txPointcut&quot; expression=&quot;execution(* com.lei.demo.service..*.*(..))&quot; /&gt;
+        &lt;!-- Advisor定义，切入点和通知分别为txPointcut、txAdvice --&gt;
+        &lt;aop:advisor pointcut-ref=&quot;txPointcut&quot; advice-ref=&quot;txAdvice&quot;/&gt;
+    &lt;/aop:config&gt;
+    
+&lt;/beans&gt;</pre><br><p><p>其中主要配置中是<span style="background-color: #ffff00;">tx:advice</span>和<span style="background-color: #ffff00;">aop:config</span>两个配置节，以Spring AOP的方式实现事务管理。</p><p><span style="background-color: #ffff00;">tx:advice</span>配置了事务的管理者是<span style="color:#0000ff;"><em>transactionManager</em></span>，同时<span style="color:#0000ff;">tx:method</span>也规定了如果方法名匹配“add*”和“get*”方法时使用事务，propagation是设定事务的传播级别。除了“add*”和“get*”方法，其他的方法的事务是只读的（典型地，对于只执行查询的事务你会将该属性设为true，如果出现了更新、插入或是删除语句时只读事务就会失败）</p><p><span style="background-color: #ffff00;">aop:config</span>指定了一个aop:pointcut去引用上边的advice。</p><p>这样就通过AOP的拦截机制实现了事务，当然你还要用Spring的方式自己配置UserDAO和UserService。</p><p>&nbsp;</p><h2>二、&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Annotation方式</h2><p><br></p><p>第一步，首先看一下web.xml，如下：</p><p><br></p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_5_8662686" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; 
+    xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; 
+    xmlns:web=&quot;http://java.sun.com/xml/ns/javaee&quot; 
+    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee 
+        http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot; 
+        id=&quot;WebApp_ID&quot; version=&quot;3.0&quot;&gt;
+  &lt;display-name&gt;Archetype Created Web Application&lt;/display-name&gt;
+  &lt;context-param&gt;
+    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+    &lt;param-value&gt;classpath:/spring-*.xml&lt;/param-value&gt;
+  &lt;/context-param&gt;
+  &lt;listener&gt;
+    &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+  &lt;/listener&gt;
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;lei-dispatcher&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+      &lt;param-value&gt;classpath:/lei-dispatcher-servlet.xml&lt;/param-value&gt;
+    &lt;/init-param&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;/servlet&gt;
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;lei-dispatcher&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</pre><br>第二步，spring-hibernate配置，见以下spring-hibernate.xml配置<p><br></p><p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_6_9044370" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
+    xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
+    xsi:schemaLocation=&quot;
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        &quot;&gt;
+
+    &lt;!-- Hibernate4 --&gt;
+    &lt;!-- 加载资源文件  其中包含变量信息，必须在Spring配置文件的最前面加载，即第一个加载--&gt;
+    &lt;context:property-placeholder location=&quot;classpath:persistence-mysql.properties&quot; /&gt;
+    
+    &lt;bean id=&quot;sessionFactory&quot; 
+        class=&quot;org.springframework.orm.hibernate4.LocalSessionFactoryBean&quot;&gt;
+        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt;
+        &lt;property name=&quot;packagesToScan&quot;&gt;
+            &lt;list&gt;
+                &lt;!-- 可以加多个包 --&gt;
+                &lt;value&gt;com.lei.demo.entity&lt;/value&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;hibernateProperties&quot;&gt;
+            &lt;props&gt;
+                &lt;prop key=&quot;hibernate.hbm2ddl.auto&quot;&gt;${hibernate.hbm2ddl.auto}&lt;/prop&gt;
+                &lt;prop key=&quot;hibernate.dialect&quot;&gt;${hibernate.dialect}&lt;/prop&gt;
+                &lt;prop key=&quot;hibernate.show_sql&quot;&gt;${hibernate.show_sql}&lt;/prop&gt;
+                &lt;!--  &lt;prop key=&quot;hibernate.current_session_context_class&quot;&gt;thread&lt;/prop&gt; --&gt; 
+            &lt;/props&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+    
+    &lt;!-- 数据库映射 --&gt;
+    &lt;!--  class=&quot;org.apache.tomcat.dbcp.dbcp.BasicDataSource&quot; --&gt;
+    &lt;!--  class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot; --&gt;
+    &lt;bean id=&quot;dataSource&quot; class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;&gt;
+      &lt;property name=&quot;driverClassName&quot; value=&quot;${jdbc.driverClassName}&quot; /&gt;
+      &lt;property name=&quot;url&quot; value=&quot;${jdbc.url}&quot; /&gt;
+      &lt;property name=&quot;username&quot; value=&quot;${jdbc.user}&quot; /&gt;
+      &lt;property name=&quot;password&quot; value=&quot;${jdbc.pass}&quot; /&gt;
+   &lt;/bean&gt;
+   
+    &lt;!-- 配置Hibernate事务管理器 --&gt;
+    &lt;bean id=&quot;transactionManager&quot;
+        class=&quot;org.springframework.orm.hibernate4.HibernateTransactionManager&quot;&gt;
+      &lt;property name=&quot;sessionFactory&quot; ref=&quot;sessionFactory&quot; /&gt;
+   &lt;/bean&gt;
+   
+   &lt;!-- 配置事务异常封装 --&gt;
+   &lt;bean id=&quot;persistenceExceptionTranslationPostProcessor&quot; 
+       class=&quot;org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor&quot; /&gt;
+
+&lt;/beans&gt;</pre><br><p><p>第一节中xml配置事务中需要通过配置tx:advice和aop:config来增加事务的功能。此处采用全注释方法，这两个配置节就不需要了。</p><p>&nbsp;</p><p>相应的需要在视图解析配置中启用注释，如下lei-dispatcher-servlet.xml</p><p><br></p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_7_9774718" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:mvc=&quot;http://www.springframework.org/schema/mvc&quot;
+    xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
+    xsi:schemaLocation=&quot;
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        &quot;&gt;
+        
+    &lt;!-- 启动自动扫描 该包下所有的Bean(@Controller) --&gt;
+    &lt;context:component-scan base-package=&quot;com.lei.demo&quot; /&gt;
+    
+    &lt;!-- 基于注释的事务，当注释中发现@Transactional时，使用id为“transactionManager”的事务管理器  --&gt;
+    &lt;!-- 如果没有设置transaction-manager的值，则spring以缺省默认的事务管理器来处理事务，默认事务管理器为第一个加载的事务管理器 --&gt;
+    &lt;tx:annotation-driven transaction-manager=&quot;transactionManager&quot;/&gt;
+    
+    &lt;!-- 定义视图解析器 --&gt;
+    &lt;bean class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;
+        &lt;property name=&quot;prefix&quot;&gt;
+            &lt;value&gt;/WEB-INF/user/&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;suffix&quot;&gt;
+            &lt;value&gt;.jsp&lt;/value&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+    
+&lt;/beans&gt;</pre><br>UserDAO如下<p><br></p><p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_8_6568352" name="code" class="java">package com.lei.demo.dao;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.stereotype.Repository;
+
+import com.lei.demo.entity.Users;
+
+@Repository
+public class UsersDAO {
+    @Resource(name=&quot;sessionFactory&quot;)
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    public SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
+    public List&lt;Users&gt; getAllUser(){
+        String hsql=&quot;from users&quot;;
+        Session session = sessionFactory.getCurrentSession();
+        Query query = session.createQuery(hsql);
+        
+        return query.list();
+    }
+}</pre><br>UserService.java如下<p><p><br></p><p><pre code_snippet_id="1594787" snippet_file_name="blog_20160302_9_5346853" name="code" class="java">package com.lei.demo.service;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lei.demo.dao.*;
+
+@Service(&quot;userService&quot;)
+public class UserService {
+    @Resource
+    private UsersDAO userDao;
+    
+    @Transactional
+    public int userCount(){
+        return userDao.getAllUser().size();
+    }
+
+    public UsersDAO getUserDao() {
+        return userDao;
+    }
+
+    public void setUserDao(UsersDAO userDao) {
+        this.userDao = userDao;
+    }
+
+}</pre><br><p><p>这里，方法名userCount上加入<span style="color:#ff9900;">@Transactional</span>，说明这个方法要启用事务。如果类名UserService上加入<span style="color:#ff9900;">@Transactional</span>，则表明这个类中的所有方法都会启用事务。</p><p>如果配有多个<span style="color:#0000ff;"><em>transactionManager</em></span>，例如配置有<span style="color:#0000ff;"><em>transactionManager1</em></span>,和<span style="color:#0000ff;"><em>transactionManager2</em></span>，则可以通过<span style="color:#ff9900;">@Transactional(“transactionManager1”)</span>，的方式指定使用哪个数据源的事务。</p><p>&nbsp;</p><p>源代码下载：</p><p><a target="_blank" target="_blank" href="http://www.oschina.net/code/snippet_1764868_35775">http://www.oschina.net/code/snippet_1764868_35775</a></p><p><br></p><p><br></p><p><br></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/50781096'>原文链接</a>

@@ -1,0 +1,87 @@
+﻿<div style="color:blue" align=center>性能最好的序列化反序列化，Protobuf的用法（maven项目）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;">首先要在pom.xml里添加Protobuf的jar包</span></p><p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"></span><pre code_snippet_id="2369847" snippet_file_name="blog_20170503_1_6018215" name="code" class="html">&lt;dependency&gt;  
+     &lt;groupId&gt;com.dyuproject.protostuff&lt;/groupId&gt;  
+     &lt;artifactId&gt;protostuff-core&lt;/artifactId&gt;  
+     &lt;version&gt;1.0.8&lt;/version&gt;  
+ &lt;/dependency&gt;  
+  
+ &lt;dependency&gt;  
+     &lt;groupId&gt;com.dyuproject.protostuff&lt;/groupId&gt;  
+     &lt;artifactId&gt;protostuff-runtime&lt;/artifactId&gt;  
+     &lt;version&gt;1.0.8&lt;/version&gt;  
+ &lt;/dependency&gt;  </pre><br></p><p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;">序列化的实体类User.<a target="_blank" href="http://lib.csdn.net/base/javase" class="replace_word" title="Java SE知识库" target="_blank" style="text-decoration: none; color: rgb(223, 52, 52);">Java</a>（不需要实现Serializable接口）</span><br></span></p><p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"></span></span><pre code_snippet_id="2369847" snippet_file_name="blog_20170503_2_8602917" name="code" class="java">package com.serialize.entity;  
+  
+public class User {  
+    private String id;  
+    private String username;  
+    private String password;  
+      
+    public User() {  
+    }  
+    public User(String id, String username, String password) {  
+        this.id = id;  
+        this.username = username;  
+        this.password = password;  
+    }  
+    public String getId() {  
+        return id;  
+    }  
+    public void setId(String id) {  
+        this.id = id;  
+    }  
+    public String getUsername() {  
+        return username;  
+    }  
+    public void setUsername(String username) {  
+        this.username = username;  
+    }  
+    public String getPassword() {  
+        return password;  
+    }  
+    public void setPassword(String password) {  
+        this.password = password;  
+    }  
+    @Override  
+    public String toString() {  
+        return &quot;User [id=&quot; + id + &quot;, username=&quot; + username + &quot;, password=&quot;  
+                + password + &quot;]&quot;;  
+    }  
+      
+  
+}  </pre><br></p><p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;">序列化的工具类SerializeUtils.java（使用了泛型方法）</span><br></span></span></p><p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"></span></span></span><pre code_snippet_id="2369847" snippet_file_name="blog_20170503_3_2856059" name="code" class="java">package com.serialize.utils;  
+  
+import com.dyuproject.protostuff.LinkedBuffer;  
+import com.dyuproject.protostuff.ProtobufIOUtil;  
+import com.dyuproject.protostuff.runtime.RuntimeSchema;  
+  
+public class SerializeUtils{  
+    public static &lt;T&gt; byte[] serialize(T t,Class&lt;T&gt; clazz) {  
+        return ProtobufIOUtil.toByteArray(t, RuntimeSchema.createFrom(clazz),  
+                LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));  
+    }  
+    public static &lt;T&gt; T deSerialize(byte[] data,Class&lt;T&gt; clazz) {  
+        RuntimeSchema&lt;T&gt; runtimeSchema = RuntimeSchema.createFrom(clazz);  
+        T t = runtimeSchema.newMessage();  
+        ProtobufIOUtil.mergeFrom(data, t, runtimeSchema);  
+        return t;  
+    }  
+}  </pre><br></p><p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;">测试主类App.java</span><br></span></span></span></p><p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"></span></span></span></span><pre code_snippet_id="2369847" snippet_file_name="blog_20170503_4_6585813" name="code" class="java">package com.serialize;  
+  
+import com.serialize.entity.User;  
+import com.serialize.utils.SerializeUtils;  
+  
+public class App {  
+    public static void main(String[] args) {      
+        User user=new User(&quot;1&quot;,&quot;xiaobao&quot;,&quot;123456&quot;);  
+        System.out.println(&quot;序列化&quot;);  
+        byte[] data = SerializeUtils.serialize(user,User.class);  
+        for (byte b : data) {  
+            System.out.print(b);  
+        }  
+        System.out.println();  
+        System.out.println(&quot;反序列化&quot;);  
+        User user2 = SerializeUtils.deSerialize(data,User.class);  
+        System.out.println(user2);  
+    }  
+}  </pre><br><br></p><p><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><span style="color: rgb(85, 85, 85); font-family: 'microsoft yahei'; font-size: 15px;"><br></span></span></span></span></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/71125299'>原文链接</a>

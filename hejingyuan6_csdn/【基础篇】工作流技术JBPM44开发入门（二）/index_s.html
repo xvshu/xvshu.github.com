@@ -1,0 +1,77 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【基础篇】工作流技术JBPM44开发入门（二）</div><div style="color:blue" align=center>【基础篇】工作流技术JBPM44开发入门（二）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">继续上篇博客的介绍</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">举例说明</span><span lang="en-US">JBPM</span><span lang="zh-CN">帮我们做的工作：</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">其一：流程的调用工作，实现自动化且灵活化</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">说明：每完成一个任务后，将会自动执行下一个流程</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="16153838591433" alt=""><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">对应的</span><span lang="en-US">xml</span><span lang="zh-CN">文件</span><br>
+</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<pre code_snippet_id="531608" snippet_file_name="blog_20141124_1_6733030" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;process name=&quot;ApplyDepartmentDecision&quot; xmlns=&quot;http://jbpm.org/4.4/jpdl&quot;&gt;
+   &lt;start g=&quot;306,5,48,48&quot; name=&quot;start1&quot;&gt;
+      &lt;transition g=&quot;-93,-22&quot; name=&quot;to 申请学籍转办&quot; to=&quot;申请学籍转办&quot;/&gt;
+   &lt;/start&gt;
+   &lt;end g=&quot;335,397,48,48&quot; name=&quot;end1&quot;/&gt;
+   &lt;task  g=&quot;268,102,144,59&quot; name=&quot;申请学籍转办&quot;&gt;
+      &lt;transition g=&quot;-69,-22&quot; name=&quot;to 班长审批&quot; to=&quot;班长审批&quot;/&gt;
+   &lt;/task&gt;
+   &lt;task assignee=&quot;班长&quot; g=&quot;302,192,92,52&quot; name=&quot;班长审批&quot;&gt;
+      &lt;transition g=&quot;-69,-22&quot; name=&quot;to 导员审批&quot; to=&quot;导员审批&quot;/&gt;
+      &lt;transition g=&quot;-93,-22&quot; name=&quot;to 教学秘书审批&quot; to=&quot;教学秘书审批&quot;/&gt;
+   &lt;/task&gt;
+   &lt;task assignee=&quot;导员&quot; g=&quot;240,299,92,52&quot; name=&quot;导员审批&quot;&gt;
+      &lt;transition g=&quot;-50,-22&quot; name=&quot;to end1&quot; to=&quot;end1&quot;/&gt;
+   &lt;/task&gt;
+   &lt;task assignee=&quot;教学秘书&quot; g=&quot;414,306,92,52&quot; name=&quot;教学秘书审批&quot;&gt;
+      &lt;transition g=&quot;-50,-22&quot; name=&quot;to end1&quot; to=&quot;end1&quot;/&gt;
+   &lt;/task&gt;
+&lt;/process&gt;
+</pre><br>
+<br>
+<p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">其二：对于流程管理中的数据维护</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">说明：对于工作流的流转过程中产生的数据，均由工作流自己维护的工作流库来管理</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">优点：所有的流转数据维护都由工作流自己维护，而且处理完的任务有相应的历史记录表，我们在查看时只需要跟</span><span lang="en-US">jbpm</span><span lang="zh-CN">封装的</span><span lang="en-US">API</span><span lang="zh-CN">打交道，而不需要管理相应的表，更加简化了我们的工作量</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<br>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="39679209444901" alt=""><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">其三：业务与流程的解耦</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">说明：jbpm工作流流程独立，可以使用工具定义和建模，利于跟踪、监控、管理、调度、优化和重整，和业务操作松散耦合，日后需求变动但</span><span lang="en-US">jbpm的封装代码几乎不用修改</span><span lang="zh-CN">，很好的应对了变化。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">对于一般流程的变化，我们要做的只是针对需要的流程，画出相应的工作流流程指派给相应的操作人员，然后部署到项目中，然后即可自动实现相应的流程管理</span></p>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">总结：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">工作流是一项分离业务操作和系统流程的技术，也就是我们常常挂在嘴边的抽象，解耦。其实所有的高大上的技术，最基础的还是我们面向对象的一些思想！</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">以上只是简单介绍了</span><span lang="en-US">JBPM</span><span lang="zh-CN">给我们带来的一些操作上的便利，也只是一些最基础的认识，对于有异议的地方还望大家指出！</span><span lang="en-US">JBPM</span><span lang="zh-CN">的学习仍在继续！</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">下篇简单介绍一个</span><span lang="en-US">JBPM</span><span lang="zh-CN">实例！</span></span></p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; font-family:SimSun; font-size:14.0pt"><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/41420391'>原文链接</a>

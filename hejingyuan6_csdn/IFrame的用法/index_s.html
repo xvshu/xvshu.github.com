@@ -1,0 +1,217 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; IFrame的用法</div><div style="color:blue" align=center>IFrame的用法</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">I</span><span lang="en-US">F</span><span lang="zh-CN">rame介绍：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">&lt;iframe&gt;也应该是框架的一种形式，iframe和</span><span lang="en-US">frame比较相&#20284;，但是有一个根本的区别，iframe可以活动，而frame是不可活动的。换句话说，iframe可以指定其坐标位置。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">大部分的时候我们用</span><span lang="en-US">iframe去模拟一些特效。例如我现在要求当前页面执行某个操作，而操作后肯定要有一个跳转的动作。但是一旦跳转，原始页面就没了，这个时候可以让iframe内部做跳转，这样页面不动，而执行的内容也完成了。如果iframe的尺寸是个0*0的，就可以模拟ajax的效果了。</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span style="color:rgb(51,51,51)">Frame</span>简单介绍：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin-top:0pt; margin-bottom:3pt; line-height:18pt; color:rgb(51,51,51)">
+<span style="font-family:KaiTi_GB2312; font-size:24px">在JAVA中，frame是一种控件，可作为父窗体加载其他swing控件。</span></p>
+<p style="margin-top:0pt; margin-bottom:3pt; line-height:18pt; color:rgb(51,51,51)">
+<span style="font-family:KaiTi_GB2312; font-size:24px">在VB中，Frame是一种控件。Frame 控件为控件提供可标识的分组。Frame 可以在功能上进一步分割一个窗体－例如，把 OptionButton 控件分成几组。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">一</span><span lang="en-US">,I</span><span lang="zh-CN">frame</span><span lang="zh-CN">标记的使用&#26684;式是</span><span lang="en-US">:</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">代码如下</span><span lang="en-US">:</span></span></p>
+<p style="margin:0in; font-size:10.5pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+<p style="margin:0in"><span lang="en-US"></span></p>
+<pre code_snippet_id="85447" snippet_file_name="blog_20131127_1_8843718" name="code" class="html" style="font-size: 10.5pt; font-family: Calibri;">&lt;Iframe src=&quot;URL&quot; width=&quot;x&quot; height=&quot;x&quot; scrolling=&quot;[OPTION]&quot; frameborder=&quot;x&quot;&gt;&lt;/iframe&gt;
+</pre><br>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">src：文件的路径，既可是HTML文件，也可以是文本、ASP等；</span><span lang="en-US">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">width、height：&quot;画中画&quot;区域的宽与高；</span><span lang="en-US">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">scrolling:当SRC的指定的HTML文件在指定的区域不显不完时，滚动选项，如果设置为NO，则不出现滚动条；如为Auto：则自动出现滚动条；如为Yes，则显示;</span><span lang="en-US">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">FrameBorder：区域边框的宽度，为了让“画中画“与邻近的内容相融合，常设置为0。</span><span lang="en-US">&nbsp;</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">例如：</span></p>
+<p style="margin-top:2pt; margin-bottom:0pt; line-height:18pt; color:rgb(68,68,68)">
+<span style="font-family:KaiTi_GB2312; font-size:24px">代码如下:</span></p>
+<br>
+<p style="margin:0in"><span lang="en-US"></span></p>
+<pre code_snippet_id="85447" snippet_file_name="blog_20131127_2_4415853" name="code" class="html" style="font-size: 10.5pt; font-family: Calibri;">&lt;Iframe src=&quot;http://www.jb51.net&quot;;; width=&quot;250&quot; height=&quot;200&quot; scrolling=&quot;no&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;&#160;
+</pre><br>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">二、父窗体与</span><span lang="zh-CN">子窗体</span><span lang="zh-CN">之间的相互控制</span><span lang="en-US"></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">在脚本语言与对象层次中，包含Iframe的窗口我们称之为父窗体，</span><span lang="zh-CN">另一个为</span><span lang="en-US">子窗体，弄清这两者的关系很重要，因为要在父窗体中访问子窗体或相反都必须清楚对象层次，才能通过程序来访问并控制窗体。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">1、在父窗体中访问并控制子窗体中的对象</span><span lang="en-US"></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">在父窗体中，</span><span lang="en-US">Iframe即子窗体是document对象的一个子对象，可以直接在脚本中访问子窗体中的对象。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">代码如下</span><span lang="en-US">:</span></span></p>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in">
+<pre code_snippet_id="85447" snippet_file_name="blog_20131127_3_2845690" name="code" class="html">&lt;Iframe src=&quot;test.htm&quot; id=&quot;test&quot; width=&quot;250&quot; height=&quot;200&quot; scrolling=&quot;no&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt; 
+test.htm文件代码为: 
+&lt;html&gt; 
+&lt;body&gt; 
+&lt;h1 id=&quot;myH1&quot;&gt;hello,my boy&lt;/h1&gt; 
+&lt;/body&gt; 
+&lt;/html&gt; </pre>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span style="color:rgb(68,68,68); line-height:25px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span style="color:rgb(68,68,68); line-height:25px">如我们要改变ID号为myH1的H1标记里的文字为hello,my dear，则可用:&nbsp;</span><br style="color:rgb(68,68,68); line-height:25px">
+<span style="color:rgb(68,68,68); line-height:25px">document.myH1.innerText=&quot;hello,my dear&quot;(其中，document可省)&nbsp;</span></span><br>
+</p>
+<br>
+<pre code_snippet_id="85447" snippet_file_name="blog_20131127_4_1591171" name="code" class="csharp">document.myH1.innerText=&quot;hello,my dear&quot;</pre>
+<p style="margin:0in"><br>
+</p>
+<br>
+<span style="font-family:KaiTi_GB2312; font-size:24px">另一种使用方式：</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span lang="en-US"></span></p>
+<pre code_snippet_id="85447" snippet_file_name="blog_20131127_5_7512752" name="code" class="html" style="font-size: 10.5pt; font-family: Calibri;"> &lt;iframe id=&quot;myframe&quot; width=&quot;100%&quot; class=&quot;hide&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot; frameborder=&quot;0&quot; scrolling=&quot;auto&quot;  src=&quot;StuRecords.aspx&quot; style=&quot;display: inline; height: 450px;&quot; runat=&quot;server&quot;&gt;
+                      
+  &lt;/iframe&gt;</pre>
+<p>
+<p style="margin:0in"><br>
+</p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">当加载父窗体时，默认同时加载子窗体（此时子窗体为空），但是当触发父窗体的某个事件时，要激发子窗体的事件，显示内容</span></p>
+<p style="font-size:10.5pt; font-family:SimSun; margin:0in"><br>
+</p>
+<pre code_snippet_id="85447" snippet_file_name="blog_20131127_6_3434334" name="code" class="csharp" style="font-size: 10.5pt; font-family: Calibri;">   /// &lt;summary&gt;
+        /// 显示某道试题的答题记录，显示某一部分。
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;dtOneQuestionRecords&quot;&gt;查询出20条答题记录&lt;/param&gt;
+        /// &lt;param name=&quot;pageIndex&quot;&gt;为0&lt;/param&gt;
+        private void ShowAnswerRecord(DataTable dtOneQuestionRecords, string tableRecord, int pageIndex)
+        {
+            myframe.Attributes[&quot;src&quot;] = &quot;StuRecords.aspx&quot;;
+        }
+	
+        /// &lt;summary&gt;
+        /// 下一批
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+        protected void btnNextPage_Click(object sender, EventArgs e)
+        {
+            myframe.Attributes[&quot;src&quot;] = &quot;StuRecords.aspx&quot;;
+         }
+</pre><br>
+<span style="font-family:KaiTi_GB2312; font-size:24px">子窗体的判断</span><br>
+<p style="margin:0in; font-size:10.5pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+<p style="margin:0in"><span lang="en-US"></span></p>
+<pre code_snippet_id="85447" snippet_file_name="blog_20131127_7_9148172" name="code" class="csharp" style="font-family: Calibri; font-size: 10.5pt;">/// &lt;summary&gt;
+/// 窗体加载时，判断session的值是否为空，空则加载子窗体空白页，否则执行子窗体的事件
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;sender&quot;&gt;&lt;/param&gt;
+/// &lt;param name=&quot;e&quot;&gt;&lt;/param&gt;
+      
+ protected void Page_Load(object sender, EventArgs e)
+        {
+            if (Session[&quot;questionType&quot;] != null)
+            {
+                ShowStuRecord();
+            }
+            else { 
+            }
+        }
+
+        public void ShowStuRecord() {
+
+            //得到试题id
+            int questionIndex = Convert.ToInt32(Session[&quot;questionIndex&quot;]);
+
+            //获取考试id值
+            //string ExamID = DropExam.SelectedItem.Value;
+            string ExamID = &quot;1306172117&quot;;
+            //查找试题记录--答题记录表
+            string tableRecord = Convert.ToString(Session[&quot;tableRecord&quot;]);
+            //题型的value
+            //string UserName = Session[&quot;UserName&quot;].ToString();
+            string UserName = &quot;xvshu&quot;;
+            string questionType = Session[&quot;questionType&quot;].ToString();
+            //调用王永俊的方法，查看答题记录前20条，并写入教师姓名
+            Hashtable map = new Hashtable();
+            map.Add(&quot;TableNameRecord&quot;, tableRecord);//题型value和表名
+            map.Add(&quot;QuestionType&quot;, questionType);
+            map.Add(&quot;Teacher&quot;, UserName);
+            map.Add(&quot;QuestionID&quot;, questionIndex);
+            map.Add(&quot;ExamID&quot;, ExamID);
+            QuestionContextBLL awardingBLL = new QuestionContextBLL(map);
+
+            //查出答题记录
+            DataTable dtOneQuestionRecords = awardingBLL.SelectRecordTopbyQuestionID(map);
+            if (dtOneQuestionRecords.Rows.Count == 0)
+            {
+                MessageBox.Show(this, &quot;已判完！&quot;);
+            }
+
+            lblFraction.Text = &quot;标准分数：&quot; + Session[&quot;Fraction&quot;];
+            int pageIndex = 0;
+            for (int i = 30 * pageIndex; i &lt; 30 * pageIndex + 30 &amp;&amp; i &lt; dtOneQuestionRecords.Rows.Count; i++)
+            {
+                //显示答写的试题答案
+                TableCell tc = new TableCell();
+                tc.Text = (i + 1).ToString() + &quot;答案:&quot; + dtOneQuestionRecords.Rows[i][&quot;ExamAnswer&quot;].ToString();
+
+                TableRow tr = new TableRow();
+                tr.Cells.Add(tc);
+                tblAutoTable.Rows.Add(tr);
+
+                TextBox textBox = new TextBox();
+                //得到试题记录的id号
+                string id = dtOneQuestionRecords.Rows[i][&quot;ID&quot;].ToString();
+                textBox.Text = dtOneQuestionRecords.Rows[i][&quot;Fraction&quot;].ToString();
+                //给评分控件设置id号
+                textBox.ID = tableRecord.Trim() + dtOneQuestionRecords.Rows[i][&quot;ID&quot;].ToString();
+                textBox.Attributes.Add(&quot;Onblur&quot;, &quot;javascript:return CheckFraction(event.srcElement)&amp;&amp;JudgeQuestions(&#39;&quot; + tableRecord.Trim() + &quot;&#39;,&#39;&quot; + id + &quot;&#39;,&#39;&quot; + textBox.ID + &quot;&#39;)&quot;);
+                //textBox.Attributes.Add(&quot;Onblur&quot;, &quot;javascript:test()&quot;);
+                TableCell tc1 = new TableCell();
+                tc1.Controls.Add(textBox);
+                TableRow tr1 = new TableRow();
+                tr1.Cells.Add(tc1);
+                tblAutoTable.Rows.Add(tr1);
+                //Session[&quot;txtScores&quot;] = textBox.ID;
+            }
+
+        }
+</pre><br>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="en-US">&nbsp;</span><span lang="zh-CN">在这里的应用主要是根据</span><span lang="en-US">id</span><span lang="zh-CN">&#20540;来加载子页面！当然我们也可以根据</span><span lang="en-US">id</span><span lang="zh-CN">&#20540;来对它进行不同的操作。</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">2、在子窗体中访问并控制父窗体中对象</span><span lang="en-US"></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">在子窗体中我们可以通过其</span><span lang="en-US">parent即父（双亲）对象来访问父窗口中的对象。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">复制代码代码如下</span><span lang="en-US">:</span></span></p>
+<br>
+<p style="margin:0in"><span lang="en-US"></span></p>
+<pre code_snippet_id="85447" snippet_file_name="blog_20131127_8_1166059" name="code" class="html" style="font-size: 10.5pt; font-family: Calibri;">&lt;html&gt; 
+&lt;body onclick=&quot;alert(tt.myH1.innerHTML)&quot;&gt; 
+&lt;Iframe name=&quot;tt&quot; src=&quot;frame1.htm&quot; width=&quot;250&quot; height=&quot;200&quot; scrolling=&quot;no&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt; 
+&lt;h1 id=&quot;myH2&quot;&gt;hello,my wife&lt;/h1&gt; 
+&lt;/body&gt; 
+&lt;/html&gt; 
+</pre><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">如果要在myframe</span><span lang="zh-CN">操作我们可以这样写：</span><span lang="en-US"></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">parent.myframe.innerText=&quot;hello,myfriend&quot;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">这里</span><span lang="en-US">parent对象就代表当前窗体(example.htm所在窗体)，要在子窗体中访问父窗体中的对象，无一例外都通过parent对象来进行。</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span lang="zh-CN">总结：</span><span lang="zh-CN">通过</span><span lang="en-US">Iframe标记，我们可将那些不变的内容以Iframe来表示，这样，不必重复写相同的内容</span><span lang="zh-CN">（框架）</span><span lang="en-US">，这有点象程序设计中的过程或函数，减省了多少繁琐的手工劳动！另外，至关重要的是，它使页面的修改更为可行，因为，不必因为版式的调整而修改每个页面，你只需修改一个父窗体的版式即可了。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<span style="font-size:24px"><br>
+</span>
+<p style="margin:0in; font-size:10.5pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/16992583'>原文链接</a>

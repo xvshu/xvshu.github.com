@@ -1,0 +1,64 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 面向过程的软件设计</div><div style="color:blue" align=center>面向过程的软件设计</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; “面向过程”是一种以过程为中心的编程思想。“面向过程”也可称之为“面向记录”编程思想，他们不支持丰富的“面向对象”特性（比如继承、多态），并且它们不允许混合持久化状态和域逻辑。就是分析出解决问题所需要的步骤，然后用函数把这些步骤一步一步实现，使用的时候一个一个依次调用就可以了。</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><img src="27246529013074.gif" alt="">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">开发阶段的信息流</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="11203409883965.png" alt="" width="369" height="159"></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">结构图：程序中模块间的调用关系</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">1，&nbsp; 模块</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="32128528727739.png" alt=""><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">2，<span style="font-family:KaiTi_GB2312; font-size:24px">表示模块A有条件地调用另一个模块B</span> &nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="40029668102423.png" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">3，&nbsp; 模块间的信息传递</span><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">4，&nbsp; <span style="font-family:KaiTi_GB2312; font-size:24px">
+模块的调用关系和接口</span></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="3253067896394.png" width="379" height="124" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">程序的系统结构图</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="26397238278691.png" width="397" height="173" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">深度：5</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">宽度：7</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">结构化设计方法</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">在系统结构图（SC）中的模块</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="44630846276500.png" width="384" height="122" alt=""> &nbsp; &nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">系统结构图（SC图）</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">变换分析</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="130176710390177.png" width="380" height="204" alt="">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">以变换中心为主模块，从逻辑输入到逻辑输出这个就是变换中心</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">事务分析</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="477794610203408.png" width="380" height="204" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">I为事务处理中心，三条中执行一条，执行哪条看I</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">变换型系统结构图</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="261659110422403.png" width="385" height="247" alt="">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">事务型系统结构图</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="45418586348858.png" width="391" height="308" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">过程设计——详细设计</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">图形工具</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">1，&nbsp; 程序流程图（PSC）</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="9567756341028.png" width="383" height="268" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">2，&nbsp; N—S图（盒图）</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="23976779974100.png" width="387" height="107" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">3，&nbsp; 问题分析图（PAD图）</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="16883109440232.png" width="387" height="143" alt=""></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">表&#26684;工具</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">1，&nbsp; 判定表</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">2，&nbsp; 伪代码/结构化英语PDL</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/8142133'>原文链接</a>

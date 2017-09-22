@@ -1,0 +1,406 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 【整合篇】JBPM44与Spring整合</div><div style="color:blue" align=center>【整合篇】JBPM44与Spring整合</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">我们大家都知道容器的好处，那么工作流也提供了与</span><span lang="en-US">spring</span><span lang="zh-CN">整合的方式，将工作流引擎由</span><span lang="en-US">spring</span><span lang="zh-CN">容器统一管理起来，共同拥有容器的特性。下面来从代码的角度来看看整合与不整合的对比：</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<h1 style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">未整合：</span><span lang="en-US">&nbsp;</span></span></h1>
+<p lang="en-US" style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">引入相应的</span><span lang="en-US">jar</span><span lang="zh-CN">包，使用</span><span lang="en-US">hibernate</span><span lang="zh-CN">来持久化</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="9275555502926" alt=""><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">配置文件：</span></p>
+<p style="margin:0in; font-size:14pt">&nbsp;</p>
+<p style="margin:0in; font-size:14pt"><span lang="zh-CN">jbpm.cfg.xml</span><span lang="en-US">:</span></p>
+<p style="margin:0in; font-size:14pt"><span lang="en-US"></span></p>
+<pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;jbpm-configuration&gt;
+
+  &lt;import resource=&quot;jbpm.default.cfg.xml&quot; /&gt;
+  &lt;import resource=&quot;jbpm.businesscalendar.cfg.xml&quot; /&gt;
+  &lt;import resource=&quot;jbpm.tx.hibernate.cfg.xml&quot; /&gt;
+  &lt;import resource=&quot;jbpm.jpdl.cfg.xml&quot; /&gt;
+  &lt;import resource=&quot;jbpm.bpmn.cfg.xml&quot; /&gt;
+  &lt;import resource=&quot;jbpm.identity.cfg.xml&quot; /&gt;
+
+  &lt;!-- Job executor is excluded for running the example test cases. --&gt;
+  &lt;!-- To enable timers and messages in production use, this should be included. --&gt;
+  &lt;!--
+  &lt;import resource=&quot;jbpm.jobexecutor.cfg.xml&quot; /&gt;
+  --&gt;
+
+&lt;/jbpm-configuration&gt;
+</pre>
+<p><br>
+</p>
+<span style="font-size:18px">jbpm.hibernate.cfg.xml：</span>
+<p style="margin:0in; font-size:14pt"><span lang="en-US"><span style="font-family:SimSun"></span></span></p>
+<pre name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+
+&lt;!DOCTYPE hibernate-configuration PUBLIC
+          &quot;-//Hibernate/Hibernate Configuration DTD 3.0//EN&quot;
+          &quot;http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd&quot;&gt;
+
+&lt;hibernate-configuration&gt;
+  &lt;session-factory&gt;
+  
+     &lt;property name=&quot;hibernate.dialect&quot;&gt;org.hibernate.dialect.MySQL5InnoDBDialect&lt;/property&gt;
+     &lt;property name=&quot;hibernate.connection.driver_class&quot;&gt;com.mysql.jdbc.Driver&lt;/property&gt;
+     &lt;property name=&quot;hibernate.connection.url&quot;&gt;jdbc:mysql://127.0.0.1/jbpm&lt;/property&gt;
+     &lt;property name=&quot;hibernate.connection.username&quot;&gt;root&lt;/property&gt;
+     &lt;property name=&quot;hibernate.connection.password&quot;&gt;hejingyuan&lt;/property&gt;
+    &lt;!--  &lt;property name=&quot;hibernate.dialect&quot;&gt;org.hibernate.dialect.HSQLDialect&lt;/property&gt;
+     &lt;property name=&quot;hibernate.connection.driver_class&quot;&gt;org.hsqldb.jdbcDriver&lt;/property&gt;
+     &lt;property name=&quot;hibernate.connection.url&quot;&gt;jdbc:hsqldb:mem:.&lt;/property&gt;
+     &lt;property name=&quot;hibernate.connection.username&quot;&gt;sa&lt;/property&gt;
+     &lt;property name=&quot;hibernate.connection.password&quot;&gt;&lt;/property&gt; --&gt;
+     &lt;property name=&quot;hibernate.hbm2ddl.auto&quot;&gt;update&lt;/property&gt;
+     &lt;property name=&quot;hibernate.format_sql&quot;&gt;true&lt;/property&gt;
+     
+     &lt;mapping resource=&quot;jbpm.repository.hbm.xml&quot; /&gt;
+     &lt;mapping resource=&quot;jbpm.execution.hbm.xml&quot; /&gt;
+     &lt;mapping resource=&quot;jbpm.history.hbm.xml&quot; /&gt;
+     &lt;mapping resource=&quot;jbpm.task.hbm.xml&quot; /&gt;
+     &lt;mapping resource=&quot;jbpm.identity.hbm.xml&quot; /&gt;
+     
+  &lt;/session-factory&gt;
+&lt;/hibernate-configuration&gt;
+</pre>
+<p><br>
+</p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">申请时应用：</span></p>
+<p style="margin:0in; font-size:14pt">
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_3_8837292" name="code" class="java"> ProcessEngine pe = Configuration.getProcessEngine();
+	TaskService ts = pe.getTaskService();
+	
+	String taskId = request.getParameter(&quot;taskId&quot;);
+	String owner = request.getParameter(&quot;owner&quot;);
+	int day = Integer.parseInt(request.getParameter(&quot;day&quot;));
+	String reason = request.getParameter(&quot;reason&quot;);
+	
+	Map map = new HashMap();
+	map.put(&quot;day&quot;, day);
+	map.put(&quot;reason&quot;, reason);
+	map.put(&quot;msg&quot;, &quot;&lt;hr&gt;申请人:&quot;+owner+&quot;&lt;br&gt;请假天数:&quot;+day+&quot;&lt;br&gt;请假原因:&quot;+reason);
+	
+	ts.setVariables(taskId,map);
+	ts.completeTask(taskId);
+	
+	response.sendRedirect(&quot;index.jsp&quot;);
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">对应的源码：</span></p>
+<p style="margin:0in; font-size:14pt">
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_4_3868355" name="code" class="java"> /** singletone instance */
+  private static ProcessEngine singleton;
+
+  /** get the singleton ProcessEngine that is created from the default
+   * configuration file &#39;jbpm.cfg.xml&#39;. */
+  public static ProcessEngine getProcessEngine() {
+    if (singleton == null) {
+      synchronized (Configuration.class) {
+        if (singleton == null) {
+          singleton = new Configuration().setResource(&quot;jbpm.cfg.xml&quot;).buildProcessEngine();
+        }
+      }
+    }
+    return Configuration.singleton;
+  }
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">在</span><span lang="en-US">jbpm</span><span lang="zh-CN">的</span><span lang="en-US">jar</span><span lang="zh-CN">包下，我们可以看到：</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><br>
+</p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">这些是</span><span lang="en-US">jbpm.cfg.xml</span><span lang="zh-CN">文件中引入的文件</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<img src="17923468702149" alt=""><br>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">如何识别的</span><span lang="en-US">hibernate</span><span lang="zh-CN">的配置文件：</span><br>
+</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="45459187427616" alt=""><br>
+</span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></span></p>
+<h1 style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">整合后：</span></h1>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">使用</span><span lang="en-US">ssh</span><span lang="zh-CN">架构：</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">web.xml</span><span lang="zh-CN">文件：</span></span></p>
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_5_9431647" name="code" class="html">http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; id=&quot;WebApp_ID&quot; version=&quot;2.5&quot;&gt;
+  &lt;display-name&gt;SSH&lt;/display-name&gt;
+  
+  &lt;listener&gt;  
+        &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;        
+  &lt;/listener&gt;
+ &lt;context-param&gt;
+		&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+		&lt;param-value&gt;classpath:applicationContext.xml&lt;/param-value&gt;
+  &lt;/context-param&gt;   
+ 
+ &lt;!-- 配置Spring的OpenSessionInViewFilter，以解决懒加载异常的问题 --&gt;
+	&lt;filter&gt;
+		&lt;filter-name&gt;OpenSessionInViewFilter&lt;/filter-name&gt;
+		&lt;filter-class&gt;org.springframework.orm.hibernate3.support.OpenSessionInViewFilter&lt;/filter-class&gt;
+	&lt;/filter&gt;
+	&lt;filter-mapping&gt;
+		&lt;filter-name&gt;OpenSessionInViewFilter&lt;/filter-name&gt;
+		&lt;url-pattern&gt;*.action&lt;/url-pattern&gt;
+	&lt;/filter-mapping&gt;
+ 
+ &lt;!--  hejingyuan添加 --&gt;
+   &lt;filter&gt;  
+        &lt;filter-name&gt;SSH&lt;/filter-name&gt;  
+        &lt;filter-class&gt;org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter&lt;/filter-class&gt;  
+    &lt;/filter&gt;  
+  
+    &lt;filter-mapping&gt;  
+        &lt;filter-name&gt;SSH&lt;/filter-name&gt;  
+        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;  
+    &lt;/filter-mapping&gt;
+   
+    &lt;welcome-file-list&gt;  
+        &lt;welcome-file&gt;index.html&lt;/welcome-file&gt;  
+    &lt;/welcome-file-list&gt;
+  &lt;!-- 结束 --&gt;
+  
+  &lt;!-- open session in view 的配置--&gt;
+ &lt;!--  &lt;filter&gt;
+ &lt;filter-name&gt;openSessionInView&lt;/filter-name&gt;
+ &lt;filter-class&gt;org.springframework.orm.hibernate3.support.OpenSessionInViewFilter&lt;/filter-class&gt;
+ &lt;init-param&gt;
+ &lt;param-name&gt;sessionFactoryBeanName&lt;/param-name&gt;
+ &lt;param-value&gt;sessionFactory&lt;/param-value&gt;
+ &lt;/init-param&gt;
+ &lt;/filter&gt;
+
+ &lt;filter-mapping&gt;
+ &lt;filter-name&gt;openSessionInView&lt;/filter-name&gt;
+ &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+ &lt;/filter-mapping&gt; --&gt;
+  
+  
+&lt;/web-app&gt;
+</pre><br>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">struts.xml配置文件：<br>
+</span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></span></p>
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_6_5726071" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.1//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.1.dtd&quot;&gt;
+&lt;struts&gt;
+
+&lt;!-- 问题一： namespace=&quot;/&quot; 错误，找不到返回值 --&gt;
+
+	&lt;!-- 配置为开发模式 --&gt;
+	&lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
+
+	&lt;include file=&quot;struts-default.xml&quot; /&gt;  
+    &lt;package name=&quot;hjy&quot; extends=&quot;struts-default&quot;  namespace=&quot;/&quot;&gt;  
+       
+        
+        &lt;!-- 审批流转：审批流程管理 --&gt;
+		&lt;action name=&quot;processDefinitionAction_*&quot; class=&quot;com.hjy.ssh.action.ProcessDefinitionAction&quot; method=&quot;{1}&quot;&gt;
+			&lt;result name=&quot;list&quot;&gt;/WEB-INF/jsp/definitionFlow/list.jsp&lt;/result&gt;
+			&lt;result name=&quot;addUI&quot;&gt;/WEB-INF/jsp/definitionFlow/addUI.jsp&lt;/result&gt;
+			&lt;result name=&quot;toList&quot; type=&quot;redirectAction&quot;&gt;processDefinitionAction_list&lt;/result&gt;
+			&lt;!-- 下载专用的结果配置 --&gt;
+			&lt;result name=&quot;downloadProcessImage&quot; type=&quot;stream&quot;&gt;
+				&lt;param name=&quot;contentType&quot;&gt;image/png&lt;/param&gt;
+				&lt;param name=&quot;inputName&quot;&gt;inputStream&lt;/param&gt;
+			&lt;/result&gt;
+		&lt;/action&gt;
+			
+		
+		&lt;!-- 审批流转：申请流转 --&gt;
+		&lt;action name=&quot;flowAction_*&quot; class=&quot;com.hjy.ssh.action.FlowAction&quot; method=&quot;{1}&quot;&gt;					
+			&lt;result name=&quot;submitUI&quot;&gt;/WEB-INF/jsp/flowAction/submitUI.jsp&lt;/result&gt;
+			&lt;result name=&quot;myApplicationList&quot;&gt;/WEB-INF/jsp/flowAction/myApplicationList.jsp&lt;/result&gt;
+			&lt;result name=&quot;toMyApplicationList&quot; type=&quot;redirectAction&quot;&gt;flowAction_myApplicationList&lt;/result&gt;
+			&lt;result name=&quot;myTaskList&quot;&gt;/WEB-INF/jsp/flowAction/myTaskList.jsp&lt;/result&gt;
+			&lt;result name=&quot;approveUI&quot;&gt;/WEB-INF/jsp/flowAction/approveUI.jsp&lt;/result&gt;
+			&lt;result name=&quot;approveHistory&quot;&gt;/WEB-INF/jsp/flowAction/approveHistory.jsp&lt;/result&gt;
+			&lt;result name=&quot;toMyTaskList&quot; type=&quot;redirectAction&quot;&gt;flowAction_myTaskList&lt;/result&gt;
+			
+			&lt;result name=&quot;showProcessImageUI&quot;&gt; /WEB-INF/jsp/flowAction/showProcessImageUI.jsp&lt;/result&gt;
+		&lt;/action&gt;
+			
+		&lt;!-- 用户管理 --&gt;
+		&lt;action name=&quot;userAction_*&quot; class=&quot;com.hjy.ssh.action.UserAction&quot; method=&quot;{1}&quot;&gt;
+			&lt;result name=&quot;toIndex&quot; type=&quot;redirect&quot;&gt;/index.jsp&lt;/result&gt;
+			&lt;result name=&quot;loginUI&quot;&gt;/WEB-INF/jsp/user/loginUI.jsp&lt;/result&gt;
+		&lt;/action&gt;
+		&lt;!-- 首页 --&gt;
+		&lt;action name=&quot;homeAction_*&quot; class=&quot;com.hjy.ssh.action.HomeAction&quot; method=&quot;{1}&quot;&gt;
+			&lt;result name=&quot;{1}&quot;&gt;/WEB-INF/jsp/homeAction/{1}.jsp&lt;/result&gt;
+		&lt;/action&gt;
+		
+    &lt;/package&gt; 
+&lt;/struts&gt;</pre>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span style="font-family:KaiTi_GB2312"><span lang="en-US">sring</span><span lang="zh-CN">的配置文件：</span><span lang="zh-CN">applicationContext.xml</span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"></span></p>
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_7_2336139" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+	xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd&quot;&gt;
+
+  
+      &lt;!-- 自动扫描与装配bean --&gt;
+	&lt;context:component-scan base-package=&quot;com.hjy.ssh&quot;&gt;&lt;/context:component-scan&gt;
+     
+    &lt;bean id=&quot;dataSource&quot; class=&quot;org.apache.commons.dbcp.BasicDataSource&quot; destroy-method=&quot;close&quot;&gt;  
+        &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot;&gt;&lt;/property&gt;  
+        &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://127.0.0.1/ssh&quot;&gt;&lt;/property&gt;  
+        &lt;property name=&quot;username&quot; value=&quot;root&quot;&gt;&lt;/property&gt;  
+        &lt;property name=&quot;password&quot; value=&quot;hejingyuan&quot;&gt;&lt;/property&gt;  
+    &lt;/bean&gt; 
+		
+    &lt;!--定义Hibernate的SessionFactory --&gt;  
+    &lt;!-- SessionFactory使用的数据源为上面的数据源 --&gt;  
+    &lt;!-- 指定了Hibernate的映射文件和配置信息 --&gt;  
+	
+	&lt;!-- 配置SessionFactory --&gt;
+	&lt;bean id=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.LocalSessionFactoryBean&quot;&gt;
+		&lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;&gt;&lt;/property&gt;
+		&lt;property name=&quot;configLocation&quot; value=&quot;classpath:hibernate.cfg.xml&quot;&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	
+   &lt;!-- 配置声明式的事务管理（采用基于注解的方式） --&gt;
+	 &lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.orm.hibernate3.HibernateTransactionManager&quot;&gt;
+		&lt;property name=&quot;sessionFactory&quot; ref=&quot;sessionFactory&quot;&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	&lt;tx:annotation-driven transaction-manager=&quot;transactionManager&quot; /&gt;
+	  
+    &lt;!-- more bean definitions go here --&gt; 
+     
+ 	&lt;!-- 配置ProcessEngine --&gt;
+	  &lt;bean id=&quot;springHelper&quot; class=&quot;org.jbpm.pvm.internal.processengine.SpringHelper&quot;&gt;
+		&lt;property name=&quot;jbpmCfg&quot; value=&quot;jbpm.cfg.xml&quot;&gt;&lt;/property&gt;
+	&lt;/bean&gt;
+	&lt;bean id=&quot;processEngine&quot; factory-bean=&quot;springHelper&quot; factory-method=&quot;createProcessEngine&quot; /&gt;
+  
+&lt;/beans&gt;   
+</pre>
+<p><br>
+</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">hibernate.cfg.xml：</span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></span></p>
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_8_3647073" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!-- &lt;!DOCTYPE hibernate-configuration PUBLIC
+		&quot;-//Hibernate/Hibernate Configuration DTD 3.0//EN&quot;
+		&quot;http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd&quot;&gt;--&gt;
+
+
+&lt;!DOCTYPE hibernate-configuration PUBLIC
+        &quot;-//Hibernate/Hibernate Configuration DTD 3.0//EN&quot;
+        &quot;http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd&quot;&gt;  
+&lt;hibernate-configuration&gt; 
+  &lt;session-factory&gt;  
+    &lt;!-- Database connection settings --&gt;  
+   	&lt;!--  &lt;property name=&quot;connection.driver_class&quot;&gt;com.mysql.jdbc.Driver&lt;/property&gt;  
+    &lt;property name=&quot;connection.url&quot;&gt;jdbc:mysql://127.0.0.1/ssh&lt;/property&gt;  
+    &lt;property name=&quot;connection.username&quot;&gt;root&lt;/property&gt;  
+    &lt;property name=&quot;connection.password&quot;&gt;hejingyuan&lt;/property&gt;   --&gt;
+  
+    &lt;!-- JDBC connection pool (use the built-in) --&gt;  
+    &lt;!-- &lt;property name=&quot;connection.pool_size&quot;&gt;1&lt;/property&gt; --&gt;  
+  
+    &lt;!-- SQL dialect --&gt; 
+      
+    &lt;property name=&quot;hibernate.dialect&quot;&gt;org.hibernate.dialect.MySQL5InnoDBDialect&lt;/property&gt;
+    &lt;!-- Enable Hibernate&#39;s automatic session context management --&gt;  
+    &lt;!-- &lt;property name=&quot;current_session_context_class&quot;&gt;thread&lt;/property&gt; --&gt;  
+  
+   
+    &lt;!-- Echo all executed SQL to stdout --&gt;  
+    &lt;property name=&quot;show_sql&quot;&gt;true&lt;/property&gt;  
+  
+
+    &lt;!-- Drop and re-create the database schema on startup --&gt;      
+    &lt;property name=&quot;hibernate.hbm2ddl.auto&quot;&gt;update&lt;/property&gt;  
+    
+    &lt;mapping resource=&quot;com/hjy/ssh/beans/User.hbm.xml&quot;/&gt; 
+    &lt;mapping resource=&quot;com/hjy/ssh/beans/Application.hbm.xml&quot;/&gt;
+    &lt;mapping resource=&quot;com/hjy/ssh/beans/ApproveInfo.hbm.xml&quot;/&gt;
+    
+    &lt;!-- 导入JBPM4.4的映射文件 --&gt;
+	&lt;mapping resource=&quot;jbpm.repository.hbm.xml&quot; /&gt;
+	&lt;mapping resource=&quot;jbpm.execution.hbm.xml&quot; /&gt;
+	&lt;mapping resource=&quot;jbpm.history.hbm.xml&quot; /&gt;
+	&lt;mapping resource=&quot;jbpm.task.hbm.xml&quot; /&gt;
+	&lt;mapping resource=&quot;jbpm.identity.hbm.xml&quot; /&gt;
+	 
+  &lt;/session-factory&gt;  
+&lt;/hibernate-configuration&gt;  </pre>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">jbpm.cfg.xml：</span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></span></p>
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_9_4434618" name="code" class="html">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;jbpm-configuration&gt;  
+
+  &lt;import resource=&quot;jbpm.default.cfg.xml&quot; /&gt;
+  &lt;import resource=&quot;jbpm.businesscalendar.cfg.xml&quot; /&gt;
+  &lt;!-- 
+  &lt;import resource=&quot;jbpm.tx.hibernate.cfg.xml&quot; /&gt;
+   --&gt;
+   &lt;!-- 与Spring整合需要导入jbpm.tx.spring.cfg.xml文件 --&gt;
+  &lt;import resource=&quot;jbpm.tx.spring.cfg.xml&quot; /&gt;
+    
+  &lt;import resource=&quot;jbpm.jpdl.cfg.xml&quot; /&gt;
+  &lt;import resource=&quot;jbpm.bpmn.cfg.xml&quot; /&gt;
+  &lt;import resource=&quot;jbpm.identity.cfg.xml&quot; /&gt;
+    
+&lt;/jbpm-configuration&gt;  
+</pre>
+<p><br>
+</p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">部署应用：</span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></span></p>
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_10_6650623" name="code" class="java">@Resource
+protected ProcessDefinitionService processDefinitionService;
+
+/** 部署 ,即添加一个流程定义（上传png和xml文件）*/
+public String add() throws Exception {
+	ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(upload));
+	try {
+		processDefinitionService.deploy(zipInputStream);
+	} finally {
+		zipInputStream.close();
+	}
+	return &quot;toList&quot;;
+	}</pre>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312">实现类：<br>
+</span></span></span></p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></span></p>
+<pre code_snippet_id="583179" snippet_file_name="blog_20150119_11_9946424" name="code" class="java">@Override
+public void deploy(ZipInputStream zipInputStream) {
+	// 部署流程
+	processEngine.getRepositoryService()//
+		.createDeployment()//
+		.addResourcesFromZipInputStream(zipInputStream)//
+		.deploy();
+	
+	}
+</pre><br>
+<p>
+<p style="margin:0in; font-size:14.0pt"><span lang="zh-CN"><span lang="zh-CN"></span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">总结：</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312">&nbsp;</span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">以上通过代码的方式展示，主要是让大家更加系统性的来了解工作流的工作原理，而看配置文件也是最简单的一种方式。对于是否与</span><span lang="en-US">spring</span><span lang="zh-CN">或者其他框架整合，相信大家通过做日常项目也能体会到应用框架的优势，以上的对比只是让大家有个直观的认识。</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-size:14pt"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><br>
+</span></span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/42834123'>原文链接</a>

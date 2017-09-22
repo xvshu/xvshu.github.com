@@ -1,0 +1,176 @@
+﻿<div style="color:blue" align=center>JAVA学习篇Servlet详解</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span lang="en-US"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><strong><span lang="en-US">Servlet</span><span lang="zh-CN">由来</span></strong></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">&nbsp;&nbsp;&nbsp;&nbsp; 做过</span><span lang="en-US">BS</span><span lang="zh-CN">项目的人都知道，浏览器能够根据HTML静态标记语言来显示各式各样的网页。但是如果我们需要在网页上完成一些业务逻辑：比如登陆验证。或者说网页显示的内容在服务器的数据库中。如果是这样，除了负责显示的HTML标记之外，必须还要有完成这些业务功能的代码存在。这种网页我们就叫做动态网页。</span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">对于静态网页而言，服务器上存在的是一个个纯HTML文件。当客户端浏览器发出HTTP请求时，服务器可以根据请求的URL找到对应的HTML文件，并将HTML代码返回给客户端浏览器。</span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp;但是对于动态网页，服务器上除了找到需要显示的HTML标记外，还必须执行所需要的业务逻辑，然后将业务逻辑运算后的结果和需要显示的HTML标记一起生成新的HTML代码。最后将新的带有业务逻辑运算结果的HTML代码返回给客户端。</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">为了实现动态网页的目标，JavaServlet技术因应而生，它能够以一种可移植的方法来提供动态的、面向用户的内容。</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">简单来说：</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">servlet是在服务器上运行的小程序。Servlet的主要功能在于交互式地浏览和修改数据，生成动态Web内容，是为</span><span lang="en-US">web</span><span lang="zh-CN">开发</span><span lang="zh-CN">服务的。</span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><strong><span lang="zh-CN">CGI与</span><span lang="en-US">Servlet</span><span lang="zh-CN">对比</span></strong></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">开始的时候，公共网关接口（CommonGateway Interface，CGI）脚本是生成动态内容的主要技术。虽然使用得非常广泛，但CGI脚本技术有很多的缺陷，这包括平台相关性和缺乏可扩展性。为了避免这些局限性，JavaServlet技术因应而生，它能够以一种可移植的方法来提供动态的、面向用户的内容。处理用户请求。</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">对比一：当用户浏览器发出一个Http/CGI的请求，或者说调用一个CGI程序的时候，服务器端就要新启用一个进程(而且是每次都要调用)，调用CGI程序越多(特别是访问量高的时候)，就要消耗系统越多的处理时间，只剩下越来越少的系统资源，对于用户来说，只能是漫长的等待服务器端的返回页面了，这对于电子商务激烈发展的今天来说，不能不说是一种技术上的遗憾。</span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN">　　而Servlet充分发挥了服务器端的资源并高效的利用。每次调用Servlet时并不是新启用一个进程，而是在一个Web服务器的进程中共享和分离线程，而线程最大的好处在于可以共享一个数据源，使系统资源被有效利用。故</span><span lang="en-US">servlet</span><span lang="zh-CN">不是线程安全的，单实例多线程的</span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">　　对比二：传统的CGI程序，不具备平台无关性特征，系统环境发生变化，CGI程序就要瘫痪，而Servlet具备Java的平台无关性，在系统开发过程中保持了系统的可扩展性、高效性。</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">　　对比三：传统技术中，一般大都为二层的系统架构，即Web服务器&#43;数据库服务器，导致网站访问量大的时候，无法克服CGI程序与数据库建立连接时速度慢的瓶颈，从而死机、数据库死锁现象频繁发生。而我们的Servlet有连接池的概念，它可以利用多线程的优点，在系统缓存中事先建立好若干与数据库的连接，到时候若想和数据库打交道可以随时跟系统&quot;要&quot;一个连接即可，反应速度可想而知。</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><strong>Servlet的运行过程</strong></span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;　　</span></span></p>
+<p style="margin:0in; line-height:21pt; font-size:12pt"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp;⒈ 客户端发送请求至服务器端；</span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-family:KaiTi_GB2312"><span style="font-size:12pt">&nbsp;　　⒉</span><span style="font-size:14.0pt">服务器端根据web.xml文件中的Servlet相关配置信息，将客户端请求转发到相应的Servlet</span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-family:KaiTi_GB2312"><span style="font-size:12pt">&nbsp; &nbsp; &nbsp;⒊ Servlet引擎调用Service()方法，</span><span style="font-size:14.0pt">根据request对象中封装的用户请求与数据库进行交互，返回数据之后，Servlet会将返回的数据封装到response对象中；</span></span></p>
+<p style="margin:0in; line-height:21pt; font-size:12pt"><span style="font-family:KaiTi_GB2312">&nbsp;　　⒋ Servlet生成响应内容并将其传给服务器。响应内容动态生成，通常取决于客户端的请求　</span></p>
+<p style="margin:0in 0in 0in 0.375in; line-height:21pt; font-size:12pt"><span style="font-family:KaiTi_GB2312">⒌ 服务器将响应返回给客户端</span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"></span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="white-space:pre"><span style="font-family:KaiTi_GB2312"><span style="white-space:pre"></span>&nbsp;<img src="50815018792610" alt=""><span style="white-space:pre"></span></span></span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; line-height:21pt">
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><strong>Servlet生命周期</strong></span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp;&nbsp;<img src="6027859398099" alt=""></span></span></p>
+<p style="margin:0in; line-height:21pt">
+<p style="margin:0in 0in 0in 0.375in"><span style="font-size:18px"><span lang="en-US"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:18px">1） 加载和实例化；在第一次请求Servlet时，Servlet容器将会创建Servlet实例；</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:18px">2）&nbsp;初始化；Servlet容器加载完成Servlet之后，必须进行初始化，此时，init方法将被调用；</span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">3）&nbsp;Servlet初始化之后，就处于响应请求的就绪状态，此时如有客户端请求发送，就会调用Servlet实例的service</span><span lang="en-US">()</span><span lang="zh-CN">方法，并且根据用户的请求方式，调用doPost或者doGet方法；</span></span></p>
+<p style="margin:0in 0in 0in 0.375in"><span style="font-family:KaiTi_GB2312; font-size:18px">4） 最后，Servlet容器负责将Servlet实例进行销毁，调用destroy方法实现；</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">　　对于更多的客户端请求，Server创建新的请求和响应对象，仍然激活此Servlet的service()方法，将这两个对象作为参数传递给它。如此重复以上的循环，但无需再次调用init()方法。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN">一般Servlet只初始化一次(只有一个对象),当Server不再需要Servlet时(一般当Server关闭时)，Server调用Servlet的Destroy()方法。</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN"><span style="font-family:KaiTi_GB2312"></span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><strong>实例解析：</strong></span></span></p>
+<span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="39334599883520" alt=""></span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in; line-height:21pt"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">html代码--客户端浏览器</span></span></p>
+<p style="margin:0in; line-height:21pt">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="390006" snippet_file_name="blog_20140612_1_3257741" name="code" class="html">&lt;span style=&quot;font-family:KaiTi_GB2312;&quot;&gt;&lt;html&gt;
+	&lt;head&gt;
+		&lt;title&gt;学生管理&lt;/title&gt;
+	&lt;/head&gt;
+	&lt;body&gt;
+		&lt;h1&gt;根据出生日期段查询&lt;/h1&gt;
+		&lt;form action=&quot;queryStudentServlet&quot;&gt;
+			出生日期 ：&lt;input type=&quot;text&quot; name=&quot;beginDate&quot;&gt;至&lt;input type=&quot;text&quot; name=&quot;endDate&quot;&gt;
+			&lt;input type=&quot;submit&quot; value=&quot;查询学生&quot;&gt;
+		&lt;/form&gt;
+	&lt;/body&gt;
+&lt;/html&gt;
+&lt;/span&gt;</pre><span style="font-family:KaiTi_GB2312"><br>
+<span style="font-size:18px">配置文件</span></span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"></span></span></p>
+<pre code_snippet_id="390006" snippet_file_name="blog_20140612_2_1338130" name="code" class="html">&lt;span style=&quot;font-family:KaiTi_GB2312;&quot;&gt;&lt;servlet&gt;
+		&lt;servlet-name&gt;StudentMgrServlet&lt;/servlet-name&gt;
+		&lt;servlet-class&gt;StudentServlet&lt;/servlet-class&gt;
+	&lt;/servlet&gt;
+	&lt;servlet-mapping&gt;
+		&lt;servlet-name&gt;StudentMgrServlet&lt;/servlet-name&gt;
+		&lt;url-pattern&gt;/queryStudentServlet&lt;/url-pattern&gt;
+	&lt;/servlet-mapping&gt;
+&lt;/span&gt;</pre><span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">servlet处理过程</span></span></p>
+<p style="margin:0in">
+<pre code_snippet_id="390006" snippet_file_name="blog_20140612_3_4784477" name="code" class="java">&lt;span style=&quot;font-family:KaiTi_GB2312;&quot;&gt;	import java.text.*;
+	import java.util.*;
+	import java.io.*;
+	import javax.servlet.http.*;
+	import javax.servlet.*;
+	
+	import com.bjpowernode.exam.model.*;
+	import com.bjpowernode.exam.manager.*;
+	
+	public class StudentServlet extends HttpServlet {
+	
+		public void doGet(HttpServletRequest request, HttpServletResponse response)	
+		throws ServletException, IOException {
+			doPost(request, response);
+		}
+		
+		public void doPost(HttpServletRequest request, HttpServletResponse response)
+		throws ServletException, IOException {
+			
+			String sBeginDate = request.getParameter(&quot;beginDate&quot;);
+			String sEndDate = request.getParameter(&quot;endDate&quot;);
+			
+			Date beginDate = new Date();
+			Date endDate = new Date();
+			try {
+				beginDate = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;).parse(sBeginDate);
+			 	endDate = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;).parse(sEndDate);
+			 }catch(Exception e) {
+				e.printStackTrace();		 
+			 }	 
+			
+			
+			StudentManager studentManager = new StudentManagerImpl();
+			List&lt;Student&gt; studentList = studentManager.findStudentList(beginDate, endDate);
+			//表格省略…
+		}
+	}
+&lt;/span&gt;</pre><span style="font-family:KaiTi_GB2312"><br>
+</span>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px"><strong>Servlet如何同时处理多个请求？</strong><br>
+<br>
+<br>
+&nbsp; &nbsp; &nbsp; &nbsp;Servlet采用多线程来处理多个请求的同时访问。Servlet容器通过线程池来管理维护服务请求。所谓线程池，相当于数据库连接池，实际上是等待执行代码的一组线程，叫做工作者线程。Servlet容器通过一个调度线程来管理工作者线程。<br>
+· 当容器收到一个Servlet的访问请求，调度者线程就从线程池中选出一个工作者线程，将用户请求传递给该线程，然后由该线程处理Servlet的service()方法；<br>
+· 当这个线程在执行的时候，容器收到一个新的请求，调度者线程再次从线程池中选出一个新的工作者线程；<br>
+· 当容器同时收到对同一个Servlet的多个请求时，那么Servlet的service方法将在多线程中并发执行。<br>
+<br>
+<br>
+注：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:18px">&nbsp; &nbsp; 1.Servlet容器默认采用单实例多线程的方式来处理请求。这样减少了产生Servlet实例的开销，提升了对请求的响应时间；<br>
+&nbsp; &nbsp; 2.对于Tomcat容器来讲，可以在其server.xml中通过&lt;Connector&gt;中设置线程池中的线程数目。<br>
+<br>
+<br>
+<strong>如何开发线程安全的Servlet？</strong><br>
+<br>
+<br>
+&nbsp; &nbsp; &nbsp; &nbsp;Servlet容器采用多线程来处理请求，提高性能的同时也造成了线程安全问题。要开发线程安全的Servlet应该从一下几个方面进行：<br>
+1． &nbsp;变量的线程安全； 多线程并不共享局部变量，所以我们要尽可能的在Servlet中使用局部变量；<br>
+2． &nbsp;代码块的线程安全； 使用同步块Synchronized，防止可能调用的代码块；但是要注意的是，要尽可能得缩小同步代码的方范围，不要在service方法和响应方法上直接使用同步，这会严重影响性能。<br>
+3． &nbsp;属性的线程安全； ServletContext，HttpSession，ServletRequest对象中属性；<br>
+4． &nbsp;使用同步集合； 使用Vector代替ArrayList，使用HashTable代替HashMap；<br>
+5． &nbsp;不要在Servlet中创建自己的线程来完成某个功能； Servlet本身就是多线程的，如果再创建新的线程，将会导致线程执行复杂化，出现线程安全问题；<br>
+6． &nbsp;在多个Servlet中，对外部对象，比如：文件；进行修改操作一定要加锁，做到互斥访问；</span><br>
+</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><strong>总结：</strong></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN" style="color:blue"></span>&nbsp; &nbsp; 一个servlet就是Java编程语言中的一个类，它被用来扩展服务器的性能，服务器上驻留着可以通过“请求-响应”编程模型来访问的应用程序。Servlet通过解析http请求，取得客户端的参数来进行下一步操作。其实简单来说，servlet就是一个控制器，取参数，调用业务逻辑.</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp; &nbsp; 而在.net 中HttpHandler是一个HTTP请求的真正处理中心，也正是在这个HttpHandler容器中，ASP.NET Framework才真正地对客户端请求的服务器页面做出编译和执行，并将处理过后的信息附加在HTTP请求信息流中再次返回到HttpModule中。<span lang="zh-CN"></span></span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/30273879'>原文链接</a>

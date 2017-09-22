@@ -1,0 +1,64 @@
+﻿<div style="color:blue" align=center>PV操作</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-size:16pt; font-family:仿宋"><strong>相关临界区</strong></span><span lang="en-US" style="font-size:16pt; font-family:Calibri">:</span><span lang="zh-CN" style="font-size:16pt; font-family:仿宋">指并发进程中涉及到相同变量的那些操作</span><span lang="en-US" style="font-size:16pt; font-family:Calibri">.</span><span lang="zh-CN" style="font-size:16pt; font-family:仿宋">可以理解为</span><span lang="en-US" style="font-size:16pt; font-family:Calibri">vb</span><span lang="zh-CN" style="font-size:16pt; font-family:仿宋">中的公有变量</span><span lang="en-US" style="font-size:16pt; font-family:Calibri">.</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri"><strong>PV</strong></span><span lang="zh-CN" style="font-family:仿宋"><strong>操作</strong>是对信号量进行的操作定义如下</span><span lang="en-US" style="font-family:Calibri">:</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; P</span><span lang="zh-CN" style="font-family:仿宋">操作</span><span lang="en-US" style="font-family:Calibri">:</span><span lang="zh-CN" style="font-family:仿宋">将信号量</span><span lang="en-US" style="font-family:Calibri">S</span><span lang="zh-CN" style="font-family:仿宋">减去</span><span lang="en-US" style="font-family:Calibri">1,</span><span lang="zh-CN" style="font-family:仿宋">若结果小于</span><span lang="en-US" style="font-family:Calibri">0,</span><span lang="zh-CN" style="font-family:仿宋">则把调用</span><span lang="en-US" style="font-family:Calibri">P(S)</span><span lang="zh-CN" style="font-family:仿宋">的进程之后成等待信号量的状态</span><span lang="en-US" style="font-family:Calibri">.</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; V</span><span lang="zh-CN" style="font-family:仿宋">操作</span><span lang="en-US" style="font-family:Calibri">:</span><span lang="zh-CN" style="font-family:仿宋">将信号量加</span><span lang="en-US" style="font-family:Calibri">1,</span><span lang="zh-CN" style="font-family:仿宋">若结果不大于</span><span lang="en-US" style="font-family:Calibri">0,</span><span lang="zh-CN" style="font-family:仿宋">则释放一个等待信号量</span><span lang="en-US" style="font-family:Calibri">S</span><span lang="zh-CN" style="font-family:仿宋">的进程</span><span lang="en-US" style="font-family:Calibri">.</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span lang="en-US" style="font-size:16pt; font-family:Calibri">原语：</span><span lang="en-US" style="font-size:16pt"><span style="font-family:FangSong_GB2312">说明原子性，即不可拆分的整体。</span></span></span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; P</span><span lang="zh-CN" style="font-family:仿宋">操作原语</span><span lang="en-US" style="font-family:Calibri">:</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {&nbsp;</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;S=S-1</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if S&lt;0 then</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;wait</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; V</span><span lang="zh-CN" style="font-family:仿宋">操作原语：</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;S=S&#43;1</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if S&lt;=0 then</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Run</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp;PV</span><span lang="zh-CN" style="font-family:仿宋">操作举例说明：一个盘子，最多能容纳</span><span lang="en-US" style="font-family:Calibri">1</span><span lang="zh-CN" style="font-family:仿宋">个苹果，此时盘子为空，父亲负责放苹果，儿子负责从盘子中拿走苹果且只有盘子中有苹果时，儿子才可以拿苹果。</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">如图：</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="23930818799821.png" alt=""><br>
+</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">设：</span><span lang="en-US" style="font-family:Calibri">S1=1</span><span lang="zh-CN" style="font-family:仿宋">，</span><span lang="en-US" style="font-family:Calibri">S2=0</span><span lang="zh-CN" style="font-family:仿宋">（即盘子中没有苹果，父亲可以放，儿子不能拿）</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">父：</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P</span><span lang="zh-CN" style="font-family:仿宋">操作（申请资源，查看自己是否有能力放苹果）</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S1=S1-1; S1=0;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V</span><span lang="zh-CN" style="font-family:仿宋">操作（通知儿子盘子里有苹果，可以来拿）</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S2=S2&#43;1; S2=1</span><span lang="zh-CN" style="font-family:仿宋">；</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">子：</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp; P</span><span lang="zh-CN" style="font-family:仿宋">操作：（查看自己能不能拿苹果）</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp;&nbsp;&nbsp;&nbsp; S2=S2-1;&nbsp;S2=0;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp; V</span><span lang="zh-CN" style="font-family:仿宋">操作：（通知父亲又可以来放苹果）</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp;&nbsp;&nbsp;&nbsp; S1=S1&#43;1;&nbsp;S1=1;</p>
+<p lang="en-US" style="margin:0in; font-family:Calibri; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">注意事项：</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp; &nbsp; &nbsp; &nbsp; PV</span><span lang="zh-CN" style="font-family:仿宋">操作是同时存在的（有</span><span lang="en-US" style="font-family:Calibri">P</span><span lang="zh-CN" style="font-family:仿宋">必有</span><span lang="en-US" style="font-family:Calibri">V</span><span lang="zh-CN" style="font-family:仿宋">）。且</span><span lang="en-US" style="font-family:Calibri">P</span><span lang="zh-CN" style="font-family:仿宋">操作和</span><span lang="en-US" style="font-family:Calibri">V</span><span lang="zh-CN" style="font-family:仿宋">操作的绝对&#20540;相加等于盘子的最大容量。</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><strong>进程的同步和互斥</strong></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt"><strong><br>
+</strong></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp; 同步：指在并发进程之间存在一种制约关系，一个进程的执行依赖另一个进程的消息，当一个进程没有得到另一个进程的消息时应等待，直到消息到达才被唤醒。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">举例：如上，盘中只能放一个苹果，只用父亲放了，儿子才能拿，此时即协作关系（同步）。</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp; &nbsp; 互斥：指当有若干个进程都要使用某一共享资源时，任何时候最多只允许一个进程去使用该资源，其他要使用它的进程必须等待，直到该资源的占用者释放了该资源。</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋">举例：学校有多台打印机，但此时只有一个打印机处于空闲状态，甲和乙同时想使用，但只能一人先用，直到甲用完，乙才能使用</span><span lang="en-US" style="font-family:Calibri">----</span><span lang="zh-CN" style="font-family:仿宋">（互斥）</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">注意事项：</p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:仿宋">同步：当有且只有一个资源时。如果同上，盘子中最多可以容纳</span><span lang="en-US" style="font-family:Calibri">4</span><span lang="zh-CN" style="font-family:仿宋">个苹果的话即不是同步，因为此时父亲和儿子之间并不相互制约，可以独立操作。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:仿宋">互斥：当仅剩一个资源时。不是说只有一个资源而是仅剩下一个资源，多人要使用时为互斥。</span></p>
+<p style="margin:0in; font-family:仿宋; font-size:16.0pt">&nbsp;</p>
+<p style="margin:0in; font-size:16.0pt"><strong><span lang="en-US" style="font-family:Calibri">PV</span><span lang="zh-CN" style="font-family:仿宋">操作如何实现解耦：</span></strong></p>
+<p style="margin:0in; font-size:16.0pt"><strong><span lang="zh-CN" style="font-family:仿宋"><br>
+</span></strong></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="en-US" style="font-family:Calibri">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span lang="zh-CN" style="font-family:仿宋">再来说盘子的这个例子，本质上父亲和儿子都是对盘子来操作，我们使用</span><span lang="en-US" style="font-family:Calibri">PV</span><span lang="zh-CN" style="font-family:仿宋">算法，将信号量</span><span lang="en-US" style="font-family:Calibri">S</span><span lang="zh-CN" style="font-family:仿宋">分成</span><span lang="en-US" style="font-family:Calibri">S1</span><span lang="zh-CN" style="font-family:仿宋">和</span><span lang="en-US" style="font-family:Calibri">S2</span><span lang="zh-CN" style="font-family:仿宋">。</span><span lang="en-US" style="font-family:Calibri">S1</span><span lang="zh-CN" style="font-family:仿宋">表示的是父亲看盘子的状态，</span><span lang="en-US" style="font-family:Calibri">S2</span><span lang="zh-CN" style="font-family:仿宋">表示的是儿子看盘子的状态。其实他们两者都是看盘子的状态是否能满足自身的需求，只是父亲和儿子的看法是对立的。父亲认为盘子中没有苹果，我可以工作，儿子认为盘子中有苹果，我才可以工作。这样我们分别设</span><span lang="en-US" style="font-family:Calibri">S1</span><span lang="zh-CN" style="font-family:仿宋">和</span><span lang="en-US" style="font-family:Calibri">S2</span><span lang="zh-CN" style="font-family:仿宋">，使得父亲和儿子只需观察自己的信号量是否得到满足，不必考虑对方，这样减少了复杂的联系，解耦合。当然当父亲</span><span lang="en-US" style="font-family:Calibri">P</span><span lang="zh-CN" style="font-family:仿宋">操作之后还是要通知儿子的。</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"><br>
+</span></p>
+<p style="margin:0in; font-size:16.0pt"><span lang="zh-CN" style="font-family:仿宋"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/8776429'>原文链接</a>

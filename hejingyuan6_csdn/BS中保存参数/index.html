@@ -1,0 +1,159 @@
+﻿<div style="color:blue" align=center>BS中保存参数</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">开发中经常需要将&#20540;存起来，当点击某一项时以便知道点击了哪一项。</span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<h1><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">一：应用</span><span lang="en-US" style="font-family:Calibri">JS</span><span lang="zh-CN" style="font-family:SimSun">页面跳转（牛腩中讲到）</span></span></h1>
+<p lang="en-US" style="margin:0in; font-family:Calibri"><span style="font-size:18px">HTML:</span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri">
+<pre name="code" class="html">&lt;span style=&quot;font-size:18px&quot;&gt;&lt;td class=&quot;txt c&quot;&gt;&lt;a  href=&#39;ModifyExamStudentInformationVir.aspx?ExanID=&lt;%#Eval(&quot;ExanID&quot;)%&gt; &amp; WorkNo=&lt;%#Eval(&quot;WorkNo&quot;)%&gt;&#39; target=&quot;_blank&quot;&gt;&lt;%#Eval(&quot;CourseTypeCode&quot;) %&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+后台：<br>
+</span>
+<p>
+<p lang="en-US" style="margin:0in; font-family:Calibri">
+<pre name="code" class="csharp">&lt;span style=&quot;font-size:18px&quot;&gt;string WorkNo = Request.QueryString[&quot;WorkNo&quot;];
+string ExamID = Request.QueryString[&quot;ExamID&quot;];
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<h1><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">二：</span><span lang="zh-CN" style="font-family:Calibri">使用</span><span lang="en-US" style="font-family:Calibri">LinkButton的CommandArgument保存参数方式。</span><span lang="zh-CN" style="font-family:SimSun">（无需跳转页）</span></span></h1>
+<p>
+<p lang="en-US" style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:Calibri">LinkButton</span><span lang="zh-CN" style="font-family:SimSun">组件是一个服务器端的组件，类&#20284;于</span><span lang="en-US" style="font-family:Calibri">HTML</span><span lang="en-US" style="font-family:SimSun">中的</span><span lang="en-US" style="font-family:Calibri">&lt;A&gt;</span><span lang="en-US" style="font-family:SimSun">标识符。主要作用是就是在页面中显示一个超链接。当这个链接被按动的时候，页面就会往服务器端传递信息，并且在服务器端来处理相应的事件。</span></span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<h2><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">1</span><span lang="zh-CN" style="font-family:SimSun">，</span><span lang="en-US" style="font-family:Calibri">L</span><span lang="zh-CN" style="font-family:Calibri">inkButton</span><span lang="zh-CN" style="font-family:SimSun">常用属性和事件：</span></span></h2>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">a，CommandName,CommandArgument</span><span lang="en-US" style="font-family:SimSun">这二个属性在功能上基本相同，当</span><span lang="en-US" style="font-family:Calibri">Click</span><span lang="en-US" style="font-family:SimSun">事件被触发的时候，通过这二个属性可以方便的往服务器端传递数据。</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri">b，OnClick</span><span lang="en-US" style="font-family:SimSun">这个事件是当组件被</span><span lang="en-US" style="font-family:Calibri">Click</span><span lang="en-US" style="font-family:SimSun">的时候触发</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN"><span style="font-family:Calibri">c，</span></span><span lang="en-US" style="font-family:Calibri">OnCommand</span><span lang="en-US" style="font-family:SimSun">这也是一个事件，并和上面</span><span lang="en-US" style="font-family:Calibri">OnClick</span><span lang="en-US" style="font-family:SimSun">事件类&#20284;，区别在于，这个事件在被触发的时候，往服务器端传递</span><span lang="en-US" style="font-family:Calibri">CommandName,CommandArgument</span><span lang="en-US" style="font-family:SimSun">属性&#20540;</span><span lang="en-US" style="font-family:Calibri">.</span></span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<h2><span style="font-size:18px"><span lang="zh-CN" style="font-family:Calibri">2</span><span lang="zh-CN" style="font-family:SimSun">，</span><span lang="en-US" style="font-family:Calibri">C</span><span lang="zh-CN" style="font-family:Calibri">ommandName</span><span lang="zh-CN" style="font-family:SimSun">属性和</span><span lang="en-US" style="font-family:Calibri">CommandArgument</span><span lang="en-US" style="font-family:SimSun">属性：</span></span></h2>
+<p lang="en-US" style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:Calibri">LinkButton</span><span lang="zh-CN" style="font-family:SimSun">组件中</span><span lang="en-US" style="font-family:Calibri">CommandName</span><span lang="en-US" style="font-family:SimSun">属性和</span><span lang="en-US" style="font-family:Calibri">CommandArgument</span><span lang="en-US" style="font-family:SimSun">有着非常重要的作用。</span></span></p>
+<p style="margin:0in"><span lang="en-US" style="font-family:SimSun"><span style="font-size:18px"><br>
+</span></span></p>
+<p lang="en-US" style="margin:0in; font-family:SimSun"><span style="font-size:18px">举例如下：</span></p>
+<p lang="en-US" style="margin:0in; font-family:SimSun"><span style="font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">假如页面中有</span><span lang="en-US" style="font-family:Calibri">100</span><span lang="en-US" style="font-family:SimSun">个</span><span lang="en-US" style="font-family:Calibri">
+ LinkButton</span><span lang="en-US" style="font-family:SimSun">，那么在服务器端要判断到底是哪个</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">被按动了。如果没有这二个属性，可以通过给每一个</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">的</span><span lang="en-US" style="font-family:Calibri">Text</span><span lang="en-US" style="font-family:SimSun">属性赋&#20540;，然后通过检测</span><span lang="en-US" style="font-family:Calibri">Text</span><span lang="en-US" style="font-family:SimSun">属性&#20540;，来判断到底是哪个</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">被按动了。可以通过给每一个</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">命不同的名然后在事件处理函数中，通过检测</span><span lang="en-US" style="font-family:Calibri">Sender</span><span lang="en-US" style="font-family:SimSun">属性&#20540;来判断哪个</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">被按动。虽然上述这些方法都是可行的，但无一不繁琐。有了</span><span lang="en-US" style="font-family:Calibri">CommandName</span><span lang="en-US" style="font-family:SimSun">属性和</span><span lang="en-US" style="font-family:Calibri">CommandArgument</span><span lang="en-US" style="font-family:SimSun">属性就可以方便的解决这些问题。</span></span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">在程序中给</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">的</span><span lang="en-US" style="font-family:Calibri">CommandName</span><span lang="en-US" style="font-family:SimSun">属性和</span><span lang="en-US" style="font-family:Calibri">CommandArgument</span><span lang="en-US" style="font-family:SimSun">属性赋&#20540;，然后通过</span><span lang="en-US" style="font-family:Calibri">OnCommand</span><span lang="en-US" style="font-family:SimSun">事件中，可以得到从</span><span lang="en-US" style="font-family:Calibri">CommandEventArgs</span><span lang="en-US" style="font-family:SimSun">类中的数据，从而判断哪个</span><span lang="en-US" style="font-family:Calibri">
+ LinkButton</span><span lang="en-US" style="font-family:SimSun">被</span><span lang="zh-CN" style="font-family:SimSun">按</span><span lang="en-US" style="font-family:SimSun">动。</span><span lang="en-US" style="font-family:Calibri">CommandEventArgs</span><span lang="en-US" style="font-family:SimSun">类存储了和按钮</span><span lang="en-US" style="font-family:Calibri">(Button)</span><span lang="en-US" style="font-family:SimSun">事件相关的数据，并且可以在事件处理中通过</span><span lang="en-US" style="font-family:Calibri">CommandEventArgs</span><span lang="en-US" style="font-family:SimSun">类的属性来访问数据。当</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">被按动后，这个</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">所触发的数据都被储存到服务器的</span><span lang="en-US" style="font-family:Calibri">CommandEventArgs</span><span lang="en-US" style="font-family:SimSun">类中，访问</span><span lang="en-US" style="font-family:Calibri">CommandEventArgs</span><span lang="en-US" style="font-family:SimSun">类中的属性就访问了被按动的</span><span lang="en-US" style="font-family:Calibri">LinkButton</span><span lang="en-US" style="font-family:SimSun">。</span></span></p>
+<p lang="en-US" style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<h2><span style="font-size:18px"><span lang="zh-CN" style="font-family:Calibri">3，LinkButton</span><span lang="zh-CN" style="font-family:SimSun">使用方法举例说明（根据</span><span lang="en-US" style="font-family:SimSun">id</span><span lang="zh-CN" style="font-family:SimSun">&#20540;去服务器查找）：</span></span></h2>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun"><br>
+</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">前台：</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">代码如下</span><span lang="en-US" style="font-family:Calibri">:</span></span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri"></span></span></p>
+<pre name="code" class="html">&lt;span style=&quot;font-size:18px&quot;&gt;&lt;asp:LinkButton runat=&quot;server&quot; ID=&quot;lbtnUp&quot; CommandArgument=&#39;&lt;%#Eval(&quot;id&quot;) %&gt;&#39; OnClick=&quot;lbtnUp_Click&quot;&gt;修改&lt;/asp:LinkButton&gt;
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">后台：</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-size:18px"><span lang="zh-CN" style="font-family:SimSun">代码如下</span><span lang="en-US" style="font-family:Calibri">:</span></span></p>
+<span style="font-size:18px"><br>
+</span>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri"></span></span></p>
+<pre name="code" class="csharp">&lt;span style=&quot;font-size:18px&quot;&gt;protected void lbtnUp_Click(object sender, EventArgs e)
+{
+   string id = ((LinkButton)sender).CommandArgument;
+}
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">应用举例（直接用</span><span lang="en-US">js</span><span lang="zh-CN">显示）：</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">当网页上有多个</span><span lang="en-US"> LinkButton 控件时，使用 CommandName 属性指定或确定与所单击的 LinkButton控件关联的命令名。可以用标识要执行的命令的任何字符串来设置 CommandName 属性。然后，可以以编程方式确定 LinkButton控件的命令名并执行相应的操作。</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">使用</span><span lang="en-US"> CommandArgument 属性可以指定命令的补充信息（如指定 Ascending 排序顺序）。</span></span></p>
+<span style="font-size:18px"><br>
+</span>
+<p style="margin:0in"><span style="font-size:18px"><span lang="en-US" style="font-family:Calibri"></span></span></p>
+<pre name="code" class="html">&lt;span style=&quot;font-size:18px&quot;&gt;&lt;%@ Page Language=&quot;C#&quot; AutoEventWireup=&quot;True&quot; %&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script language=&quot;C#&quot; runat=&quot;server&quot;&gt;
+     
+      void LinkButton_Command(Object sender, CommandEventArgs e) 
+      {
+         Label1.Text = &quot;You chose: &quot; + e.CommandName + &quot; Item &quot; + e.CommandArgument;
+      }
+ 
+   &lt;/script&gt;
+ 
+&lt;/head&gt;
+&lt;body&gt;
+ 
+   &lt;form runat=server&gt;
+ 
+      &lt;h3&gt;LinkButton Command Event Example&lt;/h3&gt;
+  
+      &lt;asp:LinkButton id=&quot;LinkButton1&quot; 
+           Text=&quot;Order Item 10001&quot;
+           CommandName=&quot;Order&quot; 
+           CommandArgument=&quot;10001&quot; 
+           OnCommand=&quot;LinkButton_Command&quot; 
+           runat=&quot;server&quot;/&gt;
+ 
+      &lt;br&gt;
+  
+      &lt;asp:LinkButton id=&quot;LinkButton2&quot; 
+           Text=&quot;Order Item 10002&quot;
+           CommandName=&quot;Order&quot; 
+           CommandArgument=&quot;10002&quot; 
+           OnCommand=&quot;LinkButton_Command&quot; 
+           Runat=&quot;server&quot;/&gt;
+ 
+      &lt;br&gt;
+      &lt;p&gt;
+ 
+      &lt;asp:Label id=&quot;Label1&quot; runat=&quot;server&quot;/&gt;
+ 
+   &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+</span>
+<h2><span style="font-size:18px"><span style="font-family:SimSun">附加：</span><span style="font-family:Calibri">LinkButton</span><span style="font-family:SimSun">绑定多&#20540;</span></span></h2>
+<p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><br>
+</span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px">举例：</span></p>
+<pre name="code" class="html">&lt;span style=&quot;font-size:18px&quot;&gt;&lt;asp:LinkButton&#160;ID=&quot;btnSell&quot;&#160;class=&quot;btn&quot;&#160;OnCommand=&quot;btnSell_Click&quot;&#160;CommandName=&quot;Skip&quot;
+CommandArgument=&quot;&lt;%#&#160;Eval(&quot;TicketID&quot;).ToString()+&quot;|&quot;+Eval(&quot;TotalCount&quot;).ToString()+&quot;|&quot;+Eval(&quot;SellCount&quot;).ToString()&#160;%&gt;&#39;&#160;runat=&quot;server&quot;&gt;&lt;/asp:LinkButton&gt;&#160; 
+&lt;/span&gt;</pre><span style="font-size:18px"><br>
+后台：<br>
+</span>
+<p style="margin:0in">
+<pre name="code" class="csharp">  public void btnSell_Click(object sender, CommandEventArgs e)
+    {
+        string parmString= e.CommandArgument.ToString();
+        string[] parmStr = parmString.Split(&#39;|&#39;);
+ 
+        Response.Redirect(&quot;./app_visit_detail.aspx?id=&quot; + parmStr[0] + &quot;&amp;appName=&quot; + parmStr[1] + &quot;&amp;logonTime=&quot; + parmStr[2]);
+    }</pre><br>
+<br>
+<span style="font-size:18px"></span>
+<p>
+<span style="font-size:18px"><br>
+</span>
+<p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">应用</span><span lang="en-US">S</span><span lang="zh-CN">plit函数，将获取到的字符串在字符串的'|'处拆分即可</span></span></p>
+<p style="margin:0in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN"><br>
+</span></span></p>
+<p style="margin:0in 0in 0in 0.375in; font-family:SimSun"><span style="font-size:18px">举例：</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-family:SimSun"><span style="font-size:18px">如何在字符串的空&#26684;处拆分该字符串</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-family:SimSun"><span style="font-size:18px">DimTestString As String = &quot;Look at these!&quot;</span></p>
+<p style="margin:0in 0in 0in 0.375in; font-family:SimSun"><span style="font-size:18px"><span lang="zh-CN">' 返回的数组包含</span><span lang="en-US"> &quot;Look&quot;, &quot;at&quot;,and &quot;these!&quot;.</span></span></p>
+<p style="margin:0in 0in 0in 0.375in; font-family:SimSun"><span style="font-size:18px">DimTestArray() As String = Split(TestString)</span></p>
+<p style="margin:0in; font-family:Calibri"><span style="font-size:18px">&nbsp;</span></p>
+<span style="font-size:18px"><br>
+</span><br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/13171735'>原文链接</a>

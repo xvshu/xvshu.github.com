@@ -1,0 +1,120 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; 操作系统之存储管理（续）</div><div style="color:blue" align=center>操作系统之存储管理（续）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><br>
+</p>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">在“<a target="_blank" target="_blank" href="http://blog.csdn.net/hejingyuan6/article/details/8835099">操作系统概论-存储管理</a>”中已经讲解了单用户存储管理，固定用户存储管理，可变分区存储管理，页式虚拟存储管理等内容。以及它们一步一步改进的过程，下面主要说一下页式存储，段式存储和段页式存储的区别与关系。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">页式存储：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">将一个进程的地址空间划分成若干个大小相等的区域，称为页。相应地，将主存空间划分成与页相同大小的若干个物理块。在为进程分配主存时，将进程中若干个页分别装入多个不相邻的块中。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="43091309969496" alt=""><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">因为块的大小=页的大小，所以块内位移量=页内位移量</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">所以只需求出块号即可</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="31295276184272" alt=""><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">页式存储管理的地址变换<br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="51307986037001" alt=""><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">过程：根据逻辑地址中的页号与页表长度寄存器对比，如果页号大于等于页表长度寄存器，则访问越界，产生越界中断。若未出现越界，则根据页表寄存器中的始址和页号计算页表项中的位置，得到该页的物理块号，装入物理地址寄存器中，页内地址不变。下面的变化后过程类&#20284;！</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">段式存储：</span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">在分段存储管理方式中，作业的地址空间被划分成若干个段，每个段是一组完整的逻辑信息，如有主程序段，子程序段，数据段及堆栈段等，每个段都有自己的名字，都是从</span><span lang="en-US">0</span><span lang="zh-CN">开始编址的一段连续的地址空间，各段长度不等。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="458136210023241" alt=""><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">因为每个段长度不等，固需要使用基址加段内地址，确定物理地址</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="28707585762280" width="500" height="170" alt=""><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">段式存储管理的地址变换</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="107955865481" alt=""><br>
+</span></p>
+<p style="margin:0in">
+<h2><span style="font-family:KaiTi_GB2312; font-size:18px">对比：</span></h2>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="7061406869594" alt=""></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in">
+<h1><span style="font-family:KaiTi_GB2312; font-size:18px">段页式存储：</span></h1>
+<p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">先将整个主存划分成大小相等的存储块，将用户程序按程序的逻辑关系分为若干个段，并为每个段赋予一个段名，再将每个段划分成若干页，以页为单位离散分配。</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="24226535659866" alt=""><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp;<img src="23837436152194" width="700" height="250" alt=""><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">段页式存储管理的地址变换</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="32139858083631" width="700" height="250" alt=""><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">总结：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">页式：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">优点是页表对程序员来说是透明的，地址变换快，调入操作简单；</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">缺点是各页不是程序的独立模块，不便于实现程序和数据的保护。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">段式：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">优点是消除了内存零头，易于实现存储保护，便于程序动态装配；</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">缺点是调入操作复杂，地址变换速度慢于页式存储管理。</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">段页式：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">1</span><span lang="zh-CN">，段页式管理将段式和页式两种方式相结合，互相取长补短，充分发挥了它们的优点。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">2</span><span lang="zh-CN">，段页式虚拟存储器管理方案具有空间浪费小，存储共享容易，存储保护容易，能动态连接的特点。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">3</span><span lang="zh-CN">，但由于管理软件的增加，复杂性和开销也随之增加，需要的硬件及占用的内容也有所增加，使得执行速度大大下降。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">对于存储管理来说，虽然存储的方式很多，但是每一种存储方式都是上一种的改进，理解它们间的关系（织网），这些知识不难掌握！</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p><br>
+</p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/24659055'>原文链接</a>

@@ -1,0 +1,277 @@
+﻿<div style="color:blue" align=center>JAVA线程</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">进程是指一个内存中运行的应用程序，每个进程都有自己独立的一块内存空间，一个进程中可以启动多个线程。比如在Windows系统中，一个运行的exe就是一个进程。简单来说：进程是程序在计算机上的一次执行活动。当你运行一个程序，你就启动了一个进程。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">线程是指进程中的一个执行流程，一个程序内部的顺序控制流。一个进程中可以运行多个线程。比如java.exe进程中可以运行很多线程。线程总是属于某个进程，进程中的多个线程共享进程的内存。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">进程是资源分配的最小单位，线程是执行的最小单位</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<h1><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">线程和进程的区别</span></span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span lang="en-US"><span style="font-size:24px"><br>
+</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="en-US">1</span><span lang="zh-CN">，每个进程都有独立的代码和数据空间，进程间的切换会有较大的开销</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="en-US">2</span><span lang="zh-CN">，线程可以看成是轻量级的进程，同一类线程共享代码和数据空间，每个线程有独立的运行栈和程序计数器，线程切换的开销小</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="en-US">3</span><span lang="zh-CN">，多进程：在操作系统中能同时运行多个任务（程序）</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="en-US">4</span><span lang="zh-CN">，多线程：在同一应用程序中有多个顺序流同时执行</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="zh-CN">线程与进程对比-不错的博文</span><span lang="en-US">:</span></span></span></p>
+<p style="margin:0in"><a target="_blank" target="_blank" href="http://www.ruanyifeng.com/blog/2013/04/processes_and_threads.html"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">http://www.ruanyifeng.com/blog/2013/04/processes_and_threads.html</span></span></a></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<h1><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="en-US">java</span><span lang="zh-CN">的线程</span></span></span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><span style="font-size:24px"><br>
+</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="zh-CN">是通过</span><span lang="en-US">java.lang.Thread</span><span lang="zh-CN">类来实现的</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="en-US">VM</span><span lang="zh-CN">启动时会有一个由主方法（</span><span lang="en-US">public static void main</span><span lang="en-US">()</span><span lang="en-US">{}</span><span lang="zh-CN">）所定义的线程。</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="zh-CN">可以通过创建</span><span lang="en-US">T</span><span lang="en-US">hread</span><span lang="zh-CN">的实例来创建新的线程</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="zh-CN">每个线程都是通过某个特定</span><span lang="en-US">T</span><span lang="en-US">hread</span><span lang="zh-CN">对象所对应的方法</span><span lang="en-US">run()</span><span lang="zh-CN">来完成其操作的，方法</span><span lang="en-US">run()</span><span lang="zh-CN">称为线程体</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="zh-CN">通过调用</span><span lang="en-US">T</span><span lang="en-US">hread</span><span lang="zh-CN">类的</span><span lang="en-US">start()</span><span lang="zh-CN">方法来启动一个线程</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<h2><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">线程的创建和启动（两种方式）</span></span></h2>
+<p><span style="font-family:KaiTi_GB2312"><span lang="en-US"><span style="font-size:24px"><br>
+</span></span></span></p>
+<h3><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="en-US">1</span><span lang="zh-CN">，可以定义一个</span><span lang="en-US">T</span><span lang="en-US">hread</span><span lang="zh-CN">的子类并重写其</span><span lang="en-US">run</span><span lang="zh-CN">方法</span></span></span></h3>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">示例：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre code_snippet_id="295144" snippet_file_name="blog_20140416_1_2264483" name="code" class="java">public class MultiThreadDemo {
+
+    public static void main(String [] args){
+
+        MultiThread m1=new MultiThread(&quot;Window 1&quot;);
+
+        MultiThread m2=new MultiThread(&quot;Window 2&quot;);
+
+        MultiThread m3=new MultiThread(&quot;Window 3&quot;);
+
+        m1.start();
+
+        m2.start();
+
+        m3.start();
+
+    }
+
+}
+
+class MultiThread extends Thread{
+
+    private int ticket=100;//每个线程都拥有100张票
+
+    MultiThread(String name){
+
+        super(name);//调用父类带参数的构造方法
+
+    }
+
+    public void run(){
+
+        while(ticket&gt;0){
+
+            System.out.println(ticket--+&quot; is saled by &quot;+Thread.currentThread().getName());
+
+        }
+
+    }
+
+}
+</pre><br>
+<img src="9287559415848" alt=""><br>
+<p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">程序中定义一个线程类，它扩展了Thread类。利用扩展的线程类在MutliThreadDemo类的主方法中创建了三个线程对象，并通过start()方法分别将它们启动。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">从结果可以看到，每个线程分别对应100张电影票，之间并无任何关系，这就说明每个线程之间是平等的，没有优先级关系，因此都有机会得到CPU的处理。但是结果显示这三个线程并不是依次交替执行，而是在三个线程同时被执行的情况下，有的线程被分配时间片的机会多，票被提前卖完，而有的线程被分配时间片的机会比较少，票迟一些卖完。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">可见，利用扩展Thread类创建的多个线程，虽然执行的是相同的代码，但彼此相互独立，且各自拥有自己的资源，互不干扰。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<h3><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="en-US">2</span><span lang="zh-CN">，定义线程类实现</span><span lang="en-US">R</span><span lang="en-US">unable</span><span lang="zh-CN">接口</span></span></span></h3>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">示例：</span></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"></span>
+<p style="margin:0in; font-family:宋体; font-size:16.0pt">
+<pre code_snippet_id="295144" snippet_file_name="blog_20140416_2_6103703" name="code" class="java">public class MultiThreadDemo2 {
+
+    
+ public static void main(String [] args){
+
+        MultiThread m1=new MultiThread(&quot;Window 1&quot;);
+
+        MultiThread m2=new MultiThread(&quot;Window 2&quot;);
+
+        MultiThread m3=new MultiThread(&quot;Window 3&quot;);
+
+        Thread t1=new Thread(m1);
+
+        Thread t2=new Thread(m2);
+
+        Thread t3=new Thread(m3);
+
+        t1.start();
+
+        t2.start();
+
+        t3.start();
+
+    }
+}
+
+class MultiThread implements Runnable{
+
+    private int ticket=100;//每个线程都拥有100张票
+
+    private String name;
+
+    MultiThread(String name){
+
+        this.name=name;
+
+    }
+
+    public void run(){
+
+        while(ticket&gt;0){
+
+            System.out.println(ticket--+&quot; is saled by &quot;+name);
+
+        }
+
+    }
+
+}
+</pre><br>
+<p><img src="48213055600542" alt=""><br>
+</p>
+<p><br>
+</p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">由于这三个线程也是彼此独立，各自拥有自己的资源，即100张电影票，因此程序输出的结果和（1）结果大同小异。均是各自线程对自己的100张票进行单独的处理，互不影响。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">可见，只要现实的情况要求保证新建线程彼此相互独立，各自拥有资源，且互不干扰，采用哪个方式来创建多线程都是可以的。因为这两种方式创建的多线程程序能够实现相同的功能。</span></span></p>
+<p lang="en-US" style="margin:0in"><span style="font-size:24px"><span style="font-family:KaiTi_GB2312">&nbsp;</span><span style="font-family:KaiTi_GB2312">&nbsp;</span></span></p>
+<h3><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">对比：</span></span></h3>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">在Java中，类仅支持单继承，也就是说，当定义一个新的类的时候，它只能扩展一个外部类.这样，如果创建自定义线程类的时候是通过扩展Thread类的方法来实现的，那么这个自定义类就不能再去扩展其他的类，也就无法实现更加复杂的功能。因此，如果自定义类必须扩展其他的类，那么就可以使用实现Runnable接口的方法来定义该类为线程类，这样就可以避免Java单继承所带来的局限性。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">还有一点最重要的就是使用实现Runnable接口的方式创建的线程可以处理同一资源，从而实现资源的共享.</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">例如：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">假如当日从A地发往B地的火车票只有100张，且允许所有窗口卖这100张票，那么每一个窗口也相当于一个线程，但是这时和前面的例子不同之处就在于所有线程处理的资源是同一个资源，即100张车票。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"></span><pre code_snippet_id="295144" snippet_file_name="blog_20140416_3_8546701" name="code" class="java">public class MultiThreadDemo3 {
+
+    public static void main(String [] args){
+
+        MultiThread m=new MultiThread();
+
+        Thread t1=new Thread(m,&quot;Window 1&quot;);
+
+        Thread t2=new Thread(m,&quot;Window 2&quot;);
+
+        Thread t3=new Thread(m,&quot;Window 3&quot;);
+
+        t1.start();
+
+        t2.start();
+
+        t3.start();
+
+    }
+
+}
+
+class MultiThread implements Runnable{
+
+    private int ticket=100;
+
+    public void run(){
+
+        while(ticket&gt;0){
+
+            System.out.println(ticket--+&quot; is saled by &quot;+Thread.currentThread().getName());
+
+        }
+
+    }
+
+}
+</pre><br>
+<img src="3682867098849" alt=""><br>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">采用继承Thread类方式：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">（1）优点：编写简单，如果需要访问当前线程，无需使用Thread.currentThread()方法，直接使用this，即可获得当前线程。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">（2）缺点：因为线程类已经继承了Thread类，所以不能再继承其他的父类。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">采用实现Runnable接口方式：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">（1）优点：线程类只是实现了Runable接口，还可以继承其他的类。在这种方式下，可以多个线程共享同一个目标对象，所以非常适合多个相同线程来处理同一份资源的情况。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">（2）缺点：编程稍微复杂，如果需要访问当前线程，必须使用Thread.currentThread()方法。</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp;</span></span></p>
+<h2><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><span style="font-size:24px">线程同步：</span></span></span></h2>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span lang="zh-CN"><span style="font-size:24px"><br>
+</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="zh-CN">在</span><span lang="en-US">java</span><span lang="zh-CN">语言中，引入了对象互斥锁的概念，保证共享数据操作的完整性。每个对象都对应于一个可称为“互斥锁”的标记，这个标记保证在任一时刻，只能有一个线程访问该对象。</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><span lang="zh-CN">关键字</span><span lang="en-US">synchronized</span><span lang="zh-CN">来与对象的互斥锁联系。当某个对象</span><span lang="en-US">synchronized</span><span lang="zh-CN">修饰时，表明该对象在任一时刻只能由一个线程访问。</span></span></span></p>
+<span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><br>
+</span></span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">示例：</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"></span></p>
+<pre code_snippet_id="295144" snippet_file_name="blog_20140416_4_3672679" name="code" class="java">public class TestSync implements Runnable{
+	Timer timer=new Timer();
+	public static void main(String[] args){
+		TestSync test=new TestSync();
+		Thread t1=new Thread(test);
+		Thread t2=new Thread(test);
+		t1.setName(&quot;t1&quot;);
+		t2.setName(&quot;t2&quot;);
+		t1.start();
+		t2.start();
+		}
+		public void run(){
+			timer.add(Thread.currentThread().getName());
+			}
+}
+class Timer{
+	private static int num=0;
+	public synchronized void add(String name){
+		num++;
+		try{
+			Thread.sleep(1);
+		}catch(InterruptedException e){
+			
+			}
+			System.out.println(name+&quot;,你是第&quot;+num+&quot;个使用timer的线程&quot;);
+		}
+	}
+</pre><br>
+<img src="29900539969120" alt=""><br>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<p style="margin:0in">
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">去掉synchronized，显示结果并不是我们想要的，所以有时我们需要同步执行，即有序执行！</span></span></p>
+<span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><img src="23221977076010" alt=""><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><br>
+</span></p>
+<h1><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">总结：</span></span></h1>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312"><span style="font-size:24px">&nbsp; &nbsp; 对于一个CPU来说，无论我创建多少个线程，所谓的“并发执行”、“同时”其实都不是真正意义上的“同时”。操作系统将进程线程进行管理，轮流（没有固定的顺序）分配每个进程很短的一段时间（不一定是均分），然后在每个线程内部，程序代码自己处理该进程内部线程的时间分配，多个线程之间相互的切换去执行，这个切换时间也是非常短的。因此多任务、多进程、多线程都是操作系统给人的一种宏观感受，从微观角度看，程序的运行是异步执行的。<span style="color:rgb(85,85,85); line-height:28px">虽然操作系统是多线程的，但CPU每一时刻只能做一件事！</span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span style="color:rgb(85,85,85); line-height:28px"><br>
+</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:24px"><span style="color:rgb(85,85,85); line-height:28px"><br>
+</span></span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/22093367'>原文链接</a>

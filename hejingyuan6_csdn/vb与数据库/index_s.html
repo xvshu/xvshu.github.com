@@ -1,0 +1,54 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; vb与数据库</div><div style="color:blue" align=center>vb与数据库</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; Vb与数据库的连接主要应用了ADO，它是一个用于存取数据源的COM组件。它提供了编程语言和</span></p>
+<p><span style="font-size:18px">统</span><span style="font-size:18px">一数据访问方式OLE DB的一个中间层。允许开发人员编写访问数据的代码而不用关心数据库是如何</span></p>
+<p><span style="font-size:18px">实</span><span style="font-size:18px">现的，而只用关心到数据库的连接。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;OLE DB是一种低层的编程接口，ADO应用OLE DB可以实现对不同类型数据库的访问，它支持关</span></p>
+<p><span style="font-size:18px">系</span><span style="font-size:18px">或非关系型的数据源，比如各种类型的数据库，电子表&#26684;，电子邮件和文本文件等。OLE DB包括三</span></p>
+<p><span style="font-size:18px">个</span><span style="font-size:18px">组成部分：数据提供者，数据消费者和服务组件。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;数据提供者：Data Provider，指任何OLE DB的提供者。数据提供者从各种数据源读取数据，并</span><span style="font-size:18px">将</span></p>
+<p><span style="font-size:18px">这</span><span style="font-size:18px">些数据转换成消费者支持的&#26684;式，一般为关系型数据表。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;数据消费者：指使用数据提供者提供数据的应用程序。使用ADO的应用程序都是OLE DB的消费</span><span style="font-size:18px">者。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;服务组件：起连接数据消费者和数据提供者的作用。在不需要数据消费者和数据提供者的情况下，</span></p>
+<p><span style="font-size:18px">将</span><span style="font-size:18px">数据转换为不同的类型。如下图为ADO数据控件，ADO，OLE DB和数据提供者之间的关系：</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="38060268796648.png" alt=""><br>
+</span></p>
+<p><span style="font-size:18px">ADO对象模型</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; ADO中共包含了7个对象，有三个独立对象和依赖独立对象才能使用的4个非独立对象。其实我们</span></p>
+<p><span style="font-size:18px">可以</span><span style="font-size:18px">将这些对象看成是各个类，然后ADO是一组类的集合。因为它们和类的使用方法一样，这样更容</span></p>
+<p><span style="font-size:18px">易理解。</span></p>
+<p><span style="font-size:18px">例如：</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="22003548543729.png" alt=""></span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;1，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Connection：连接对象，用于创建数据源连接。在使用其他对象之前必须先建立数据源</span></p>
+<p><span style="font-size:18px">连接，</span><span style="font-size:18px">然后在连接对象上创建和使用其他对象。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;2，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Command：命令对象，用于执行动作查询。比如删除/创建数据库，执行查询返回记录集，</span></p>
+<p><span style="font-size:18px">删除记录等操作。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;3，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Recordset：记录集对象，保存来自基本表或命令对象返回的结果。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;4，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Field：字段对象，依赖于记录集对象使用。可使用Fields集合来获取记录集中每个字段</span></p>
+<p><span style="font-size:18px">的信息。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;5，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Parameter：参数对象，依赖于命令对象使用，用于为参数查询提供数据。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;6，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Property：属性对象，每个连接对象，命令对象，记录集对象以及字段对象都有一个属性</span></p>
+<p><span style="font-size:18px">对象</span><span style="font-size:18px">集合。</span></p>
+<p><span style="font-size:18px">&nbsp; &nbsp; &nbsp; &nbsp;7，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Error：错误对象，依赖连接对象使用。如果在访问数据库的过程中发生错误，这些错误</span></p>
+<p><span style="font-size:18px">的信息</span><span style="font-size:18px">便保存到连接对象的Errors集合中。使用错误对象来定义处理相应错误的措施，避免应用程序</span></p>
+<p><span style="font-size:18px">在执行过</span><span style="font-size:18px">程中意外终止。</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+<p><span style="font-size:18px"><br>
+</span></p>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/7672157'>原文链接</a>

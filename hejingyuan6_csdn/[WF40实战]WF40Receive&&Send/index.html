@@ -1,0 +1,79 @@
+﻿<div style="color:blue" align=center>[WF40实战]WF40Receive&&Send</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; 写这篇博客的目的是因为对于这个receive和send的使用一直很困惑，很多实例中都有应用，但是总感觉理解的很模糊，每次遇到都要再重新梳理，现在将这send和receive结合我们之前做的实例（未使用WCF）来理解，其实这两个看&#20284;深奥的东东，和我们已经掌握的工作流知识没有什么大的差别！</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">下面就结合着之前的工作流的知识和send，receive来对比一下：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">因为一个流程不可能是不间断的执行，再次启动时需要从当时的断点继续</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">实现方式两种：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">对比：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">1，Receive</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">当我们客户端调用Receive的方法时，即可继续进行这个流程。</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">2，BookMark</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">客户端调用WorkFlowProcess.RunInstance(info)，即可继续进行，但是我们在暂停之前需要执行Wait流，即创建BookMark，下次从书签处继续执行这个流程</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">下面简单介绍一下Receive的使用方式，对于BookMark的创建在申请审批中已经有所介绍：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">Receive中的方法，<span style="background:yellow">代理类会自动生成该方法</span>---客户端调用代理类生成的方法---相当于启动receive的方法</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">receive的返回(命令窗口的返回)：调用的方法会传guid等参数，然后将这写参数赋给工作流定义的变量_guid</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><img src="22141187593739" alt=""><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN"><br>
+</span></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">或者</span><span lang="en-US">receive</span><span lang="zh-CN">返回到客户端：</span><br>
+</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN"><br>
+</span></span></p>
+<p><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp; &nbsp; &nbsp;&nbsp;<img src="39455288972154" alt=""><br>
+</span></span></p>
+<p><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px"></span></span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">与Receive对应的还有一个Send：</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px">Send中的方法，<span style="background:yellow">可以调用</span><span style="background:yellow">webService</span><span style="background:yellow">或</span><span style="background:yellow">WCF</span><span style="background:yellow">服务中的方法</span>，下面的这个说明调用的是webService中的提供的方法，在服务端创建了接口和相应的实现类</span></p>
+<p><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="46608815399208" alt=""><br>
+<p><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;<img src="33680419229636" alt=""><br>
+</span></span></p>
+<p><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN"><br>
+</span></span></span></p>
+<p><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">返回&#20540;后缀</span><span lang="en-US">&#43;result</span><br>
+</span></span></p>
+<p><span lang="zh-CN"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US"><br>
+</span></span></span></p>
+<p><span lang="zh-CN"><span lang="en-US"><span style="font-family:KaiTi_GB2312; font-size:18px"><img src="11468976859788" alt=""><br>
+</span></span></span></p>
+<p><span lang="zh-CN"><span lang="en-US"><span style="font-family:KaiTi_GB2312; font-size:18px"></span></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">客户端：</span></p>
+<p style="margin:0in">
+<pre code_snippet_id="497864" snippet_file_name="blog_20141027_1_2496602" name="code" class="csharp"> private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            IDictionary&lt;string, object&gt; results = WorkflowInvoker.Invoke(new WFProject.Activity1());
+            string result = results[&quot;returnView&quot;].ToString();
+            MessageBox.Show(result);
+            
+        }
+</pre><br>
+<p>
+<p><span lang="zh-CN"><span lang="en-US"></span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">对比：</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">1</span><span lang="zh-CN">，</span><span lang="en-US">send</span><span lang="zh-CN">方式：消息</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="en-US">2</span><span lang="zh-CN">，代码活动（</span><span lang="en-US">CodeActivity</span><span lang="zh-CN">）</span><span lang="en-US">:</span><span lang="zh-CN">用户自定义的活动结点</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">通过上述的说明，我们不难发现其实这个</span><span lang="en-US">Send</span><span lang="zh-CN">的使用方式和我们之前自己写的</span><span lang="en-US">CodeActivity</span><span lang="zh-CN">（代码结点）没什么区别，只是它是以消息的方式传递而已！</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><span lang="zh-CN">总结：就像我在文章开头所说的，对于新的知识我们总是很难掌握，这时就需要和我们已有的知识相关联（编制知识网），拿</span><span lang="en-US">send</span><span lang="zh-CN">和</span><span lang="en-US">receive</span><span lang="zh-CN">来说，因为和已有的知识进行了比较学习，这样当再次遇到的时候我们就可以很好的理解，也就不会出现每次都当做新的知识去学习一遍！</span></span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">&nbsp;</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px">学习不仅仅是知识的罗列，而在于对知识的总结过程！</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<p style="margin:0in"><span style="font-family:KaiTi_GB2312; font-size:18px"><br>
+</span></p>
+<br>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/40451371'>原文链接</a>

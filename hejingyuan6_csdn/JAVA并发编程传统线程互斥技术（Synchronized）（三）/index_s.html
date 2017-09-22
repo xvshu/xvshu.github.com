@@ -1,0 +1,93 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; JAVA并发编程传统线程互斥技术（Synchronized）（三）</div><div style="color:blue" align=center>JAVA并发编程传统线程互斥技术（Synchronized）（三）</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">&nbsp; &nbsp;&nbsp;</span></span></p><p style="margin:0in;font-size:14.0pt"><span style="font-family:KaiTi_GB2312;"><span lang="en-US">&nbsp; &nbsp; java</span><span lang="zh-CN">线程互斥是为了保证，同一时刻最多只有一个线程执行该段代码。那么它的出现又是为了解决什么问题呢？账户存取款，在同一时间段只能让一个人进行操作。</span></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">下面来看一个简单实例（多线程带来的问题）：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="java">public class TraditionalThreadSynchronized {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		new TraditionalThreadSynchronized().init();
+	}
+	
+	private void init(){
+		//此方法同时启动两个线程，去调用同一个方法的打印名字
+		final Outputer outputer = new Outputer();
+		new Thread(new Runnable(){
+			@Override
+			public void run() {
+				while(true){
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					outputer.output(&quot;zhangxiaoxiang&quot;);
+				}				
+			}
+		}).start();
+		
+		new Thread(new Runnable(){
+			@Override
+			public void run() {
+				while(true){
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					outputer.output3(&quot;lihuoming&quot;);
+				}
+				
+			}
+		}).start();
+		
+	}
+
+	static class Outputer{
+		
+		public void output(String name){
+			int len = name.length();
+//			synchronized (Outputer.class) 
+//			{
+				for(int i=0;i&lt;len;i++){
+					System.out.print(name.charAt(i));
+				}
+				System.out.println();
+//			}
+		}
+		
+	}
+}</pre><br><p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">打印结果为：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><img src="18374726270337" alt=""><br></span></p><span style="font-family:KaiTi_GB2312;"><br></span><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">解决以上问题：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">添加synchronized的关键字，即解开注释即可。</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">打印结果：</span></p><span style="font-family:KaiTi_GB2312;"><br></span><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><img src="259679410357922" alt=""><br></span></p><p style="margin: 0in; font-size: 14pt;"><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><br></span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">总结：</span></p><p style="margin: 0in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">当两个并发线程访问同一个对象object中的这个synchronized(this)同步代码块时，一个时间内只能有一个线程得到执行。另一个线程必须等待当前线程执行完这个代码块以后才能执行该代码块。即当一个线程访问object的一个synchronized(this)同步代码块时，其他线程对object中所有其它synchronized(this)同步代码块的访问将被阻塞。</span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"><span lang="zh-CN">注意：要互斥，必须让锁子是同一把。以上的</span><span lang="en-US">demo</span><span lang="zh-CN">中，两个线程都用的是同一个new出来的output，所以output就是同一个对象。</span></span></p><p style="margin: 0in 0in 0in 1.5in; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">详细内容请参看博客<a target="_blank" target="_blank" href="http://m.blog.csdn.net/blog/javawebxy/20998903">[原]02____线程的同步(Synchronized)</a></span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">&nbsp;</span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">简答说明：</span></p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;"></span></p><pre name="code" class="java">public class Test implements Runnable {
+
+    public int cash = 100;
+
+    public synchronized void m() {
+        System.out.println(&quot;m查看账户,余额为&quot;+cash);
+        try {
+             Thread.sleep(2000);
+        } catch (InterruptedException e) {
+             e.printStackTrace();
+        }
+        cash = cash - 100;
+        System.out.println(&quot;cash1 = &quot; + cash);
+    }
+
+    public synchronized void run() {
+        System.out.println(&quot;run查看账户，余额为&quot;+cash);
+        cash += 1000;
+        try {
+            Thread.sleep(5000);
+         } catch (InterruptedException e) {
+             e.printStackTrace();
+         }
+        System.out.println(&quot;cash2 = &quot; + cash);
+    }
+
+    public static void main(String[] args) {
+        Test test = new Test();
+        Thread thrad = new Thread(test);
+        thrad.start();
+        test.m();
+    }
+}
+</pre><br><p><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><p style="margin-top: 7pt; margin-bottom: 7pt; font-size: 14pt;"><span style="font-family:KaiTi_GB2312;">添加synchronized关键字后可以看出。只要m或者run进行对账户进行操作，不论中途多长时间，或者睡眠多长时间，线程都要执行完这个方法以后才会执行其他的方法。两个方法都必须加synchronized关键字，并且两者锁定同一对象(此处锁定的对象是test对象)。也就是说，只要有一个线程进入test对象的任意一个加了锁的方法，其他线程就不能访问这个对象里加了相同锁的方法了。</span></p><span style="font-family:KaiTi_GB2312;"><br></span><br><p style="margin: 0in; font-size: 14pt;"><br></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/hejingyuan6/article/details/46991557'>原文链接</a>
