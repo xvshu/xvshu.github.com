@@ -1,0 +1,70 @@
+﻿<div style="color:blue" align=center>fontcolor=red[置顶]fontflume高并发优化——（2）精简结构</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; 大家在上篇博客中，可以看到，对flume本身的优化，我们可以说是一个较大的进步，但是，后期梳理时，发现，数据的处理经过了很多没有必要的步骤，我们的处理有些多余，但是精简哪里，又成为了一个问题，本篇博客带领大家一起看看，精简的关键位置及效果。</span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;">还是老样子，大家会议上篇博客的架构：</span></p><p><span style="font-size:18px;"><img src="40238749869079" alt=""><br></span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; 不难看出，有一个性能点就是从主端口下发的时候，三个端口到es的过程中，为了让数据有较好的缓冲，我们使用了kafka作为缓冲区，但是三个flume先得有些多余，我们可以使用首端（第一个flume）做到三个输出，不再是avro端口，而是直接和kafka对接，大家看优化之后的图：</span></p><p><span style="font-size:18px;"><img src="20156216797567" alt=""><br></span></p><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;">配置：</span></p><p><span style="font-size:18px;"></span><pre code_snippet_id="1661169" snippet_file_name="blog_20160425_1_6215857" name="code" class="html">balance.sources = source1
+balance.sinks = k1 k2 k3 k4
+balance.channels = channel1
+
+# Describe/configure source1
+balance.sources.source1.type = avro
+balance.sources.source1.bind = 192.168.10.83
+balance.sources.source1.port = 12300
+
+#define sinkgroups
+balance.sinkgroups=g1
+balance.sinkgroups.g1.sinks=k1 k2 k3 k4
+balance.sinkgroups.g1.processor.type=load_balance
+balance.sinkgroups.g1.processor.backoff=true
+balance.sinkgroups.g1.processor.selector=round_robin
+
+#define the sink 1
+balance.sinks.k1.type = org.apache.flume.sink.kafka.KafkaSink
+balance.sinks.k1.topic = ulog
+balance.sinks.k1.brokerList = 192.168.10.83:9092,192.168.10.84:9092
+balance.sinks.k1.requiredAcks = 1
+balance.sinks.k1.batchSize = 10000
+
+
+#define the sink 2
+balance.sinks.k2.type = org.apache.flume.sink.kafka.KafkaSink
+balance.sinks.k2.topic = ulog
+balance.sinks.k2.brokerList = 192.168.10.83:9092,192.168.10.84:9092
+balance.sinks.k2.requiredAcks = 1
+balance.sinks.k2.batchSize = 10000
+
+#define the sink 3
+balance.sinks.k3.type = org.apache.flume.sink.kafka.KafkaSink
+balance.sinks.k3.topic = ulog
+balance.sinks.k3.brokerList = 192.168.10.83:9092,192.168.10.84:9092
+balance.sinks.k3.requiredAcks = 1
+balance.sinks.k3.batchSize = 10000
+
+#define the sink 4
+balance.sinks.k4.type = org.apache.flume.sink.kafka.KafkaSink
+balance.sinks.k4.topic = ulog
+balance.sinks.k4.brokerList = 192.168.10.83:9092,192.168.10.84:9092
+balance.sinks.k4.requiredAcks = 1
+balance.sinks.k4.batchSize = 10000
+
+
+# Use a channel which buffers events in memory
+balance.channels.channel1.type = file
+balance.channels.channel1.checkpointDir = /export/data/flume/flume-1.6.0/dataeckPoint/balance
+balance.channels.channel1.useDualCheckpoints = true
+balance.channels.channel1.backupCheckpointDir = /export/data/flume/flume-1.6.0/data/bakcheckPoint/balance
+balance.channels.channel1.dataDirs =/export/data/flume/flume-1.6.0/data/balance
+balance.channels.channel1.transactionCapacity = 10000
+balance.channels.channel1.checkpointInterval = 30000
+balance.channels.channel1.maxFileSize = 2146435071
+balance.channels.channel1.minimumRequiredSpace = 524288000
+balance.channels.channel1.capacity = 1000000
+balance.channels.channel1.keep-alive=3
+
+# Bind the source and sink to the channel
+balance.sources.source1.channels = channel1
+balance.sinks.k1.channel = channel1
+balance.sinks.k2.channel=channel1
+balance.sinks.k3.channel=channel1
+balance.sinks.k4.channel=channel1
+
+
+</pre><br><br></p><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; 这样我们就将5个flume优化为2个flume，在flume身上加载的瓶颈就会减少很多，因为没有<span style="font-family: Arial; line-height: 26px;">sinkgroups，它还是一个多线程的处理方式，这样，我们就将这样的瓶颈固定在2个节点，下一步，我们的优化方向就是flume的filechannel，因为，我们发现这样的架构运行一端时间后，系统io有较大消耗。</span></span></p><p><span style="font-size:18px;"><span style="font-family: Arial; line-height: 26px;"><br></span></span></p><p><span style="font-family: Arial; line-height: 26px;"><span style="font-size:18px;">总结：</span></span></p><p><span style="font-family: Arial; line-height: 26px;"><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; 有时候，我们的增加，是为了负载均衡，这是没有问题的，但是如果负载均衡的分发端成了瓶颈，或者传输介质，或者存储介质成了瓶颈，我们不妨向多线程方向考虑，就会有更大的天地。</span></span></p><p><span style="font-family: Arial; line-height: 26px;"><span style="font-size:18px;"><br></span></span></p><p><span style="font-family: Arial; line-height: 26px;"><span style="font-size:18px;"><br></span></span></p><p><span style="font-family: Arial; line-height: 26px;"><span style="font-size:18px;"><br></span></span></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/51243332'>原文链接</a>

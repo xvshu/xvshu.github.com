@@ -1,0 +1,84 @@
+﻿<div style="color:blue" align=center>fontcolor=red[置顶]fontflume高并发优化——（1）load_balance</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p>&nbsp; &nbsp; &nbsp; &nbsp;通过一年多时间的使用，统一日志系统，已经接入公司前台，在20个节点，几十万用户，数百亿交易额的大压力下，仅仅使用了一个普通的服务器，承受住了严峻的考验，在公司今年更宏大的目标，也是为了给大数据组提供更加全面信息的需求下，公司所有项目，要接入ULOG系统，主要包含管理后台，wap，app等，流量一下达到一个峰值，flume的瓶颈凸显出来，在解决的过程中，对flume的了解以及性能调优，有了更深入的认识，接下的文章，会比较紧凑，请大家紧随脚步，看看我们这几周的调优结果。</p><p>&nbsp; &nbsp; &nbsp; &nbsp; 大家还记得以前的ulog部署方案吗？我们通过一张图来回忆一下：</p><p>专栏地址：<a target="_blank" target="_blank" href="http://blog.csdn.net/column/details/es-flume.html">大数据下的日志</a></p><p><br></p><p><img src="24547419609251" alt=""><br></p><p><br></p><p>这是一个最初的方案，这个方案，马上面临了以下问题：</p><p>1，flume使用memory作为channel经常丢失数据</p><p>2，两个节点分担压力有限</p><p><br></p><p>基于此，我们进行了第一次优化，加入flume以file为基础的负载均衡，大家看效果图：</p><p><img src="5693726018448" alt=""><br></p><p><br></p><p>大家看flume负载均衡端的配置文件：</p><p><pre code_snippet_id="1661131" snippet_file_name="blog_20160425_1_2538424" name="code" class="html">balance.sources = source1
+balance.sinks = k1 k2
+balance.channels = channel1
+
+# Describe/configure source1
+balance.sources.source1.type = avro
+balance.sources.source1.bind = 192.168.10.83
+balance.sources.source1.port = 12300
+
+#define sinkgroups
+balance.sinkgroups=g1
+balance.sinkgroups.g1.sinks=k1 k2
+balance.sinkgroups.g1.processor.type=load_balance
+balance.sinkgroups.g1.processor.backoff=true
+balance.sinkgroups.g1.processor.selector=round_robin
+
+#define the sink 1
+balance.sinks.k1.type=avro
+balance.sinks.k1.hostname=192.168.10.83
+balance.sinks.k1.port=12301
+
+#define the sink 2
+balance.sinks.k2.type=avro
+balance.sinks.k2.hostname=192.168.10.84
+balance.sinks.k2.port=12302
+
+# Use a channel which buffers events in memory
+# Use a channel which buffers events in memory
+balance.channels.channel1.type = file
+balance.channels.channel1.checkpointDir = /export/data/flume/flume-1.6.0/dataeckPoint/balance
+balance.channels.channel1.useDualCheckpoints = true
+balance.channels.channel1.backupCheckpointDir = /export/data/flume/flume-1.6.0/data/bakcheckPoint/balance
+balance.channels.channel1.dataDirs =/export/data/flume/flume-1.6.0/data/balance
+balance.channels.channel1.transactionCapacity = 10000
+balance.channels.channel1.checkpointInterval = 30000
+balance.channels.channel1.maxFileSize = 2146435071
+balance.channels.channel1.minimumRequiredSpace = 524288000
+balance.channels.channel1.capacity = 1000000
+balance.channels.channel1.keep-alive=3
+
+# Bind the source and sink to the channel
+balance.sources.source1.channels = channel1
+balance.sinks.k1.channel = channel1
+balance.sinks.k2.channel=channel1
+
+</pre><br>优化：<p><p>这样的初始方式，我们发现性能问题被解决了一小部分，但是仅仅是缓解，我们还需要优化，以便适应当下的需求，通过论坛，我们知道，sinkgroups，是单线程，意味着，我们启动的sink是一个线程在读数据，而如果删除sinkgroups，就是为每个sink启动一个线程，会优化文件的消费速度，大家看第二次的优化：</p><p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<img src="9442918228395" alt=""><br></p><p><pre code_snippet_id="1661131" snippet_file_name="blog_20160425_2_9092860" name="code" class="html">balance.sources = source1
+balance.sinks = k1 k2
+balance.channels = channel1
+
+# Describe/configure source1
+balance.sources.source1.type = avro
+balance.sources.source1.bind = 192.168.10.83
+balance.sources.source1.port = 12300
+
+#define the sink 1
+balance.sinks.k1.type=avro
+balance.sinks.k1.hostname=192.168.10.83
+balance.sinks.k1.port=12301
+
+#define the sink 2
+balance.sinks.k2.type=avro
+balance.sinks.k2.hostname=192.168.10.84
+balance.sinks.k2.port=12302
+
+# Use a channel which buffers events in memory
+# Use a channel which buffers events in memory
+balance.channels.channel1.type = file
+balance.channels.channel1.checkpointDir = /export/data/flume/flume-1.6.0/dataeckPoint/balance
+balance.channels.channel1.useDualCheckpoints = true
+balance.channels.channel1.backupCheckpointDir = /export/data/flume/flume-1.6.0/data/bakcheckPoint/balance
+balance.channels.channel1.dataDirs =/export/data/flume/flume-1.6.0/data/balance
+balance.channels.channel1.transactionCapacity = 10000
+balance.channels.channel1.checkpointInterval = 30000
+balance.channels.channel1.maxFileSize = 2146435071
+balance.channels.channel1.minimumRequiredSpace = 524288000
+balance.channels.channel1.capacity = 1000000
+balance.channels.channel1.keep-alive=3
+
+# Bind the source and sink to the channel
+balance.sources.source1.channels = channel1
+balance.sinks.k1.channel = channel1
+balance.sinks.k2.channel=channel1</pre><br><p><p>现象：</p><p>&nbsp; &nbsp; &nbsp; &nbsp; 我们去除sinkgroups后，虽然有些变化，但是数据依然有很大的延迟，随着时间推移，还是会达到性能瓶颈，具体，我们就要在下篇博客中介绍，如何从整体结构上优化数据传输效率。</p><p><br></p><p><br></p><p>总结：</p><p>&nbsp; &nbsp; &nbsp; &nbsp; 有时的负载均衡，也会成为性能瓶颈，在分配端，我们也要看，那种效率更高，效果更好，这样，我们就能找到合适的点，平衡我们的需求和性能。</p><p><br></p><p><br></p><p><br></p><p><br></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/51243020'>原文链接</a>

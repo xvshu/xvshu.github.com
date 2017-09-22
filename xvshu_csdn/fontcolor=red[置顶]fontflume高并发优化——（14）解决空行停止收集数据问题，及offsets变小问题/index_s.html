@@ -1,0 +1,55 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; fontcolor=red[置顶]fontflume高并发优化——（14）解决空行停止收集数据问题，及offsets变小问题</div><div style="color:blue" align=center>fontcolor=red[置顶]fontflume高并发优化——（14）解决空行停止收集数据问题，及offsets变小问题</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><p>  日志平台运行一段时间，发现日志有部分丢失，通过检查日志，发现有两个问题导致数据丢失，一个是遇到空行后，日志停止收集，还有就是kafka监控offsets时变小，通过分析代码，找到如下方法：</p>
+
+
+
+<h2 id="空行问题"><font size="5">空行问题：</font></h2>
+
+<p>  在系统稳定运行一段时间之后，发现了一个致命性的bug就是在遇到空行时，无法自动跳过，导致识别为文件结束，再次读取还是空行，跳入了死循环</p>
+
+<h3 id="解决办法"><font size="5">解决办法：</font></h3>
+
+<p>  解决的办法也非常简单，就是增加对文件大小与当前行数的比较，两者相等则是到达文件末尾，否则继续读取下一行，直到文件末尾</p>
+
+<h3 id="源码"><font size="5">源码：</font></h3>
+
+<p><img src="4062818666139" alt="读取空行逻辑" title=""></p>
+
+<h2 id="offsets变小问题"><font size="5">offsets变小问题：</font></h2>
+
+<hr>
+
+<p>  我们发现，在大数据量的并发前提下，通过监控kafka，发现数据有重复收入的现象，而且非常严重</p>
+
+<h3 id="解决办法-1"><font size="5">解决办法：</font></h3>
+
+<p>  观察一段时间，发现可能是flume-kafka-channel管理offsets的问题，果断进行源码分析，加入相关配置后，情况有所改善， 但是由于offsets是由flume管理，彻底解决这个问题，需要进一步修正代码。</p>
+
+<h3 id="配置"><font size="5">配置：</font></h3>
+
+<pre class="prettyprint"><code class=" hljs avrasm">agent1<span class="hljs-preprocessor">.channels</span><span class="hljs-preprocessor">.c</span>2<span class="hljs-preprocessor">.migrateZookeeperOffsets</span>=true
+agent1<span class="hljs-preprocessor">.channels</span><span class="hljs-preprocessor">.c</span>2<span class="hljs-preprocessor">.kafka</span><span class="hljs-preprocessor">.consumer</span><span class="hljs-preprocessor">.session</span><span class="hljs-preprocessor">.timeout</span><span class="hljs-preprocessor">.ms</span>=<span class="hljs-number">100000</span>
+agent1<span class="hljs-preprocessor">.channels</span><span class="hljs-preprocessor">.c</span>2<span class="hljs-preprocessor">.kafka</span><span class="hljs-preprocessor">.consumer</span><span class="hljs-preprocessor">.request</span><span class="hljs-preprocessor">.timeout</span><span class="hljs-preprocessor">.ms</span>=<span class="hljs-number">110000</span>
+agent1<span class="hljs-preprocessor">.channels</span><span class="hljs-preprocessor">.c</span>2<span class="hljs-preprocessor">.kafka</span><span class="hljs-preprocessor">.consumer</span><span class="hljs-preprocessor">.fetch</span><span class="hljs-preprocessor">.max</span><span class="hljs-preprocessor">.wait</span><span class="hljs-preprocessor">.ms</span>=<span class="hljs-number">1000</span>
+agent1<span class="hljs-preprocessor">.channels</span><span class="hljs-preprocessor">.c</span>2<span class="hljs-preprocessor">.zookeeperConnect</span>=<span class="hljs-number">10.1</span><span class="hljs-number">.115</span><span class="hljs-number">.181</span>:<span class="hljs-number">2181</span>,<span class="hljs-number">10.1</span><span class="hljs-number">.114</span><span class="hljs-number">.221</span>:<span class="hljs-number">2181</span>,<span class="hljs-number">10.1</span><span class="hljs-number">.114</span><span class="hljs-number">.231</span>:<span class="hljs-number">2181</span>/kafka</code></pre>
+
+
+
+<h2 id="总结"><font size="5">总结：</font></h2>
+
+<p>  flume在业界，是一款不错的管道工具，高并发下问题解决也比较迅速，源码结构简单，逻辑清晰，扩展和维护方便推荐各大公司使用。</p></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/75647535'>原文链接</a>

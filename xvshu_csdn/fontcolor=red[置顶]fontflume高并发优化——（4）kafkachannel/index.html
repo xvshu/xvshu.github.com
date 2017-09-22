@@ -1,0 +1,32 @@
+﻿<div style="color:blue" align=center>fontcolor=red[置顶]fontflume高并发优化——（4）kafkachannel</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;在上篇博客中，我们还留了一个小疑问，就是我们对最后一个flume的优化是如何做的，关于这一点，我们的思路是这样的，file的瓶颈是io，而我们使用的硬盘是5400转1t硬盘，如果想要优化，我们必须找到性能和memory相当，但是又能较好的保存数据，保证事务性的channel，符合这样要求的一款channel进入了我们的视线，就是kafkachannel，具体怎么做的，请大家看详细介绍：</p><p>优化之前的架构：</p><p><img src="1476209931372" alt=""><br></p><p>&nbsp; &nbsp; &nbsp; &nbsp; 要替换三个flume的file channel不仅仅是从kafka之前的三个替换，我们还要替换kafka到es的flume，让kafka中的数据直接到es，这样我们又会减少一个堵塞的点，数据的流向也会更简单明晰：</p><p><img src="36826449846341" alt=""><br></p><p><br></p><p>配置文件</p><p><pre name="code" class="html">balance.sources = source1
+balance.sinks = k1
+balance.channels = channel1
+
+# Describe/configure source1
+balance.sources.source1.type = avro
+balance.sources.source1.bind = 192.168.10.83
+balance.sources.source1.port = 12301
+
+#define the sink 1
+balance.sinks.k1.type=org.apache.flume.sink.elasticsearch.ElasticSearchSink
+balance.sinks.k1.batchSize=10000
+balance.sinks.k1.hostNames=192.168.10.83:9300,192.168.10.84:9301
+balance.sinks.k1.indexType = flume_kafka
+balance.sinks.k1.indexName=logstash
+balance.sinks.k1.clusterName=unifyloggingplatform
+balance.sinks.k1.serializer=org.apache.flume.sink.elasticsearch.ElasticSearchLogStashEventSerializer
+balance.sinks.k1.indexNameBuilder=org.apache.flume.sink.elasticsearch.SimpleIndexNameBuilder
+
+# Use a channel which buffers events in memory
+balance.channels.channel1.type=org.apache.flume.channel.kafka.KafkaChannel
+balance.channels.channel1.capacity=10000
+balance.channels.channel1.transactionCapacity=1000
+balance.channels.channel1.brokerList=192.168.10.83:9092,192.168.10.84:9092
+balance.channels.channel1.topic=flume_ulog_channel
+balance.channels.channel1.zookeeperConnect=192.168.10.83:2181
+
+# Bind the source and sink to the channel
+balance.sources.source1.channels = channel1
+balance.sinks.k1.channel = channel1</pre><br><br></p><p><br></p><p><br></p><p>结果：</p><p>&nbsp; &nbsp; &nbsp; &nbsp; 我们这一番的优化过后，我们对性能的提升是巨大的，我们将es，kafka都做了集群，部署在83和84两台机器（1t 5400转磁盘，32g内存），且每台机器承载4个flume节点，其中一台机器承载haproxy的分发，这样的情况下，我们看看系统的消耗：</p><p><img src="21299247999835" alt=""><br></p><p><br></p><p>&nbsp; &nbsp; &nbsp; &nbsp; 大家看，实际是没有什么消耗的，机器处在一个平稳运行的状态</p><p><br></p><p>总结：</p><p>&nbsp; &nbsp; &nbsp; &nbsp; 经过以上阶段的优化，Ulog的信息收集阶段，我们完成了极大的性能提升，为公司更宏大的目标提供了技术支撑，实际我们整体回顾这个优化过程，就是一个由繁入简的过程，简单的，基本就是可靠的，我们最初方案的复杂，也导致了性能问题排查的复杂，而简单的过程既保证了健壮性，也简化了排查问题的过程。</p><p><br></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/51243689'>原文链接</a>

@@ -1,0 +1,37 @@
+﻿<div class="articleLocationOnion"><a href='../../index.html'>首页: </a> &gt; <a href='../index_s.html'>未分类</a> &gt; fontcolor=red[置顶]fontflume高并发优化——（3）haproxy</div><div style="color:blue" align=center>fontcolor=red[置顶]fontflume高并发优化——（3）haproxy</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p>&nbsp; &nbsp; &nbsp; &nbsp; 在上篇博客中，我们虽然进行了较大的改动，但是，没有料到的是，flume的file性能瓶颈会如此快的到来，由于我们使用了一个filechannel作为负载均衡的通道，导致性能瓶颈很快到来，为了应对这样的瓶颈，我们对结构进行了第三次升级，替换了负载均衡的前端，换为性能更好的haproxy作为分发端，大家一起来看看是如何优化的。</p><p>&nbsp; &nbsp; &nbsp; &nbsp; 还是老样子，大家看看上次优化过之后的结构：</p><p><img src="20156216797567" alt=""><br></p><p><br></p><p>&nbsp; &nbsp; &nbsp; &nbsp; 我们将avro端口的12300接收的数据，不再通过flume分发，换为haproxy，大家看看优化完之后的结构：</p><p><img src="1476209931372" alt=""><br></p><p>&nbsp; &nbsp; &nbsp; &nbsp; 由于是avro协议，我们采用第四层改的tcp中转进行分发，haproxy的安装及配置如下：</p><p>1，安装</p><p><span style="white-space:pre">	</span>下载tar包：<a target="_blank" target="_blank" href="http://pan.baidu.com/s/1qYchXpy">http://pan.baidu.com/s/1qYchXpy</a></p><p><pre code_snippet_id="1661207" snippet_file_name="blog_20160425_1_8936152" name="code" class="html">tar zcvf haproxy-1.3.20.tar.gz
+cd haproxy-1.3.20
+make TARGET=linux26 PREFIX=/usr/local/haproxy                                #将haproxy安装到/usr/local/haproxy
+make install PREFIX=/usr/local/haproxy</pre><p><p><span style="white-space:pre"></span></p><p>备注：linux26为linux内核版本&nbsp;，通过 uname -a&nbsp;查看linux内核版本。这个参数必须带，否则会出错。</p><p><br></p><p>2，配置</p><p><pre code_snippet_id="1661207" snippet_file_name="blog_20160425_2_953256" name="code" class="html">cd /usr/local/haproxy
+vi haproxy.cfg</pre><p><p><br></p>我的配置文件如下：<p><pre code_snippet_id="1661207" snippet_file_name="blog_20160425_3_2555656" name="code" class="html">global
+    log         127.0.0.1 local2
+    chroot      /export/home/haproxy
+    pidfile     /export/home/haproxy/haproxy.pid
+    maxconn     4000
+    user        root
+    daemon
+
+defaults
+    mode        tcp
+    log         global
+    option      tcplog
+    option      redispatch
+    timeout connect 10000
+    timeout client 300000
+    timeout server 300000
+    maxconn     60000
+    retries     3
+
+listen 12300
+   bind 192.168.10.83:12300
+   mode tcp
+   balance roundrobin
+   server tcp-1 192.168.10.83:12301
+   server tcp-2 192.168.10.83:12302
+   server tcp-3 192.168.10.83:12303
+   server tcp-4 192.168.10.83:12304
+   server tcp-41 192.168.10.84:12301
+   server tcp-42 192.168.10.84:12302
+   server tcp-43 192.168.10.84:12303
+   server tcp-44 192.168.10.84:12304</pre><p><p><br></p>意思是从192.168.10.83:12300端口分发到8个端口，模式为tcp分发。<br><br><br><p>3，启动和停止</p><p>启动服务</p><p><pre code_snippet_id="1661207" snippet_file_name="blog_20160425_4_1541901" name="code" class="html">/usr/local/haproxy/sbin/haproxy -f /usr/local/haproxy/haproxy.cfg</pre><p><p><br></p>停止服务：<p><pre code_snippet_id="1661207" snippet_file_name="blog_20160425_5_8891941" name="code" class="html"> killall haproxy</pre><br>总结：<p><p>&nbsp; &nbsp; &nbsp; &nbsp; 经过haproxy的代理，我们前端的压力变得非常小，这样我们就可以有余力解决其他的性能问题，而现在摆在我们面前的问题，只剩一个，就是由kafka到es的flume性能问题，关于这个问题，我们下篇博客介绍如何解决。<br><br></p><p><br></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/51243477'>原文链接</a>

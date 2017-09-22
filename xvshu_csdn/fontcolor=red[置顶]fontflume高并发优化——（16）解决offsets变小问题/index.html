@@ -1,0 +1,70 @@
+﻿<div style="color:blue" align=center>fontcolor=red[置顶]fontflume高并发优化——（16）解决offsets变小问题</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+        <div class="markdown_views"><h1 id="offsets初始化">offsets初始化</h1>
+
+<p>在上篇博客中《<a href="http://blog.csdn.net/xvshu/article/details/75647535" target="_blank">flume高并发优化——（14）解决空行停止收集数据问题，及offsets变小问题</a> 》我们遗留了一个小问题，就是offsets变小的问题，迟迟未解决，经过研究flume代码发现，flume中，是自己管理offsets关系的，每个kafkachannel的代码中保留了一份topic-offsets的关系，源码：</p>
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-annotation">@Override</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">start</span>() {
+    <span class="hljs-keyword">try</span> {
+      logger.info(<span class="hljs-string">"=KafkaChannel.start=&gt; begin "</span> + getName());
+      <span class="hljs-comment">// As a migration step check if there are any offsets from the group stored in kafka</span>
+      <span class="hljs-comment">// If not read them from Zookeeper and commit them to Kafka</span>
+      <span class="hljs-comment">//***重要：设置这两个属性才可以初始化offsets***</span>
+      <span class="hljs-keyword">if</span> (migrateZookeeperOffsets &amp;&amp; zookeeperConnect != <span class="hljs-keyword">null</span> &amp;&amp; !zookeeperConnect.isEmpty()) {
+        migrateOffsets();
+      }
+      logger.info(<span class="hljs-string">"=KafkaChannel.start=&gt; create KafkaProducer begin producerProps:"</span> + JSON.toString(producerProps));
+      producer = <span class="hljs-keyword">new</span> KafkaProducer&lt;String, <span class="hljs-keyword">byte</span>[]&gt;(producerProps);
+      <span class="hljs-comment">// We always have just one topic being read by one thread</span>
+      logger.info(<span class="hljs-string">"Topic = {}"</span>, topic.get());
+      counter.start();
+      <span class="hljs-keyword">super</span>.start();
+    }<span class="hljs-keyword">catch</span> (Exception ex){
+      logger.error(<span class="hljs-string">"=KafkaChannel.start=&gt;error:"</span>,ex);
+    }
+    logger.info(<span class="hljs-string">"=KafkaChannel.start=&gt; end "</span> + getName());
+
+  }</code></pre>
+
+<p>我们发现，设置了<code>agent1.channels.c1.migrateZookeeperOffsets=true, <br>
+agent1.channels.c1.zookeeperConnect=10.1.115.181:2181,10.1.114.221:2181,10.1.114.231:2181/kafka</code>，才可以触发offsets的初始化，我们希望offsets初始化的情况下，能够从kafka进行offsets对比，这种方法解决了初始化的问题。</p>
+
+<h1 id="分区调整">分区调整</h1>
+
+<p>但是，还有问题就是offsets的变化问题，研究发现，在offsets提交中，遇到消费者多余分区的情况，在某些消费者重新分配的情况下，因为每个消费者都保留了topic-offsets对应关系，导致offsets消费重复，解决方法是改为自动提交，且分区&gt;=消费者，修正后源码：</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm">private void setConsumerProps(Context ctx, String bootStrapServers) {
+    consumerProps<span class="hljs-preprocessor">.put</span>(ConsumerConfig<span class="hljs-preprocessor">.KEY</span>_DESERIALIZER_CLASS_CONFIG, DEFAULT_KEY_DESERIALIZER)<span class="hljs-comment">;</span>
+    consumerProps<span class="hljs-preprocessor">.put</span>(ConsumerConfig<span class="hljs-preprocessor">.VALUE</span>_DESERIALIZER_CLASS_CONFIG, DEFAULT_VALUE_DESERIAIZER)<span class="hljs-comment">;</span>
+    consumerProps<span class="hljs-preprocessor">.put</span>(ConsumerConfig<span class="hljs-preprocessor">.AUTO</span>_OFFSET_RESET_CONFIG, DEFAULT_AUTO_OFFSET_RESET)<span class="hljs-comment">;</span>
+    //Defaults overridden based on config
+    consumerProps<span class="hljs-preprocessor">.putAll</span>(ctx<span class="hljs-preprocessor">.getSubProperties</span>(KAFKA_CONSUMER_PREFIX))<span class="hljs-comment">;</span>
+    //These always take precedence over config
+    consumerProps<span class="hljs-preprocessor">.put</span>(ConsumerConfig<span class="hljs-preprocessor">.BOOTSTRAP</span>_SERVERS_CONFIG, bootStrapServers)<span class="hljs-comment">;</span>
+    consumerProps<span class="hljs-preprocessor">.put</span>(ConsumerConfig<span class="hljs-preprocessor">.GROUP</span>_ID_CONFIG, groupId)<span class="hljs-comment">;</span>
+    /<span class="hljs-comment">/***重要：设置这两个属性才自动提交offsets***
+    consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);  
+    //***重要：自动提交offsets频率 ms ***
+    consumerProps.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+  }</span></code></pre>
+
+<h1 id="总结">总结：</h1>
+
+<p>遇到此类问题，还是我们对于kafka的设计不熟悉，导致的问题，在源码的层次分析问题帮助我们更容易找到问题的梗结所在，推荐各大公司使用开源项目，便于定制与维护。</p></div>
+        <script>
+            $(function () {
+                $('pre.prettyprint code').each(function () {
+                    var lines = $(this).text().split('\n').length;
+                    var $numbering = $('<ul/>').addClass('pre-numbering').hide();
+                    $(this).addClass('has-numbering').parent().append($numbering);
+                    for (i = 1; i <= lines; i++) {
+                        $numbering.append($('<li/>').text(i));
+                    };
+                    $numbering.fadeIn(1700);
+                });
+            });
+        </script>
+   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/76419360'>原文链接</a>

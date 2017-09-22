@@ -1,0 +1,641 @@
+﻿<div style="color:blue" align=center>fontcolor=red[置顶]fontflume高并发优化——（8）多文件source扩展断点续传</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
+<p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; 在很多情况下，我们为了不丢失数据，一般都会为数据收集端扩展断点续传，而随着公司日志系统的完善，我们在原有的基础上开发了断点续传的功能，以下是思路，大家共同讨论：</span></p><p><span style="font-size:18px;"><br></span></p><h1><span style="font-size:18px;">核心流程图：</span></h1><p><span style="font-size:18px;"><br></span></p><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img src="43538489743349" alt=""><br></span></p><p><span style="font-size:18px;"><br></span></p><h1><span style="font-size:18px;">源码：</span></h1><p><span style="font-size:18px;"><br></span></p><p><pre code_snippet_id="1725321" snippet_file_name="blog_20160622_1_4143616" name="code" class="java"><span style="font-size:18px;">/*
+ * 作者：许恕
+ * 时间：2016年5月3日
+ * 功能：实现tail 某目录下的所有符合正则条件的文件
+ * Email：xvshu1@163.com
+ * To detect all files in a folder
+ */
+
+package org.apache.flume.source;
+
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.EventDrivenSource;
+import org.apache.flume.SystemClock;
+import org.apache.flume.channel.ChannelProcessor;
+import org.apache.flume.conf.Configurable;
+import org.apache.flume.event.EventBuilder;
+import org.apache.flume.instrumentation.SourceCounter;
+import org.apache.flume.tools.HostUtils;
+import org.mortbay.util.ajax.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ *  step：
+ *    1,config one path
+ *    2,find all file with RegExp
+ *    3,tail one children file
+ *    4,batch to channal
+ *
+ *  demo:
+ *    demo.sources.s1.type = org.apache.flume.source.ExecTailSource
+ *    demo.sources.s1.filepath=/export/home/tomcat/logs/auth.el.net/
+ *    demo.sources.s1.filenameRegExp=(.log{1})$
+ *    demo.sources.s1.tailing=true
+ *    demo.sources.s1.readinterval=300
+ *    demo.sources.s1.startAtBeginning=false
+ *    demo.sources.s1.restart=true
+ */
+public class ExecTailSource extends AbstractSource implements EventDrivenSource,
+Configurable {
+
+  private static final Logger logger = LoggerFactory
+      .getLogger(ExecTailSource.class);
+
+  private SourceCounter sourceCounter;
+  private ExecutorService executor;
+  private List&lt;ExecRunnable&gt; listRuners;
+  private List&lt;Future&lt;?&gt;&gt; listFuture;
+  private long restartThrottle;
+  private boolean restart = true;
+  private boolean logStderr;
+  private Integer bufferCount;
+  private long batchTimeout;
+  private Charset charset;
+  private String filepath;
+  private String filenameRegExp;
+  private boolean tailing;
+  private Integer readinterval;
+  private boolean startAtBeginning;
+  private boolean contextIsJson;
+  private String fileWriteJson;
+  private Long flushTime;
+  private boolean contextIsFlumeLog;
+
+  @Override
+  public void start() {
+    logger.info(&quot;=start=&gt; flume tail source start begin time:&quot;+new Date().toString());
+    logger.info(&quot;ExecTail source starting with filepath:{}&quot;, filepath);
+
+    List&lt;String&gt; listFiles = getFileList(filepath);
+    if(listFiles==null || listFiles.isEmpty()){
+      Preconditions.checkState(listFiles != null &amp;&amp; !listFiles.isEmpty(),
+              &quot;The filepath's file not have fiels with filenameRegExp&quot;);
+    }
+
+    Properties prop=null;
+
+    try{
+      prop = new Properties();//属性集合对象
+      FileInputStream fis = new FileInputStream(fileWriteJson);//属性文件流
+      prop.load(fis);
+    }catch(Exception ex){
+      logger.error(&quot;==&gt;&quot;,ex);
+    }
+
+
+
+    executor = Executors.newFixedThreadPool(listFiles.size());
+
+    listRuners = new ArrayList&lt;ExecRunnable&gt;();
+    listFuture = new ArrayList&lt;Future&lt;?&gt;&gt;();
+
+    logger.info(&quot;files size is {} &quot;, listFiles.size());
+    // FIXME: Use a callback-like executor / future to signal us upon failure.
+    for(String oneFilePath : listFiles){
+      ExecRunnable runner = new ExecRunnable(getChannelProcessor(), sourceCounter,
+              restart, restartThrottle, logStderr, bufferCount, batchTimeout,
+              charset,oneFilePath,tailing,readinterval,startAtBeginning,contextIsJson,
+              prop,fileWriteJson,flushTime,contextIsFlumeLog);
+      listRuners.add(runner);
+      Future&lt;?&gt; runnerFuture = executor.submit(runner);
+      listFuture.add(runnerFuture);
+      logger.info(&quot;{} is begin running&quot;,oneFilePath);
+    }
+
+    /*
+     * NB: This comes at the end rather than the beginning of the method because
+     * it sets our state to running. We want to make sure the executor is alive
+     * and well first.
+     */
+    sourceCounter.start();
+    super.start();
+    logger.info(&quot;=start=&gt; flume tail source start end time:&quot;+new Date().toString());
+    logger.debug(&quot;ExecTail source started&quot;);
+  }
+
+  @Override
+  public void stop() {
+
+    logger.info(&quot;=stop=&gt; flume tail source stop begin time:&quot;+new Date().toString());
+    if(listRuners !=null &amp;&amp; !listRuners.isEmpty()){
+      for(ExecRunnable oneRunner : listRuners){
+        if(oneRunner != null) {
+          oneRunner.setRestart(false);
+          oneRunner.kill();
+        }
+      }
+    }
+
+
+    if(listFuture !=null &amp;&amp; !listFuture.isEmpty()){
+      for(Future&lt;?&gt; oneFuture : listFuture){
+        if (oneFuture != null) {
+          logger.debug(&quot;Stopping ExecTail runner&quot;);
+          oneFuture.cancel(true);
+          logger.debug(&quot;ExecTail runner stopped&quot;);
+        }
+      }
+    }
+
+    executor.shutdown();
+    while (!executor.isTerminated()) {
+      logger.debug(&quot;Waiting for ExecTail executor service to stop&quot;);
+      try {
+        executor.awaitTermination(500, TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+        logger.debug(&quot;Interrupted while waiting for ExecTail executor service &quot;
+            + &quot;to stop. Just exiting.&quot;);
+        Thread.currentThread().interrupt();
+      }
+    }
+
+
+
+
+    sourceCounter.stop();
+    super.stop();
+    logger.info(&quot;=stop=&gt; flume tail source stop end time:&quot;+new Date().toString());
+
+  }
+
+  @Override
+  public void configure(Context context) {
+
+    filepath = context.getString(&quot;filepath&quot;);
+    Preconditions.checkState(filepath != null,
+        &quot;The parameter filepath must be specified&quot;);
+    logger.info(&quot;The parameter filepath is {}&quot; ,filepath);
+
+    filenameRegExp = context.getString(&quot;filenameRegExp&quot;);
+    Preconditions.checkState(filenameRegExp != null,
+            &quot;The parameter filenameRegExp must be specified&quot;);
+    logger.info(&quot;The parameter filenameRegExp is {}&quot; ,filenameRegExp);
+
+    contextIsJson= context.getBoolean(ExecSourceConfigurationConstants.CONFIG_CONTEXTISJSON_THROTTLE,
+            ExecSourceConfigurationConstants.DEFAULT_CONTEXTISJSON);
+
+    contextIsFlumeLog=context.getBoolean(ExecSourceConfigurationConstants.CONFIG_CONTEXTISFLUMELOG_THROTTLE,
+            ExecSourceConfigurationConstants.DEFAULT_CONTEXTISFLUMELOG);
+
+    fileWriteJson= context.getString(ExecSourceConfigurationConstants.CONFIG_FILEWRITEJSON_THROTTLE,
+            ExecSourceConfigurationConstants.DEFAULT_FILEWRITEJSON);
+
+    flushTime= context.getLong(ExecSourceConfigurationConstants.CONFIG_FLUSHTIME_THROTTLE,
+            ExecSourceConfigurationConstants.DEFAULT_FLUSHTIME);
+
+    restartThrottle = context.getLong(ExecSourceConfigurationConstants.CONFIG_RESTART_THROTTLE,
+        ExecSourceConfigurationConstants.DEFAULT_RESTART_THROTTLE);
+
+    tailing = context.getBoolean(ExecSourceConfigurationConstants.CONFIG_TAILING_THROTTLE,
+            ExecSourceConfigurationConstants.DEFAULT_ISTAILING_TRUE);
+
+    readinterval=context.getInteger(ExecSourceConfigurationConstants.CONFIG_READINTERVAL_THROTTLE,
+            ExecSourceConfigurationConstants.DEFAULT_READINTERVAL);
+
+    startAtBeginning=context.getBoolean(ExecSourceConfigurationConstants.CONFIG_STARTATBEGINNING_THROTTLE,
+            ExecSourceConfigurationConstants.DEFAULT_STARTATBEGINNING);
+
+    restart = context.getBoolean(ExecSourceConfigurationConstants.CONFIG_RESTART,
+        ExecSourceConfigurationConstants.DEFAULT_RESTART_TRUE);
+
+    logStderr = context.getBoolean(ExecSourceConfigurationConstants.CONFIG_LOG_STDERR,
+        ExecSourceConfigurationConstants.DEFAULT_LOG_STDERR);
+
+    bufferCount = context.getInteger(ExecSourceConfigurationConstants.CONFIG_BATCH_SIZE,
+        ExecSourceConfigurationConstants.DEFAULT_BATCH_SIZE);
+
+    batchTimeout = context.getLong(ExecSourceConfigurationConstants.CONFIG_BATCH_TIME_OUT,
+        ExecSourceConfigurationConstants.DEFAULT_BATCH_TIME_OUT);
+
+    charset = Charset.forName(context.getString(ExecSourceConfigurationConstants.CHARSET,
+        ExecSourceConfigurationConstants.DEFAULT_CHARSET));
+
+
+    if (sourceCounter == null) {
+      sourceCounter = new SourceCounter(getName());
+    }
+  }
+
+  /**
+   * 获取指定路径下的所有文件列表
+   *
+   * @param dir 要查找的目录
+   * @return
+   */
+  public  List&lt;String&gt; getFileList(String dir) {
+    List&lt;String&gt; listFile = new ArrayList&lt;String&gt;();
+    File dirFile = new File(dir);
+    //如果不是目录文件，则直接返回
+    if (dirFile.isDirectory()) {
+      //获得文件夹下的文件列表，然后根据文件类型分别处理
+      File[] files = dirFile.listFiles();
+      if (null != files &amp;&amp; files.length &gt; 0) {
+        //根据时间排序
+        Arrays.sort(files, new Comparator&lt;File&gt;() {
+          public int compare(File f1, File f2) {
+            return (int) (f1.lastModified() - f2.lastModified());
+          }
+
+          public boolean equals(Object obj) {
+            return true;
+          }
+        });
+        for (File file : files) {
+          //如果不是目录，直接添加
+          if (!file.isDirectory()) {
+            String oneFileName = file.getName();
+            if(match(filenameRegExp,oneFileName)){
+              listFile.add(file.getAbsolutePath());
+              logger.info(&quot;filename:{} is pass&quot;,oneFileName);
+            }
+          } else {
+            //对于目录文件，递归调用
+            listFile.addAll(getFileList(file.getAbsolutePath()));
+          }
+        }
+      }
+    }else{
+      logger.info(&quot;FilePath:{} is not Directory&quot;,dir);
+    }
+    return listFile;
+  }
+
+  /**
+   * @param regex
+   * 正则表达式字符串
+   * @param str
+   * 要匹配的字符串
+   * @return 如果str 符合 regex的正则表达式格式,返回true, 否则返回 false;
+   */
+  private boolean match(String regex, String str) {
+    Pattern pattern = Pattern.compile(regex);
+    Matcher matcher = pattern.matcher(str);
+   return matcher.find();
+  }
+
+
+  private static class ExecRunnable implements Runnable {
+
+    public ExecRunnable( ChannelProcessor channelProcessor,
+        SourceCounter sourceCounter, boolean restart, long restartThrottle,
+        boolean logStderr, int bufferCount, long batchTimeout,
+                         Charset charset, String filepath,
+                         boolean tailing,Integer readinterval,
+                         boolean startAtBeginning,boolean contextIsJson,
+                         Properties prop,String fileWriteJson,Long flushTime,
+                         boolean contextIsFlumeLog) {
+
+      this.channelProcessor = channelProcessor;
+      this.sourceCounter = sourceCounter;
+      this.restartThrottle = restartThrottle;
+      this.bufferCount = bufferCount;
+      this.batchTimeout = batchTimeout;
+      this.restart = restart;
+      this.logStderr = logStderr;
+      this.charset = charset;
+      this.filepath=filepath;
+      this.logfile=new File(filepath);
+      this.tailing=tailing;
+      this.readinterval=readinterval;
+      this.startAtBeginning=startAtBeginning;
+      this.contextIsJson=contextIsJson;
+      this.prop = prop;
+      this.fileWriteJson=fileWriteJson;
+      this.flushTime=flushTime;
+      this.contextIsFlumeLog=contextIsFlumeLog;
+    }
+
+
+
+    private final ChannelProcessor channelProcessor;
+    private final SourceCounter sourceCounter;
+    private volatile boolean restart;
+    private final long restartThrottle;
+    private final int bufferCount;
+    private long batchTimeout;
+    private final boolean logStderr;
+    private final Charset charset;
+    private SystemClock systemClock = new SystemClock();
+    private Long lastPushToChannel = systemClock.currentTimeMillis();
+    ScheduledExecutorService timedFlushService;
+    ScheduledFuture&lt;?&gt; future;
+    private String filepath;
+    private boolean contextIsJson;
+    private Properties prop;
+    private long timepoint;
+    private String fileWriteJson;
+    private Long flushTime;
+
+    /**
+     * 当读到文件结尾后暂停的时间间隔
+     */
+    private long readinterval = 500;
+
+    /**
+     * 设置日志文件
+     */
+    private File logfile;
+
+    /**
+     * 设置是否从头开始读
+     */
+    private boolean startAtBeginning = false;
+
+    /**
+     * 设置tail运行标记
+     */
+    private boolean tailing = false;
+
+    private boolean contextIsFlumeLog=false;
+
+    private static String getDomain(String filePath){
+      String[] strs = filePath.split(&quot;/&quot;);
+      String domain ;
+      domain=strs[strs.length-2];
+      if(domain==null || domain.isEmpty()){
+        domain=filePath;
+      }
+      return domain;
+    }
+
+    @Override
+    public void run() {
+      do {
+        logger.info(&quot;=run=&gt; flume tail source run start time:&quot;+new Date().toString());
+        timepoint=System.currentTimeMillis();
+        Long filePointer = 0l;
+        if (this.startAtBeginning) { //判断是否从头开始读文件
+          filePointer = 0l;
+        } else {
+          if(prop!=null || prop.contains(filepath)){
+
+            try {
+              filePointer = Long.valueOf((String) prop.get(filepath));
+             logger.info(&quot;=ExecRunnable.run=&gt;filePointer get from  Properties&quot;);
+            }catch (Exception ex){
+              logger.error(&quot;=ExecRunnable.run=&gt;&quot;,ex);
+              logger.info(&quot;=ExecRunnable.run=&gt; error filePointer get from file size&quot;);
+            }
+          }
+          if(filePointer ==null){
+            filePointer = this.logfile.length(); //指针标识从文件的当前长度开始。
+            logger.info(&quot;=ExecRunnable.run=&gt;filePointer get from file size&quot;);
+          }
+
+        }
+
+        final List&lt;Event&gt; eventList = new ArrayList&lt;Event&gt;();
+
+        timedFlushService = Executors.newSingleThreadScheduledExecutor(
+                new ThreadFactoryBuilder().setNameFormat(
+                &quot;timedFlushExecService&quot; +
+                Thread.currentThread().getId() + &quot;-%d&quot;).build());
+        RandomAccessFile randomAccessFile = null;
+        try {
+
+          randomAccessFile= new RandomAccessFile(logfile, &quot;r&quot;); //创建随机读写文件
+          future = timedFlushService.scheduleWithFixedDelay(new Runnable() {
+                                                              @Override
+                                                              public void run() {
+                                                                try {
+                                                                  synchronized (eventList) {
+                                                                    if(!eventList.isEmpty() &amp;&amp; timeout()) {
+                                                                      flushEventBatch(eventList);
+                                                                    }
+                                                                  }
+                                                                } catch (Exception e) {
+                                                                  logger.error(&quot;Exception occured when processing event batch&quot;, e);
+                                                                  if(e instanceof InterruptedException) {
+                                                                    Thread.currentThread().interrupt();
+                                                                  }
+                                                                }
+                                                              }
+                                                            },
+                  batchTimeout, batchTimeout, TimeUnit.MILLISECONDS);
+
+          while (this.tailing) {
+            long fileLength = this.logfile.length();
+            if (fileLength &lt; filePointer) {
+              randomAccessFile = new RandomAccessFile(logfile, &quot;r&quot;);
+              filePointer = 0l;
+            }
+            if (fileLength &gt; filePointer) {
+              randomAccessFile.seek(filePointer);
+              String line = randomAccessFile.readLine();
+              while (line != null) {
+
+                //送channal
+                synchronized (eventList) {
+                  sourceCounter.incrementEventReceivedCount();
+
+
+                  String bodyjson = &quot;&quot;;
+                  if (!contextIsJson) {
+                    HashMap body = new HashMap();
+                    body.put(&quot;context&quot;, line.toString());
+                    body.put(&quot;filepath&quot;, filepath);
+                    body.put(&quot;contextType&quot;, filepath);
+                    body.put(&quot;created&quot;, System.currentTimeMillis());
+                    body.put(&quot;localHostIp&quot;, HostUtils.getLocalHostIp());
+                    body.put(&quot;localHostName&quot;, HostUtils.getLocalHostName());
+                    body.put(&quot;domain&quot;, getDomain(filepath));
+                    String context = line.toString();
+                    if(contextIsFlumeLog){
+                      body = ParseFlumeLog(context,body);
+                    }
+                    bodyjson = JSON.toString(body);
+                    if(bodyjson.indexOf(&quot;{&quot;)&gt;0){
+                      bodyjson.substring(bodyjson.indexOf(&quot;{&quot;),bodyjson.length()-1);
+                    }
+                  } else {
+                    bodyjson = line.toString();
+                  }
+
+                  Event oneEvent = EventBuilder.withBody(bodyjson.getBytes(charset));
+                  eventList.add(oneEvent);
+                  if (eventList.size() &gt;= bufferCount || timeout()) {
+                    flushEventBatch(eventList);
+                  }
+                }
+
+                //读下一行
+                line = randomAccessFile.readLine();
+                try {
+                  Long nowfilePointer = randomAccessFile.getFilePointer();
+                  if (!nowfilePointer.equals(filePointer)) {
+                    filePointer = nowfilePointer;
+                    if (System.currentTimeMillis() - timepoint &gt; flushTime) {
+                      timepoint = System.currentTimeMillis();
+                      prop.setProperty(filepath, filePointer.toString());
+                      FileOutputStream fos = new FileOutputStream(fileWriteJson);
+                      if (fos != null) {
+                        prop.store(fos, &quot;Update '&quot; + filepath + &quot;' value&quot;);
+                      }
+                      fos.close();
+
+                    }
+                  }
+                }catch(Exception ex){
+                  ex.printStackTrace();
+                }
+              }
+
+            }
+            Thread.sleep(this.readinterval);
+          }
+
+          synchronized (eventList) {
+              if(!eventList.isEmpty()) {
+                flushEventBatch(eventList);
+              }
+          }
+
+        } catch (Exception e) {
+          logger.error(&quot;Failed while running filpath: &quot; + filepath, e);
+          if(e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+          }
+        } finally {
+
+          if(randomAccessFile!=null){
+            try {
+              randomAccessFile.close();
+            } catch (IOException ex) {
+              logger.error(&quot;Failed to close reader for ExecTail source&quot;, ex);
+            }
+          }
+
+        }
+        logger.info(&quot;=run=&gt; flume tail source run restart:&quot;+restart);
+        if(restart) {
+          logger.info(&quot;=run=&gt; flume tail source run restart time:&quot;+new Date().toString());
+          logger.info(&quot;Restarting in {}ms&quot;, restartThrottle);
+          try {
+            Thread.sleep(restartThrottle);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+          }
+        } else {
+          logger.info(&quot;filepath [&quot; + filepath + &quot;] exited with restart[&quot; + restart+&quot;]&quot;);
+        }
+      } while(restart);
+    }
+
+    private void flushEventBatch(List&lt;Event&gt; eventList){
+      channelProcessor.processEventBatch(eventList);
+      sourceCounter.addToEventAcceptedCount(eventList.size());
+      eventList.clear();
+      lastPushToChannel = systemClock.currentTimeMillis();
+    }
+
+    private HashMap ParseFlumeLog(String log,HashMap logMap){
+      String[] strLogs = log.split(&quot;\\|&quot;);
+      logMap.put(&quot;className&quot;,strLogs[0]);
+      logMap.put(&quot;methodName&quot;,strLogs[1]);
+      logMap.put(&quot;level&quot;,strLogs[2]);
+      logMap.put(&quot;treeId&quot;,strLogs[3]);
+      logMap.put(&quot;requestId&quot;,strLogs[4]);
+      logMap.put(&quot;transactionId&quot;,strLogs[5]);
+      return logMap;
+    }
+
+    private boolean timeout(){
+      return (systemClock.currentTimeMillis() - lastPushToChannel) &gt;= batchTimeout;
+    }
+
+    private static String[] formulateShellCommand(String shell, String command) {
+      String[] shellArgs = shell.split(&quot;\\s+&quot;);
+      String[] result = new String[shellArgs.length + 1];
+      System.arraycopy(shellArgs, 0, result, 0, shellArgs.length);
+      result[shellArgs.length] = command;
+      return result;
+    }
+
+    public int kill() {
+      logger.info(&quot;=kill=&gt; flume tail source kill start time:&quot;+new Date().toString());
+      this.tailing=false;
+        synchronized (this.getClass()) {
+          try {
+            // Stop the Thread that flushes periodically
+            if (future != null) {
+              future.cancel(true);
+            }
+
+            if (timedFlushService != null) {
+              timedFlushService.shutdown();
+              while (!timedFlushService.isTerminated()) {
+                try {
+                  timedFlushService.awaitTermination(500, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                  logger.debug(&quot;Interrupted while waiting for ExecTail executor service &quot;
+                          + &quot;to stop. Just exiting.&quot;);
+                  Thread.currentThread().interrupt();
+                }
+              }
+            }
+            logger.info(&quot;=kill=&gt; flume tail source kill end time:&quot; + new Date().toString());
+            return Integer.MIN_VALUE;
+          } catch (Exception ex) {
+            logger.error(&quot;=kill=&gt;&quot;, ex);
+            Thread.currentThread().interrupt();
+          }
+        }
+      logger.info(&quot;=kill=&gt; flume tail source kill end time:&quot;+new Date().toString());
+      return Integer.MIN_VALUE / 2;
+    }
+    public void setRestart(boolean restart) {
+      this.restart = restart;
+    }
+  }
+  private static class StderrReader extends Thread {
+    private BufferedReader input;
+    private boolean logStderr;
+
+    protected StderrReader(BufferedReader input, boolean logStderr) {
+      this.input = input;
+      this.logStderr = logStderr;
+    }
+
+
+
+    @Override
+    public void run() {
+      try {
+        int i = 0;
+        String line = null;
+        while((line = input.readLine()) != null) {
+          if(logStderr) {
+            // There is no need to read 'line' with a charset
+            // as we do not to propagate it.
+            // It is in UTF-16 and would be printed in UTF-8 format.
+            logger.info(&quot;StderrLogger[{}] = '{}'&quot;, ++i, line);
+          }
+        }
+      } catch (IOException e) {
+        logger.info(&quot;StderrLogger exiting&quot;, e);
+      } finally {
+        try {
+          if(input != null) {
+            input.close();
+          }
+        } catch (IOException ex) {
+          logger.error(&quot;Failed to close stderr reader for ExecTail source&quot;, ex);
+        }
+      }
+    }
+  }
+}
+</span></pre><span style="font-size:18px;"><br><br></span><p><h1><span style="font-size:18px;">总结：</span></h1><p><span style="font-size:18px;">&nbsp; &nbsp; &nbsp; &nbsp; 这是初步的实现，通过多线程与file i/o 协作，在效率和实时性上，做平衡，实现一版简单的断点续传，以前看似高大上的功能已经被破解一小部分，在讨论中，实际还有结果的收集与去重和正确性验证，加密，等，综合成本考虑，这版简单的，暂行，我们又为flume贡献了一大功能，希望大家一起，将flume做的更完善！</span></p><p><br></p>   
+</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/51736202'>原文链接</a>
