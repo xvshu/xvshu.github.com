@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Kid Chinese</title>
+<!-- for-mobile-apps -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="Modern CV Responsive web template, Bootstrap Web Templates, Flat Web Templates, Android Compatible web template, 
+Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
+
+<!-- //for-mobile-apps -->
+<!-- js -->
+<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+<!-- //js -->
+<style>
+	.div_contenx{
+		width: 90%;
+		height: 80%;
+		background: green;
+		position:absolute;
+		left:0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		margin: auto;
+	}
+	
+	.div_tian{
+		width: 80%;
+		height: 80%;
+		left:0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		margin: auto;
+		background-image:url('images\\kid\\tian.jpg');
+		background-size:100% 100%;
+		text-align:center;
+		font-size:380px;
+	}
+	
+	.div_button{
+		width: 80%;
+		height: 80%;
+		background: gray;
+		left:0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		margin: auto;
+	}
+	
+	.div_button_num{
+		width: 95%;
+		height: 95%;
+		background: yellow;
+		left:0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		margin: auto;
+		text-align:center;
+		font-size:80px;
+	}
+</style>
+
+<script type="text/javascript" >
+	$(function(){ $("#kid_div_num").html("许"); })
+	function change_num(lab_val){
+		$("#kid_div_num").html(lab_val);
+		doTTS(lab_val);
+	}
+	
+	function doTTS(lab_val){
+			var ttsDiv = document.getElementById('bdtts_div_id');
+			var ttsAudio = document.getElementById('tts_autio_id');
+			
+			
+			// 这样就可实现播放内容的替换了
+			ttsDiv.removeChild(ttsAudio);
+			var au1 = '<audio id="tts_autio_id" autoplay="autoplay">';
+			var sss = '<source id="tts_source_id" src="http://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=7&text='+lab_val+'" type="audio/mpeg">';
+			var eee = '<embed id="tts_embed_id" height="0" width="0" src="">';
+			var au2 = '</audio>';
+			ttsDiv.innerHTML = au1 + sss + eee + au2;
+			
+			ttsAudio = document.getElementById('tts_autio_id');
+			ttsAudio.play();
+		}
+
+</script>
+
+</head>
+	
+<body style="width:100%;height:100%">
+<div id="bdtts_div_id">
+	<audio id="tts_autio_id" autoplay="autoplay">
+		<source id="tts_source_id" src="" type="audio/mpeg">
+		<embed id="tts_embed_id" height="0" width="0" src="">
+	</audio>
+</div>
+
+<div class="div_contenx">
+<table style="width:100%;height:100%">
+	<tr style="width:100%;height:100%">
+		<td style="width:50%"><div id="kid_div_num" class="div_tian"></div></td>
+		<td style="width:50%"><div id="kid_div_btn" class="div_button">
+			<table style="width:100%;height:100%">
+				<tr style="width:100%;height:25%">
+					<td style="width:33%;height:25%"><div id="kid_div_num_1" class="div_button_num" onclick="change_num('许')">许</div></td>
+					<td style="width:33%;height:25%"><div id="kid_div_num_2" class="div_button_num" onclick="change_num('文')">文</div></td>
+					<td style="width:33%;height:25%"><div id="kid_div_num_3" class="div_button_num" onclick="change_num('馨')">馨</div></td>
+				</tr>
+				<tr style="width:100%;height:25%">
+					<td style="width:33%;height:25%"><div id="kid_div_num_4" class="div_button_num" onclick="change_num('何')">何</div></td>
+					<td style="width:33%;height:25%"><div id="kid_div_num_5" class="div_button_num" onclick="change_num('静')">静</div></td>
+					<td style="width:33%;height:25%"><div id="kid_div_num_6" class="div_button_num" onclick="change_num('媛')">媛</div></td>
+				</tr>
+				<tr style="width:100%;height:25%">
+					<td style="width:33%;height:25%"><div id="kid_div_num_7" class="div_button_num" onclick="change_num('朱')">朱</div></td>
+					<td style="width:33%;height:25%"><div id="kid_div_num_8" class="div_button_num" onclick="change_num('谢')">谢</div></td>
+					<td style="width:33%;height:25%"><div id="kid_div_num_9" class="div_button_num" onclick="change_num('芳')">芳</div></td>
+				</tr>
+				<tr style="width:100%;height:25%">
+					<td style="width:33%;height:25%"><div id="kid_div_num_0" class="div_button_num" onclick="change_num('盼')">盼</div></td>
+					<td colspan="2" style="width:66%;height:25%"><div id="kid_div_num_add" class="div_button_num" onclick="change_num('棒')">棒</div></td>
+				</tr>
+			</table>
+		</div></td>
+	</tr>
+</table>
+</div>
+
+	
+</body>
+</html>
