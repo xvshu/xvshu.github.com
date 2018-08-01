@@ -62,6 +62,51 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 		text-align:center;
 		font-size:80px;
 	}
+	
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	
+	ul {
+		list-style: none;
+	}
+
+
+	.tab {
+		height: 10%;
+	}
+
+	.tab li {
+		position: relative;
+		float: left;
+		width:80px;
+		height: 90%;
+		line-height: 34px;
+		text-align: center;
+		cursor: pointer;
+		border-top: 4px solid #fff;
+		background: #CDAA7D;
+		margin: 1px;
+	}
+
+	.products {
+		border: 1px solid #ddd;
+	}
+
+	.products .main {
+		float: left;
+		display: none;
+	}
+
+	.products .main.selected {
+		display: block;
+	}
+
+	.tab li.active {
+		border-color: red;
+		border-bottom: 0;
+	}
 </style>
 
 <script type="text/javascript" >
@@ -104,33 +149,79 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 <table style="width:100%;height:100%">
 	<tr style="width:100%;height:100%">
 		<td style="width:50%"><div id="kid_div_num" class="div_tian"></div></td>
-		<td style="width:50%"><div id="kid_div_btn" class="div_button">
-			<table style="width:100%;height:100%">
-				<tr style="width:100%;height:25%">
-					<td style="width:33%;height:25%"><div id="kid_div_num_1" class="div_button_num" onclick="change_num('许')">许</div></td>
-					<td style="width:33%;height:25%"><div id="kid_div_num_2" class="div_button_num" onclick="change_num('文')">文</div></td>
-					<td style="width:33%;height:25%"><div id="kid_div_num_3" class="div_button_num" onclick="change_num('馨')">馨</div></td>
-				</tr>
-				<tr style="width:100%;height:25%">
-					<td style="width:33%;height:25%"><div id="kid_div_num_4" class="div_button_num" onclick="change_num('何')">何</div></td>
-					<td style="width:33%;height:25%"><div id="kid_div_num_5" class="div_button_num" onclick="change_num('静')">静</div></td>
-					<td style="width:33%;height:25%"><div id="kid_div_num_6" class="div_button_num" onclick="change_num('媛')">媛</div></td>
-				</tr>
-				<tr style="width:100%;height:25%">
-					<td style="width:33%;height:25%"><div id="kid_div_num_7" class="div_button_num" onclick="change_num('朱')">朱</div></td>
-					<td style="width:33%;height:25%"><div id="kid_div_num_8" class="div_button_num" onclick="change_num('谢')">谢</div></td>
-					<td style="width:33%;height:25%"><div id="kid_div_num_9" class="div_button_num" onclick="change_num('芳')">芳</div></td>
-				</tr>
-				<tr style="width:100%;height:25%">
-					<td style="width:33%;height:25%"><div id="kid_div_num_0" class="div_button_num" onclick="change_num('盼')">盼</div></td>
-					<td colspan="2" style="width:66%;height:25%"><div id="kid_div_num_add" class="div_button_num" onclick="change_num('棒')">棒</div></td>
-				</tr>
-			</table>
-		</div></td>
+		<td style="width:50%">
+			<div id="kid_div_btn" class="div_button">
+				<ul class="tab">
+					<li class="tab-item active">1</li>
+					<li class="tab-item">2</li>
+				</ul>
+				
+				<div class="products" style="width:100%;height:90%">
+					<div class="main selected" style="width:100%;height:100%">
+						<table style="width:100%;height:100%">
+							<tr style="width:100%;height:25%">
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('许')">许</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('文')">文</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('馨')">馨</div></td>
+							</tr>
+							<tr style="width:100%;height:25%">
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('何')">何</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('静')">静</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('媛')">媛</div></td>
+							</tr>
+							<tr style="width:100%;height:25%">
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('朱')">朱</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('谢')">谢</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('芳')">芳</div></td>
+							</tr>
+							<tr style="width:100%;height:25%">
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('朱')">盼</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('谢')">花</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('芳')">永</div></td>
+							</tr>
+						</table>
+					</div>
+					<div class="main" style="width:100%;height:100%">
+						<table style="width:100%;height:100%">
+							<tr style="width:100%;height:25%">
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('芝')">芝</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('天')">天</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('人')">人</div></td>
+							</tr>
+							<tr style="width:100%;height:25%">
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('地')">地</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('日')">日</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('月')">月</div></td>
+							</tr>
+							<tr style="width:100%;height:25%">
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('星')">星</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('云')">云</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('雨')">雨</div></td>
+							</tr>
+							<tr style="width:100%;height:25%">
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('雪')">雪</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('雷')">雷</div></td>
+								<td style="width:33%;height:25%"><div  class="div_button_num" onclick="change_num('伞')">伞</div></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				
+			
+			</div>
+		</td>
 	</tr>
 </table>
 </div>
 
+	<script>
+        $(function () {
+            $(".tab-item").click(function () {
+                $(this).addClass("active").siblings().removeClass("active");
+                $(".products .main").eq($(this).index()).show().siblings().hide();
+            })
+        })
+    </script>
 	
 </body>
 </html>
