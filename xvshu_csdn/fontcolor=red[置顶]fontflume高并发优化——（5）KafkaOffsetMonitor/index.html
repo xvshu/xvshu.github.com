@@ -1,8 +1,0 @@
-﻿<div style="color:blue" align=center>fontcolor=red[置顶]fontflume高并发优化——（5）KafkaOffsetMonitor</div><br><div id="article_content" class="article_content tracking-ad" data-mod="popu_307" data-dsm="post">
-<p>本片博客是介绍一款kafka监控的软件，以配合查看flume的kafka channel性能，其实这是个非常简单的项目，我们只需要下载好jar包，就可以使用了</p><p>1，下载jar包</p><p><a target="_blank" href="http://pan.baidu.com/s/1eSPlzpw" target="_blank">http://pan.baidu.com/s/1eSPlzpw</a><br></p><p><br></p><p>2，启动</p><p><pre code_snippet_id="1661314" snippet_file_name="blog_20160425_1_7299601" name="code" class="html">java -cp KafkaOffsetMonitor-assembly-0.2.0.jar \
- com.quantifind.kafka.offsetapp.OffsetGetterWeb \
- --zk 192.168.2.16:2181 \
- --port 8089 \
- --refresh 10.seconds \
- --retain 30.days</pre><br>3，查看</p><p>输入网址，我的是http://192.168.10.84:8089</p><p>效果：</p><p><img src="27115267859975" alt=""><br></p><p><br></p><p>3，参数说明</p><p>&nbsp; &nbsp; &nbsp; &nbsp; Topic：创建Topic名称<br>&nbsp; &nbsp; &nbsp; &nbsp; Partition：分区编号<br>&nbsp; &nbsp; &nbsp; &nbsp; Offset：表示该Parition已经消费了多少Message<br>&nbsp; &nbsp; &nbsp; &nbsp; LogSize：表示该Partition生产了多少Message<br>&nbsp; &nbsp; &nbsp; &nbsp; Lag：表示有多少条Message未被消费<br>&nbsp; &nbsp; &nbsp; &nbsp; Owner：表示消费者<br>&nbsp; &nbsp; &nbsp; &nbsp; Created：表示该Partition创建时间<br>&nbsp; &nbsp; &nbsp; &nbsp; Last Seen：表示消费状态刷新最新时间<br></p><p><br></p><p>总结：</p><p>&nbsp; &nbsp; &nbsp; &nbsp; 通过观察我们发现，现在虽然kafka的压力不大，但是基本上性能瓶颈的压力都在kafka和es上了，这样我们就能安心吃晚餐了，不会被半夜叫醒调bug了！由此可见，简化架构是一个多么明智的决定啊！希望这几篇博客能帮到你，也不被半夜叫醒！</p><p><br></p><p><br></p>   
-</div><div class="ArcitleLink"><a href='http://blog.csdn.net/xvshu/article/details/51244064'>原文链接</a>
